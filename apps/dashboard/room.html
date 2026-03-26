@@ -1952,3 +1952,71 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVision(
   body { font-size: var(--fs-base); }
 }
 </style>
+<style id="room-patch-v2">
+/* ── Header split: portals top, functions bottom ── */
+@media (max-width: 768px) {
+  .header-actions { flex-wrap: wrap; justify-content: flex-end; gap: 3px; }
+  .header-actions .btn-sm { font-size: 10px; padding: 5px 8px; min-height: 32px; }
+  #voiceModeBtn { order: 10; width: 100%; justify-content: center; margin-top: 4px; border-color: rgba(167,139,250,0.6) !important; color: #c4b5fd !important; font-size: 13px !important; padding: 9px !important; }
+  .lang-switcher .lang-btn { min-height: 36px; min-width: 44px; font-size: 12px; }
+  #tts-stop-btn { min-height: 36px; border-color: rgba(248,113,113,0.6) !important; color: #f87171 !important; }
+  .btn-icon, .btn-send { width: 46px; height: 46px; font-size: 20px; }
+  .voice-row { padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 6px; }
+  textarea { font-size: 15px !important; word-break: break-word; overflow-wrap: break-word; }
+  .msg-group.user { align-items: flex-start !important; }
+  .msg-group.user .msg-bubble { border-radius: var(--radius) !important; }
+  .msg-group.user .msg-header { flex-direction: row !important; }
+}
+/* ── Response delay selector ── */
+#responseDelayRow { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+#responseDelayRow select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-family: inherit; }
+/* ── Font size control ── */
+#fontSizeRow { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+#fontSizeRow input[type=range] { width: 80px; }
+/* ── Reread on click ── */
+.msg-bubble[data-reread]:hover { cursor: pointer; }
+.msg-bubble[data-reread]::before { content: '↺'; position: absolute; right: 8px; bottom: 6px; font-size: 10px; opacity: 0; transition: opacity .2s; color: rgba(255,255,255,0.3); }
+.msg-bubble[data-reread]:hover::before { opacity: 1; }
+</style>
+<script id="room-patch-v2-js">
+(function(){
+  // ── Response delay ──
+  const delayRow = document.createElement('div');
+  delayRow.id = 'responseDelayRow';
+  delayRow.innerHTML = '<span>Response delay:</span><select id="responseDelaySel"><option value="0">Instant</option><option value="2000">2s</option><option value="5000" selected>5s</option><option value="10000">10s</option><option value="manual">Manual (blue mic)</option></select>';
+  const voiceRow = document.querySelector('.voice-row');
+  if(voiceRow) voiceRow.appendChild(delayRow);
+
+  // ── Font size ──
+  const fsRow = document.createElement('div');
+  fsRow.id = 'fontSizeRow';
+  fsRow.innerHTML = '<span>Font:</span><input type="range" min="12" max="20" value="14" id="fontSizeRange" step="1"><span id="fontSizeVal">14px</span>';
+  if(voiceRow) voiceRow.appendChild(fsRow);
+  document.getElementById('fontSizeRange')?.addEventListener('input', function(){
+    document.getElementById('fontSizeVal').textContent = this.value+'px';
+    document.querySelector('.messages').style.fontSize = this.value+'px';
+    localStorage.setItem('nyxa_fontsize', this.value);
+  });
+  const savedFs = localStorage.getItem('nyxa_fontsize');
+  if(savedFs){ document.querySelector('.messages').style.fontSize = savedFs+'px'; const r=document.getElementById('fontSizeRange'); if(r){r.value=savedFs; document.getElementById('fontSizeVal').textContent=savedFs+'px';} }
+
+  // ── Persist voice settings ──
+  const saveVoiceSettings = () => {
+    const data = {};
+    document.querySelectorAll('.vc-row input[type=range]').forEach(r=>{ data[r.id]=r.value; });
+    document.querySelectorAll('.vc-row select').forEach(s=>{ data[s.id]=s.value; });
+    localStorage.setItem('nyxa_voice_settings', JSON.stringify(data));
+  };
+  document.querySelectorAll('.vc-row input, .vc-row select').forEach(el=>{ el.addEventListener('change', saveVoiceSettings); });
+  const savedVS = localStorage.getItem('nyxa_voice_settings');
+  if(savedVS){ const d=JSON.parse(savedVS); Object.entries(d).forEach(([k,v])=>{ const el=document.getElementById(k); if(el) el.value=v; }); }
+
+  // ── Reread on click ──
+  document.addEventListener('click', function(e){
+    const bubble = e.target.closest('.msg-bubble[data-reread]');
+    if(!bubble) return;
+    const txt = bubble.dataset.reread;
+    if(window.speakText) window.speakText(txt);
+  });
+})();
+</script>
