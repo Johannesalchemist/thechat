@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nyxa — Taxonomy Review</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #04040f; --surface: rgba(10,10,22,0.9); --surface2: rgba(20,20,42,0.7);
+      --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+      --text: #e8e8f4; --muted: #5a5a7a; --accent: #a78bfa;
+      --green: #4ade80; --amber: #fbbf24; --red: #f87171; --cyan: #22d3ee;
+      --radius: 14px;
+    }
+    html, body { min-height: 100%; background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+    body::before { content: ''; position: fixed; width: 600px; height: 600px;
+      background: rgba(124,58,237,0.06); border-radius: 50%; filter: blur(80px);
+      top: -200px; left: -100px; pointer-events: none; z-index: 0; }
+
+    /* ── Login overlay ── */
+    #loginOverlay { position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .login-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px; width: 320px;
+      backdrop-filter: blur(20px); }
+    .login-card h2 { margin-bottom: 6px; font-size: 16px; }
+    .login-card p { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+    .login-card input { width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 14px;
+      font-family: inherit; outline: none; margin-bottom: 12px; transition: border-color .2s; }
+    .login-card input:focus { border-color: var(--accent); }
+    .login-card button { width: 100%; background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: #fff; border: none; padding: 11px; border-radius: 8px;
+      font-weight: 700; cursor: pointer; font-family: inherit; }
+
+    /* ── Layout ── */
+    #main { display: none; max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px;
+      position: relative; z-index: 1; }
+
+    /* ── Header ── */
+    .page-header { display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .page-header-left { display: flex; align-items: center; gap: 14px; }
+    .logo-mark { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      background: conic-gradient(from 120deg, #a78bfa, #22d3ee, #fbbf24, #a78bfa);
+      box-shadow: 0 0 16px rgba(167,139,250,0.4); }
+    .page-title { font-size: 18px; font-weight: 700; }
+    .page-sub { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .last-review { font-size: 11px; color: var(--muted); }
+
+    /* ── Buttons ── */
+    .btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px;
+      border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: opacity .2s; }
+    .btn:hover { opacity: .85; }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: rgba(255,255,255,0.03); }
+
+    /* ── Stat cards ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      backdrop-filter: blur(20px); }
+    .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--muted); margin-bottom: 8px; }
+    .stat-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .stat-sub { font-size: 11px; color: var(--muted); }
+    .stat-card.accent { border-color: rgba(167,139,250,0.2);
+      background: rgba(124,58,237,0.08); }
+    .stat-card.warn { border-color: rgba(251,191,36,0.2);
+      background: rgba(251,191,36,0.05); }
+    .stat-card.ok { border-color: rgba(74,222,128,0.2);
+      background: rgba(74,222,128,0.05); }
+    .stat-card.danger { border-color: rgba(248,113,113,0.2);
+      background: rgba(248,113,113,0.05); }
+
+    /* ── Section titles ── */
+    .section { margin-bottom: 28px; }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Fragmentation bar ── */
+    .frag-bar-wrap { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
+    .frag-bar-label { display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .frag-bar-track { height: 8px; background: rgba(255,255,255,0.05);
+      border-radius: 4px; overflow: hidden; }
+    .frag-bar-fill { height: 100%; border-radius: 4px;
+      transition: width .6s cubic-bezier(.4,0,.2,1); }
+
+    /* ── Gap vector bars ── */
+    .gap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 28px; }
+    .gap-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; }
+    .gap-dim { font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin-bottom: 8px; }
+    .gap-val { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .gap-track { height: 4px; background: rgba(255,255,255,0.05);
+      border-radius: 2px; overflow: hidden; }
+    .gap-fill { height: 100%; border-radius: 2px; transition: width .6s; }
+
+    /* ── Intent/Behavior table ── */
+    .dist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+    @media (max-width: 700px) { .dist-grid { grid-template-columns: 1fr; } }
+
+    .dist-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; }
+    .dist-card-header { padding: 14px 16px; border-bottom: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--muted); }
+    .dist-row { display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; border-top: 1px solid var(--border); }
+    .dist-row:first-child { border-top: none; }
+    .dist-row:hover { background: rgba(255,255,255,0.02); }
+    .dist-label { flex: 1; font-size: 12px; font-family: monospace; color: var(--text); }
+    .dist-track { width: 100px; height: 4px; background: rgba(255,255,255,0.05);
+      border-radius: 2px; overflow: hidden; }
+    .dist-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+    .dist-count { font-size: 11px; color: var(--muted); min-width: 32px; text-align: right; }
+
+    /* ── Cluster table ── */
+    .cluster-table { width: 100%; border-collapse: collapse; }
+    .cluster-table th { text-align: left; font-size: 10px; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); padding: 0 14px 12px; }
+    .cluster-table td { padding: 11px 14px; border-top: 1px solid var(--border);
+      font-size: 12px; }
+    .cluster-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .sig-key { font-family: monospace; font-size: 11px; color: var(--cyan); word-break: break-all; }
+    .size-pill { display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 600; background: rgba(167,139,250,0.12);
+      color: var(--accent); border: 1px solid rgba(167,139,250,0.25); }
+    .new-badge { display: inline-block; padding: 1px 6px; border-radius: 6px;
+      font-size: 10px; background: rgba(74,222,128,0.12); color: var(--green);
+      border: 1px solid rgba(74,222,128,0.25); margin-left: 6px; }
+
+    /* ── Health indicator ── */
+    .health-row { display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 14px; }
+    .health-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .health-dot.ok     { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .health-dot.warn   { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+    .health-dot.danger { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+    .health-text { font-size: 12px; }
+
+    /* ── Empty ── */
+    .empty { text-align: center; padding: 60px; color: var(--muted); }
+    .empty-icon { font-size: 40px; margin-bottom: 14px; opacity: 0.4; }
+    .empty-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .empty-sub { font-size: 12px; opacity: 0.6; }
+
+    .table-wrap { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<div id="loginOverlay">
+  <div class="login-card">
+    <h2>Taxonomy Review</h2>
+    <p>Admin access required</p>
+    <input id="adminToken" type="password" placeholder="Admin token" />
+    <button onclick="adminLogin()">Enter</button>
+    <div id="loginErr" style="color:#f87171;font-size:12px;margin-top:8px;"></div>
+  </div>
+</div>
+
+<div id="main">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="logo-mark"></div>
+      <div>
+        <div class="page-title">Intent Taxonomy Review</div>
+        <div class="page-sub">Weekly cluster analysis · Cadence: every Monday</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="last-review" id="lastReview">—</span>
+      <button class="btn btn-ghost" onclick="load()">Refresh</button>
+      <button class="btn" onclick="triggerReview()">Run Review Now</button>
+    </div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<script>
+const API = '';
+let adminToken = '';
+
+function adminLogin() {
+  const t = document.getElementById('adminToken').value.trim();
+  if (!t) return;
+  adminToken = t;
+  load();
+}
+document.getElementById('adminToken').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') adminLogin();
+});
+
+async function load() {
+  const res = await fetch(API + '/api/admin/clusters', {
+    headers: { Authorization: 'Bearer ' + adminToken }
+  });
+  if (!res.ok) { document.getElementById('loginErr').textContent = 'Invalid token.'; return; }
+
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+
+  const data = await res.json();
+  render(data);
+}
+
+async function triggerReview() {
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Running...';
+  await fetch(API + '/api/admin/taxonomy/review', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + adminToken }
+  });
+  btn.disabled = false; btn.textContent = 'Run Review Now';
+  load();
+}
+
+function pct(v, max) { return max > 0 ? Math.round((v / max) * 100) : 0; }
+
+function fragColor(p) {
+  if (p > 40) return '#f87171';
+  if (p > 20) return '#fbbf24';
+  return '#4ade80';
+}
+
+function gapColor(v) {
+  if (v > 0.6) return '#f87171';
+  if (v > 0.3) return '#fbbf24';
+  return '#4ade80';
+}
+
+function render(data) {
+  const { clusters, meta } = data;
+
+  if (meta.last_review) {
+    document.getElementById('lastReview').textContent =
+      'Last review: ' + new Date(meta.last_review).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+
+  if (!clusters.length) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">◎</div>
+        <div class="empty-title">No cluster data yet</div>
+        <div class="empty-sub">The clustering pipeline hasn't processed sessions.<br>Once live, this dashboard will populate automatically.</div>
+      </div>`;
+    return;
+  }
+
+  const total       = clusters.reduce((s, c) => s + c.size, 0);
+  const singletons  = clusters.filter(c => c.size === 1).length;
+  const fragPct     = clusters.length > 0 ? Math.round((singletons / clusters.length) * 100) : 0;
+  const eligible    = meta.total_sessions_classified - (meta.total_sessions_ineligible || 0);
+  const eligPct     = meta.total_sessions_classified > 0
+    ? Math.round((eligible / meta.total_sessions_classified) * 100) : 0;
+
+  // Intent and behavior distributions
+  const byIntent = {}, byBehavior = {};
+  clusters.forEach(c => {
+    const im = c.signature_key.match(/intent:([^|]+)/);
+    const bm = c.signature_key.match(/behavior:([^|]+)/);
+    if (im) byIntent[im[1]]   = (byIntent[im[1]]   || 0) + c.size;
+    if (bm) byBehavior[bm[1]] = (byBehavior[bm[1]] || 0) + c.size;
+  });
+
+  const maxIntent   = Math.max(...Object.values(byIntent),   1);
+  const maxBehavior = Math.max(...Object.values(byBehavior), 1);
+
+  // Gap averages across all clusters
+  const dims   = ['semantic', 'intent', 'specificity', 'emotion', 'formality'];
+  const gapAvg = {};
+  let   gapN   = 0;
+  dims.forEach(d => { gapAvg[d] = 0; });
+  clusters.forEach(c => {
+    if (c.gap_vector_avg) {
+      dims.forEach(d => { if (c.gap_vector_avg[d] != null) gapAvg[d] += c.gap_vector_avg[d] * c.size; });
+      gapN += c.size;
+    }
+  });
+  if (gapN > 0) dims.forEach(d => { gapAvg[d] = Math.round((gapAvg[d] / gapN) * 100) / 100; });
+
+  // Top clusters
+  const top = clusters.slice().sort((a, b) => b.size - a.size).slice(0, 20);
+
+  // Health signal
+  let healthClass = 'ok', healthMsg = 'Taxonomy health: good. Fragmentation is low and classifier confidence gate is filtering well.';
+  if (fragPct > 40) {
+    healthClass = 'danger';
+    healthMsg   = `High fragmentation (${fragPct}% singletons). Intent taxonomy likely needs consolidation — many sessions aren't clustering together.`;
+  } else if (fragPct > 20 || eligPct < 60) {
+    healthClass = 'warn';
+    healthMsg   = `Moderate fragmentation (${fragPct}%) or confidence gate filtering too many sessions (${eligPct}% eligible). Consider reviewing classifier thresholds.`;
+  }
+
+  // New clusters this week (created in last 7 days)
+  const weekAgo   = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const newThisWk = clusters.filter(c => c.created_at && new Date(c.created_at).getTime() > weekAgo).length;
+
+  document.getElementById('content').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card accent">
+        <div class="stat-label">Active Clusters</div>
+        <div class="stat-value" style="color:var(--accent)">${clusters.length}</div>
+        <div class="stat-sub">${newThisWk} new this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sessions Classified</div>
+        <div class="stat-value">${meta.total_sessions_classified || 0}</div>
+        <div class="stat-sub">${eligPct}% passed confidence gate</div>
+      </div>
+      <div class="stat-card ${fragPct > 40 ? 'danger' : fragPct > 20 ? 'warn' : 'ok'}">
+        <div class="stat-label">Fragmentation</div>
+        <div class="stat-value" style="color:${fragColor(fragPct)}">${fragPct}%</div>
+        <div class="stat-sub">${singletons} singleton clusters</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Cluster Size</div>
+        <div class="stat-value">${clusters.length > 0 ? (total / clusters.length).toFixed(1) : 0}</div>
+        <div class="stat-sub">${total} total sessions</div>
+      </div>
+    </div>
+
+    <div class="health-row">
+      <div class="health-dot ${healthClass}"></div>
+      <div class="health-text">${healthMsg}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Fragmentation Signal</div>
+      <div class="frag-bar-wrap">
+        <div class="frag-bar-label">
+          <span>Singleton clusters</span>
+          <span style="color:${fragColor(fragPct)}">${fragPct}%</span>
+        </div>
+        <div class="frag-bar-track">
+          <div class="frag-bar-fill" style="width:${fragPct}%;background:${fragColor(fragPct)}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Average Gap Vector (Platform-Wide)</div>
+      <div class="gap-grid">
+        ${dims.map(d => `
+          <div class="gap-card">
+            <div class="gap-dim">${d}</div>
+            <div class="gap-val" style="color:${gapColor(gapAvg[d])}">${gapAvg[d] || '—'}</div>
+            <div class="gap-track">
+              <div class="gap-fill" style="width:${(gapAvg[d] || 0) * 100}%;background:${gapColor(gapAvg[d])}"></div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Intent & Behavior Distribution</div>
+      <div class="dist-grid">
+        <div class="dist-card">
+          <div class="dist-card-header">Intent Types</div>
+          ${Object.entries(byIntent).sort((a,b) => b[1]-a[1]).slice(0,10).map(([k,v]) => `
+            <div class="dist-row">
+              <div class="dist-label">${k}</div>
+              <div class="dist-track"><div class="dist-fill" style="width:${pct(v,maxIntent)}%"></div></div>
+              <div class="dist-count">${v}</div>
+            </div>`).join('')}
+        </div>
+        <div class="dist-card">
+          <div class="dist-card-header">Behavior Types</div>
+          ${Object.entries(byBehavior).sort((a,b) => b[1]-a[1]).slice(0,10).map(([k,v]) => `
+            <div class="dist-row">
+              <div class="dist-label">${k}</div>
+              <div class="dist-track"><div class="dist-fill" style="width:${pct(v,maxBehavior)}%;background:var(--cyan)"></div></div>
+              <div class="dist-count">${v}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Top Clusters by Volume</div>
+      <div class="table-wrap">
+        <table class="cluster-table">
+          <thead><tr>
+            <th>Signature Key</th>
+            <th>Sessions</th>
+            <th>Created</th>
+            <th>Dimensions</th>
+          </tr></thead>
+          <tbody>
+            ${top.map(c => {
+              const isNew = c.created_at && new Date(c.created_at).getTime() > weekAgo;
+              const dims  = c.active_dimensions ? c.active_dimensions.join(', ') : '—';
+              return `<tr>
+                <td><span class="sig-key">${c.signature_key}</span>${isNew ? '<span class="new-badge">new</span>' : ''}</td>
+                <td><span class="size-pill">${c.size}</span></td>
+                <td style="color:var(--muted)">${c.created_at ? new Date(c.created_at).toLocaleDateString('en-GB') : '—'}</td>
+                <td style="color:var(--muted);font-size:11px">${dims}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>

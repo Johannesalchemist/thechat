@@ -1,0 +1,11 @@
+{
+  clusters: [],
+  meta: {
+    created_at: 2026-03-21T00:00:00.000Z,
+    last_review: null,
+    review_cadence_days: 7,
+    total_sessions_classified: 0,
+    total_sessions_ineligible: 0,
+    active_dimensions: [semantic, intent, specificity, emotion, formality]
+  }
+}

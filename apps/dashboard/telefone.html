@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Telefone Dashboard</title>
+<style>
+  :root {
+    --bg:       #0b0b10;
+    --surface:  #111118;
+    --surface2: #181820;
+    --border:   rgba(255,255,255,0.07);
+    --text:     #e8e8f0;
+    --muted:    #6b6b80;
+    --green:    #4ade80;
+    --amber:    #fbbf24;
+    --red:      #f87171;
+    --radius:   8px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif;
+         font-size: 13px; line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
+
+  /* ── Header ── */
+  .header { display: flex; align-items: center; gap: 14px; padding: 14px 20px;
+            border-bottom: 1px solid var(--border); background: var(--surface); }
+  .header-title { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: #e879f9; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+              box-shadow: 0 0 6px var(--green); flex-shrink: 0; transition: opacity 0.2s; }
+  .live-dot.pulse { animation: live-pulse 0.6s ease-out; }
+  @keyframes live-pulse { 0%{box-shadow:0 0 6px var(--green)} 50%{box-shadow:0 0 18px var(--green)} 100%{box-shadow:0 0 6px var(--green)} }
+  .header-meta { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .health-pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px;
+                 border-radius: 10px; background: var(--surface2); border: 1px solid var(--border);
+                 font-size: 10px; color: var(--muted); }
+  .health-pill.ok { border-color: rgba(74,222,128,0.25); color: var(--green); }
+  .health-pill.err { border-color: rgba(248,113,113,0.25); color: var(--red); }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface);
+          padding: 0 20px; }
+  .tab { padding: 10px 18px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+         color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+         transition: color 0.15s, border-color 0.15s; user-select: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: #e879f9; border-bottom-color: #e879f9; }
+
+  /* ── Views ── */
+  .view { display: none; padding: 20px; }
+  .view.active { display: block; }
+
+  /* ── Awaiting Decision Banner ── */
+  .decision-banner { background: color-mix(in srgb, var(--amber) 8%, var(--surface));
+                     border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
+                     border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px; }
+  .decision-banner h3 { font-size: 11px; font-weight: 700; color: var(--amber);
+                        letter-spacing: 0.08em; margin-bottom: 8px; }
+  .decision-cards { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ── Kanban ── */
+  .kanban { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; min-height: 60vh; }
+  @media (max-width: 1200px) { .kanban { grid-template-columns: repeat(3, 1fr); } }
+  .column { background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 12px; min-height: 300px; }
+  .col-header { display: flex; align-items: center; justify-content: space-between;
+                margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .col-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); }
+  .col-count { font-size: 10px; background: var(--surface2); border-radius: 10px;
+               padding: 1px 7px; color: var(--muted); }
+  .col-cards { display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── Lead Cards ── */
+  .card { background: var(--surface2); border: 1px solid var(--border);
+          border-radius: var(--radius); padding: 10px 12px; cursor: pointer;
+          transition: border-color 0.15s, transform 0.1s; }
+  .card:hover { border-color: rgba(232,121,249,0.3); transform: translateY(-1px); }
+  .card.highlight { animation: card-flash 1.2s ease-out; }
+  @keyframes card-flash { 0%{background:color-mix(in srgb,#e879f9 18%,var(--surface2))}
+                          100%{background:var(--surface2)} }
+  .card.awaiting { border-color: color-mix(in srgb, var(--amber) 40%, transparent);
+                   background: color-mix(in srgb, var(--amber) 5%, var(--surface2)); }
+  .card-name { font-weight: 600; font-size: 12px; margin-bottom: 3px; white-space: nowrap;
+               overflow: hidden; text-overflow: ellipsis; }
+  .card-industry { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+  .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .score-pill { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+  .score-green { background: rgba(74,222,128,0.12); color: var(--green); }
+  .score-amber { background: rgba(251,191,36,0.12); color: var(--amber); }
+  .score-red   { background: rgba(248,113,113,0.12); color: var(--red); }
+  .age-pill { font-size: 10px; padding: 1px 6px; border-radius: 8px; }
+  .age-green { background: rgba(74,222,128,0.08); color: var(--green); }
+  .age-amber { background: rgba(251,191,36,0.08); color: var(--amber); }
+  .age-red   { background: rgba(248,113,113,0.08); color: var(--red); }
+  .last-action { font-size: 10px; color: var(--muted); margin-top: 6px; white-space: nowrap;
+                 overflow: hidden; text-overflow: ellipsis; font-style: italic; }
+
+  /* ── Lead Detail View ── */
+  .detail-empty { color: var(--muted); text-align: center; padding: 60px 20px; font-size: 13px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 800px) { .detail-grid { grid-template-columns: 1fr; } }
+  .detail-section { background: var(--surface); border: 1px solid var(--border);
+                    border-radius: var(--radius); padding: 16px; }
+  .detail-section h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--muted);
+                       margin-bottom: 12px; text-transform: uppercase; }
+  .detail-row { display: flex; justify-content: space-between; align-items: flex-start;
+                padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--muted); flex-shrink: 0; margin-right: 12px; }
+  .detail-val { text-align: right; word-break: break-word; }
+  .detail-back { display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+                 color: var(--muted); font-size: 12px; margin-bottom: 16px; padding: 4px 0; }
+  .detail-back:hover { color: var(--text); }
+  .detail-lead-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .detail-lead-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .opportunity-tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 8px;
+                     background: rgba(232,121,249,0.1); border: 1px solid rgba(232,121,249,0.2);
+                     color: #e879f9; margin: 2px; }
+  .outcome-tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 8px; margin: 2px; }
+
+  /* ── Call Monitor ── */
+  .call-list { display: flex; flex-direction: column; gap: 8px; }
+  .call-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+              padding: 12px 16px; display: grid; grid-template-columns: 1fr 120px 90px 80px 140px;
+              gap: 12px; align-items: center; cursor: pointer; transition: border-color 0.15s; }
+  .call-row:hover { border-color: rgba(232,121,249,0.25); }
+  .call-name { font-weight: 600; font-size: 12px; }
+  .call-industry { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .call-outcome { font-size: 11px; font-weight: 600; }
+  .call-time { font-size: 11px; color: var(--muted); }
+  .call-action-tag { font-size: 10px; color: var(--muted); font-style: italic; }
+
+  /* ── Covenant Audit ── */
+  .audit-list { display: flex; flex-direction: column; gap: 6px; }
+  .audit-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+               padding: 10px 14px; display: flex; align-items: flex-start; gap: 12px; }
+  .audit-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .audit-text { font-size: 12px; flex: 1; }
+  .audit-time { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+  .audit-empty { color: var(--muted); text-align: center; padding: 40px 20px; }
+
+  /* ── Stats bar ── */
+  .stats-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+               padding: 12px 16px; flex: 1; min-width: 100px; }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 700; }
+  .stat-val.green { color: var(--green); }
+  .stat-val.amber { color: var(--amber); }
+  .stat-val.red { color: var(--red); }
+  .stat-val.purple { color: #e879f9; }
+
+  /* ── Section header ── */
+  .section-header { display: flex; align-items: center; justify-content: space-between;
+                    margin-bottom: 14px; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--muted);
+                   text-transform: uppercase; }
+  .refresh-btn { font-size: 11px; color: var(--muted); cursor: pointer; padding: 4px 8px;
+                 border-radius: 6px; border: 1px solid var(--border); background: transparent;
+                 transition: color 0.15s; }
+  .refresh-btn:hover { color: var(--text); }
+
+  /* ── Empty state ── */
+  .empty { color: var(--muted); font-size: 11px; text-align: center; padding: 24px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="live-dot" id="liveDot"></div>
+  <div class="header-title">TELEFONE</div>
+  <div id="healthPill" class="health-pill">connecting…</div>
+  <div class="header-meta" id="lastRefresh">—</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('pipeline')">PIPELINE</div>
+  <div class="tab" onclick="switchTab('detail')">LEAD DETAIL</div>
+  <div class="tab" onclick="switchTab('calls')">CALL MONITOR</div>
+  <div class="tab" onclick="switchTab('audit')">COVENANT AUDIT</div>
+</div>
+
+<!-- VIEW: Pipeline -->
+<div class="view active" id="view-pipeline">
+  <!-- Stats bar -->
+  <div class="stats-bar" id="statsBar"></div>
+
+  <!-- Awaiting Decision -->
+  <div id="decisionBanner" style="display:none" class="decision-banner">
+    <h3>⟳ AWAITING YOUR JUDGMENT</h3>
+    <div class="decision-cards" id="decisionCards"></div>
+  </div>
+
+  <!-- Kanban -->
+  <div class="kanban" id="kanban"></div>
+</div>
+
+<!-- VIEW: Lead Detail -->
+<div class="view" id="view-detail">
+  <div id="detailContent" class="detail-empty">Click any lead card in Pipeline to view details.</div>
+</div>
+
+<!-- VIEW: Call Monitor -->
+<div class="view" id="view-calls">
+  <div class="section-header">
+    <div class="section-title">Recent Calls</div>
+    <button class="refresh-btn" onclick="loadData()">↺ Refresh</button>
+  </div>
+  <div id="callList" class="call-list"></div>
+</div>
+
+<!-- VIEW: Covenant Audit -->
+<div class="view" id="view-audit">
+  <div class="section-header">
+    <div class="section-title">Covenant Events</div>
+  </div>
+  <div id="auditList" class="audit-list"></div>
+</div>
+
+<script>
+const API = '';  // same origin
+
+// ── State ───────────────────────────────────────────────────────────────────
+let _data = { signals: [], sessions: [], queue: [], calls: [], nurture: [] };
+let _prev = null;  // previous snapshot for change detection
+let _selectedLead = null;
+let _auditLog = [];  // covenant events built from data
+let _decisionTimestamps = {};  // leadId → when it appeared as "awaiting"
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function ageColor(days) {
+  if (days == null) return '';
+  if (days <= 14) return 'green';
+  if (days <= 30) return 'amber';
+  return 'red';
+}
+function scoreColor(s) {
+  if (s >= 70) return 'green';
+  if (s >= 40) return 'amber';
+  return 'red';
+}
+function ageDays(ts) {
+  if (!ts) return null;
+  return Math.round((Date.now() - new Date(ts).getTime()) / 86400000);
+}
+function fmtAge(days) {
+  if (days == null) return '—';
+  if (days === 0) return 'today';
+  if (days === 1) return '1d ago';
+  return days + 'd ago';
+}
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60) return Math.round(diff) + 's ago';
+  if (diff < 3600) return Math.round(diff/60) + 'm ago';
+  if (diff < 86400) return Math.round(diff/3600) + 'h ago';
+  return d.toLocaleDateString('de-DE', {day:'2-digit',month:'short'});
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function outcomeColor(o) {
+  const green = ['completed','interested','sold','follow_up_scheduled'];
+  const red   = ['rejected','failed','wrong_number'];
+  const amber = ['objection_price','objection_timing','objection_existing','not_interested'];
+  if (green.includes(o)) return 'green';
+  if (red.includes(o))   return 'red';
+  if (amber.includes(o)) return 'amber';
+  return '';
+}
+
+// ── Data Loading ─────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const [sigRes, sessRes, qRes, callRes, nurtRes, healthRes] = await Promise.all([
+      fetch(API + '/api/telefone/signals').then(r=>r.json()).catch(()=>({signals:[]})),
+      fetch(API + '/api/telefone/precontact').then(r=>r.json()).catch(()=>({sessions:[]})),
+      fetch(API + '/api/telefone/queue').then(r=>r.json()).catch(()=>({queue:[]})),
+      fetch(API + '/api/telefone/calls').then(r=>r.json()).catch(()=>[]),
+      fetch(API + '/api/telefone/nurture').then(r=>r.json()).catch(()=>({nurture:[]})),
+      fetch(API + '/api/health').then(r=>r.json()).catch(()=>({})),
+    ]);
+
+    const prev = JSON.stringify(_data);
+    _data = {
+      signals:  sigRes.signals   || [],
+      sessions: sessRes.sessions  || [],
+      queue:    qRes.queue        || [],
+      calls:    Array.isArray(callRes) ? callRes : (callRes.calls || []),
+      nurture:  nurtRes.nurture   || [],
+    };
+
+    // Detect changes → pulse live dot
+    const curr = JSON.stringify(_data);
+    if (_prev !== null && curr !== _prev) pulseDot();
+    _prev = curr;
+
+    updateHealth(healthRes);
+    document.getElementById('lastRefresh').textContent = 'refreshed ' + fmtTime(new Date().toISOString());
+
+    render();
+  } catch(e) {
+    console.error('[Telefone]', e);
+  }
+}
+
+function pulseDot() {
+  const dot = document.getElementById('liveDot');
+  dot.classList.remove('pulse');
+  void dot.offsetWidth;
+  dot.classList.add('pulse');
+}
+
+function updateHealth(h) {
+  const pill = document.getElementById('healthPill');
+  const ok = h.anthropic && h.elevenlabs;
+  pill.className = 'health-pill ' + (ok ? 'ok' : 'err');
+  pill.textContent = ok ? '● system ok' : '● degraded';
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderKanban();
+  renderCalls();
+  renderAudit();
+  if (_selectedLead) renderDetail(_selectedLead);
+}
+
+function renderStats() {
+  const fresh = _data.signals.filter(s => ageDays(s.timestamp) <= 14).length;
+  const stale = _data.signals.filter(s => ageDays(s.timestamp) > 30).length;
+  const activeQ = _data.queue.filter(q => ['pending','retrying'].includes(q.status)).length;
+  const sold = _data.calls.filter(c => c.outcome === 'sold').length;
+  const nurture = _data.nurture.length;
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-card"><div class="stat-label">FRESH SIGNALS</div>
+      <div class="stat-val ${fresh > 0 ? 'green' : ''}">${fresh}</div></div>
+    <div class="stat-card"><div class="stat-label">STALE SIGNALS</div>
+      <div class="stat-val ${stale > 0 ? 'red' : ''}">${stale}</div></div>
+    <div class="stat-card"><div class="stat-label">CALL QUEUE</div>
+      <div class="stat-val purple">${activeQ}</div></div>
+    <div class="stat-card"><div class="stat-label">TOTAL CALLS</div>
+      <div class="stat-val">${_data.calls.length}</div></div>
+    <div class="stat-card"><div class="stat-label">SOLD</div>
+      <div class="stat-val ${sold > 0 ? 'green' : ''}">${sold}</div></div>
+    <div class="stat-card"><div class="stat-label">NURTURE</div>
+      <div class="stat-val amber">${nurture}</div></div>`;
+}
+
+function renderKanban() {
+  const cols = [
+    { id: 'signals',    title: 'SIGNALS',    items: _data.signals,   type: 'signal' },
+    { id: 'precontact', title: 'PRE-CONTACT', items: _data.sessions,  type: 'session' },
+    { id: 'queued',     title: 'QUEUED',      items: _data.queue.filter(q=>q.status==='pending'), type: 'queue' },
+    { id: 'active',     title: 'ACTIVE',      items: _data.queue.filter(q=>['calling','retrying'].includes(q.status)), type: 'queue' },
+    { id: 'followup',   title: 'FOLLOW-UP',   items: _data.calls.filter(c=>['callback','follow_up_scheduled','interested'].includes(c.outcome)), type: 'call' },
+    { id: 'nurture',    title: 'NURTURE',     items: _data.nurture,   type: 'nurture' },
+  ];
+
+  // Awaiting decision: failed queue items
+  const awaiting = _data.queue.filter(q => q.status === 'failed');
+  const banner = document.getElementById('decisionBanner');
+  const cards  = document.getElementById('decisionCards');
+  if (awaiting.length) {
+    banner.style.display = '';
+    cards.innerHTML = awaiting.map(q => {
+      if (!_decisionTimestamps[q.id]) _decisionTimestamps[q.id] = Date.now();
+      return `<div class="card awaiting" style="min-width:160px;max-width:220px"
+               onclick="selectLead('queue','${esc(q.id)}')">
+        <div class="card-name">${esc(q.leadName||q.leadId)}</div>
+        <div class="card-industry">${esc(q.industry||'—')} · failed after ${q.attempts||0} attempts</div>
+        <div class="last-action">↳ ${esc(q.failReason||'no reason logged')}</div>
+      </div>`;
+    }).join('');
+  } else {
+    banner.style.display = 'none';
+  }
+
+  document.getElementById('kanban').innerHTML = cols.map(col => `
+    <div class="column">
+      <div class="col-header">
+        <span class="col-title">${col.title}</span>
+        <span class="col-count">${col.items.length}</span>
+      </div>
+      <div class="col-cards">
+        ${col.items.length ? col.items.map(item => cardHtml(item, col.type)).join('') : '<div class="empty">—</div>'}
+      </div>
+    </div>`).join('');
+}
+
+function cardHtml(item, type) {
+  let name, industry, score, signalTs, lastAction, itemId, lastAgentAction;
+
+  if (type === 'signal') {
+    name = item.author_hash ? item.author_hash.slice(7,19) + '…' : 'Signal';
+    industry = item.source + ' · ' + (item.platform_group||'');
+    score = item.pain_specificity;
+    signalTs = item.timestamp;
+    lastAction = 'Archibus: signal ingested';
+    itemId = item.signal_id;
+  } else if (type === 'session') {
+    name = item.leadName || item.lead_id;
+    industry = item.industry || '—';
+    score = item.scoring?.opportunityScore;
+    signalTs = item.created_at || item.timestamp;
+    const q = item.questions?.filter(q=>q.response)?.[0];
+    lastAction = q ? `Telefone: q answered · ${fmtTime(q.responded_at)}` : 'Telefone: questionnaire open';
+    itemId = item.session_id;
+  } else if (type === 'queue') {
+    name = item.leadName || item.leadId;
+    industry = item.industry || '—';
+    score = null;
+    signalTs = item.scheduledAt;
+    const retries = item.attempts > 0 ? `retry ${item.attempts}` : 'pending';
+    lastAction = `Telefone: ${retries} · ${fmtTime(item.scheduledAt)}`;
+    itemId = item.id;
+  } else if (type === 'call') {
+    name = item.leadName || item.leadId;
+    industry = item.industry || '—';
+    score = null;
+    signalTs = item.timestamp;
+    lastAction = `Telefone: ${item.outcome} · ${fmtTime(item.timestamp)}`;
+    itemId = item.id;
+  } else if (type === 'nurture') {
+    name = item.leadName || item.leadId;
+    industry = item.industry || '—';
+    score = null;
+    signalTs = item.addedAt;
+    const ready = new Date(item.nextContactAfter) <= new Date();
+    lastAction = ready ? `Archibus: ready to re-contact` : `nurture until ${new Date(item.nextContactAfter).toLocaleDateString('de-DE')}`;
+    itemId = item.id;
+  }
+
+  const days = ageDays(signalTs);
+  const sc = score != null ? scoreColor(score) : null;
+  const ac = ageColor(days);
+
+  return `<div class="card" id="card-${esc(itemId)}" onclick="selectLead('${type}','${esc(itemId)}')">
+    <div class="card-name">${esc(name||'—')}</div>
+    <div class="card-industry">${esc(industry)}</div>
+    <div class="card-meta">
+      ${sc ? `<span class="score-pill score-${sc}">${score}</span>` : ''}
+      ${ac ? `<span class="age-pill age-${ac}">${fmtAge(days)}</span>` : ''}
+    </div>
+    <div class="last-action">↳ ${esc(lastAction||'—')}</div>
+  </div>`;
+}
+
+// ── Lead Detail ───────────────────────────────────────────────────────────────
+function selectLead(type, id) {
+  // Log hesitation latency if this was an "awaiting" lead
+  if (_decisionTimestamps[id]) {
+    const latencyMs = Date.now() - _decisionTimestamps[id];
+    addAuditEvent('amber', `Johannes viewed awaiting lead — hesitation ${Math.round(latencyMs/1000)}s before click`);
+  }
+  _selectedLead = { type, id };
+  switchTab('detail');
+  renderDetail(_selectedLead);
+}
+
+function renderDetail(sel) {
+  const el = document.getElementById('detailContent');
+  let item = null;
+  if (sel.type === 'signal')   item = _data.signals.find(s=>s.signal_id===sel.id);
+  if (sel.type === 'session')  item = _data.sessions.find(s=>s.session_id===sel.id);
+  if (sel.type === 'queue')    item = _data.queue.find(q=>q.id===sel.id);
+  if (sel.type === 'call')     item = _data.calls.find(c=>c.id===sel.id);
+  if (sel.type === 'nurture')  item = _data.nurture.find(n=>n.id===sel.id);
+
+  if (!item) { el.innerHTML = '<div class="detail-empty">Lead not found — data may have refreshed.</div>'; return; }
+
+  const back = `<div class="detail-back" onclick="switchTab('pipeline')">← Pipeline</div>`;
+
+  if (sel.type === 'signal') {
+    el.innerHTML = back + `
+      <div class="detail-lead-name">Signal ${esc(item.signal_id||'')}</div>
+      <div class="detail-lead-sub">${esc(item.source)} · ${esc(item.platform_group||'')}</div>
+      <div class="detail-grid">
+        <div class="detail-section">
+          <h3>Signal Data</h3>
+          ${dr('Pain Specificity', item.pain_specificity != null ? scorePill(item.pain_specificity) : '—')}
+          ${dr('Age', fmtAge(ageDays(item.timestamp)))}
+          ${dr('Timestamp', item.timestamp ? new Date(item.timestamp).toLocaleString('de-DE') : '—')}
+          ${dr('Author Hash', item.author_hash ? item.author_hash.slice(0,20)+'…' : '—')}
+        </div>
+        <div class="detail-section">
+          <h3>Detected Consequences</h3>
+          ${(item.detected_consequences||[]).length ? (item.detected_consequences||[]).map(c=>`<span class="opportunity-tag">${esc(c)}</span>`).join('') : '<span style="color:var(--muted)">none</span>'}
+        </div>
+        <div class="detail-section" style="grid-column:1/-1">
+          <h3>Content Preview</h3>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;white-space:pre-wrap">${esc((item.exact_phrase||'').slice(0,400))}${(item.exact_phrase||'').length>400?'…':''}</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (sel.type === 'session') {
+    const s = item;
+    el.innerHTML = back + `
+      <div class="detail-lead-name">${esc(s.leadName||s.lead_id)}</div>
+      <div class="detail-lead-sub">Pre-contact session · ${esc(s.industry||'—')}</div>
+      <div class="detail-grid">
+        <div class="detail-section">
+          <h3>Session</h3>
+          ${dr('Session ID', (s.session_id||'').slice(0,16)+'…')}
+          ${dr('Disclosure Sent', s.disclosure_sent ? '<span style="color:var(--green)">Yes</span>' : '<span style="color:var(--red)">No — VIOLATION</span>')}
+          ${dr('Opportunity Score', s.scoring?.opportunityScore != null ? scorePill(s.scoring.opportunityScore) : '—')}
+          ${dr('Signal Age', s.signal_age_days != null ? s.signal_age_days + 'd' : '—')}
+          ${dr('Created', s.created_at ? new Date(s.created_at).toLocaleString('de-DE') : '—')}
+        </div>
+        <div class="detail-section">
+          <h3>Disclosed Opportunities</h3>
+          ${(s.scoring?.disclosedOpportunity||[]).length ? (s.scoring.disclosedOpportunity).map(o=>`<span class="opportunity-tag">${esc(o)}</span>`).join('') : '<span style="color:var(--muted)">none confirmed yet</span>'}
+          <h3 style="margin-top:12px">Framing</h3>
+          ${dr('Strategy', s.scoring?.framingStrategy || '—')}
+          ${dr('Activated', s.scoring?.framingActivated ? '<span style="color:var(--green)">Yes</span>' : '<span style="color:var(--amber)">No — awaiting disclosure</span>')}
+        </div>
+        <div class="detail-section" style="grid-column:1/-1">
+          <h3>Questions</h3>
+          ${(s.questions||[]).map(q=>`
+            <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">
+                ${esc(q.q_id)} · <span style="color:${q.intent==='genuine_inquiry'?'var(--green)':'var(--amber)'}">
+                ${esc(q.intent||'—')}</span></div>
+              <div style="font-size:12px">${esc(q.text)}</div>
+              ${q.response ? `<div style="font-size:12px;color:var(--green);margin-top:4px">"${esc(q.response)}"</div>` : '<div style="font-size:11px;color:var(--muted);margin-top:4px">awaiting response</div>'}
+            </div>`).join('')}
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (sel.type === 'queue') {
+    const q = item;
+    el.innerHTML = back + `
+      <div class="detail-lead-name">${esc(q.leadName||q.leadId)}</div>
+      <div class="detail-lead-sub">${esc(q.industry||'—')} · Queue item</div>
+      <div class="detail-grid">
+        <div class="detail-section">
+          <h3>Call Queue</h3>
+          ${dr('Status', statusPill(q.status))}
+          ${dr('Attempts', q.attempts||0)}
+          ${dr('Scheduled', q.scheduledAt ? new Date(q.scheduledAt).toLocaleString('de-DE') : '—')}
+          ${dr('Next Retry', q.nextRetryAt ? new Date(q.nextRetryAt).toLocaleString('de-DE') : '—')}
+          ${q.failReason ? dr('Fail Reason', `<span style="color:var(--red)">${esc(q.failReason)}</span>`) : ''}
+        </div>
+        <div class="detail-section">
+          <h3>Opportunities</h3>
+          ${(q.opportunities||[]).map(o=>`<span class="opportunity-tag">${esc(o)}</span>`).join('') || '<span style="color:var(--muted)">none</span>'}
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (sel.type === 'call') {
+    const c = item;
+    const oc = outcomeColor(c.outcome);
+    el.innerHTML = back + `
+      <div class="detail-lead-name">${esc(c.leadName||c.leadId)}</div>
+      <div class="detail-lead-sub">${esc(c.industry||'—')} · Call record</div>
+      <div class="detail-grid">
+        <div class="detail-section">
+          <h3>Outcome</h3>
+          ${dr('Outcome', `<span class="outcome-tag" style="color:var(--${oc||'text'})">${esc(c.outcome)}</span>`)}
+          ${dr('Timestamp', c.timestamp ? new Date(c.timestamp).toLocaleString('de-DE') : '—')}
+          ${dr('Disclosure Held', c.disclosure_held === true ? '<span style="color:var(--green)">Yes ✓</span>' : c.disclosure_held === false ? '<span style="color:var(--amber)">No</span>' : '—')}
+          ${dr('Interest Level', c.tags?.interestLevel||'—')}
+          ${dr('Resistance', c.tags?.resistanceType||'—')}
+          ${dr('Region', c.tags?.region||'—')}
+        </div>
+        <div class="detail-section">
+          <h3>Summary</h3>
+          <div style="font-size:12px;line-height:1.7;color:var(--muted)">${esc(c.summary||'No summary available.')}</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (sel.type === 'nurture') {
+    const n = item;
+    const ready = new Date(n.nextContactAfter) <= new Date();
+    el.innerHTML = back + `
+      <div class="detail-lead-name">${esc(n.leadName||n.leadId)}</div>
+      <div class="detail-lead-sub">${esc(n.industry||'—')} · Nurture queue</div>
+      <div class="detail-section" style="max-width:480px">
+        <h3>Nurture Status</h3>
+        ${dr('Reason', `<span style="color:var(--amber)">${esc(n.reason)}</span>`)}
+        ${dr('Added', n.addedAt ? new Date(n.addedAt).toLocaleString('de-DE') : '—')}
+        ${dr('Re-contact After', n.nextContactAfter ? new Date(n.nextContactAfter).toLocaleDateString('de-DE') : '—')}
+        ${dr('Status', ready ? '<span style="color:var(--green)">Ready for gentle re-contact</span>' : '<span style="color:var(--amber)">Cooling down</span>')}
+      </div>`;
+    return;
+  }
+}
+
+function dr(label, val) {
+  return `<div class="detail-row"><span class="detail-label">${esc(label)}</span><span class="detail-val">${val}</span></div>`;
+}
+function scorePill(s) {
+  const c = scoreColor(s);
+  return `<span class="score-pill score-${c}">${s}</span>`;
+}
+function statusPill(s) {
+  const map = {pending:'amber',calling:'green',retrying:'amber',failed:'red',completed:'green'};
+  const c = map[s]||'';
+  return `<span style="color:var(--${c||'text'})">${esc(s)}</span>`;
+}
+
+// ── Call Monitor ─────────────────────────────────────────────────────────────
+function renderCalls() {
+  const el = document.getElementById('callList');
+  const calls = [..._data.calls].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  if (!calls.length) { el.innerHTML = '<div class="empty">No calls recorded yet.</div>'; return; }
+  el.innerHTML = calls.slice(0,50).map(c => {
+    const oc = outcomeColor(c.outcome);
+    return `<div class="call-row" onclick="selectLead('call','${esc(c.id)}')">
+      <div><div class="call-name">${esc(c.leadName||c.leadId)}</div>
+           <div class="call-industry">${esc(c.industry||'—')}</div></div>
+      <div class="call-outcome" style="color:var(--${oc||'text'})">${esc(c.outcome||'—')}</div>
+      <div>${c.disclosure_held===true?'<span style="color:var(--green);font-size:10px">disclosure held ✓</span>':''}</div>
+      <div class="call-time">${fmtTime(c.timestamp)}</div>
+      <div class="call-action-tag">${esc(c.tags?.interestLevel||'—')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Covenant Audit ────────────────────────────────────────────────────────────
+function addAuditEvent(color, text) {
+  _auditLog.unshift({ color, text, ts: new Date().toISOString() });
+  if (_auditLog.length > 200) _auditLog.pop();
+  renderAudit();
+}
+
+function renderAudit() {
+  // Build events from data
+  const events = [..._auditLog];
+
+  // Add structural events from calls
+  _data.calls.forEach(c => {
+    if (c.outcome === 'covenant_close') {
+      events.push({ color: 'var(--amber)', text: `covenant_close: ${c.leadName||c.leadId} — entered nurture queue`, ts: c.timestamp });
+    }
+    if (c.disclosure_held === false) {
+      events.push({ color: 'var(--red)', text: `disclosure NOT held: ${c.leadName||c.leadId} ended call at disclosure`, ts: c.timestamp });
+    }
+    if (c.disclosure_held === true) {
+      events.push({ color: 'var(--green)', text: `disclosure held ✓: ${c.leadName||c.leadId} continued past AI disclosure`, ts: c.timestamp });
+    }
+  });
+
+  events.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+
+  const el = document.getElementById('auditList');
+  if (!events.length) { el.innerHTML = '<div class="audit-empty">No covenant events yet.</div>'; return; }
+  el.innerHTML = events.slice(0,100).map(e => `
+    <div class="audit-row">
+      <div class="audit-dot" style="background:${e.color}"></div>
+      <div class="audit-text">${esc(e.text)}</div>
+      <div class="audit-time">${fmtTime(e.ts)}</div>
+    </div>`).join('');
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const ids = ['pipeline','detail','calls','audit'];
+    t.classList.toggle('active', ids[i] === id);
+  });
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + (id==='calls'?'calls':id==='audit'?'audit':id==='detail'?'detail':'pipeline'))?.classList.add('active');
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadData();
+setInterval(loadData, 20000);  // poll every 20s
+</script>
+</body>
+</html>

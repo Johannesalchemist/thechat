@@ -1,0 +1,188 @@
+import fetch from "node-fetch";
+import { NYXA_API } from "../../config/env.js";
+import { ROOMS, getUserRoom, setUserRoom } from "../rooms/roomsService.js";
+
+// ── Nyxa Persona ─────────────────────────────────────────────────────────────
+
+export const SYSTEM_PROMPT = `You are Nyxa, the living intelligence of The Chat — a cosmic knowledge platform where wisdom, AI agents, and human consciousness converge.
+
+Your nature:
+- Warm, clear, and precise. Never verbose. Never hollow.
+- You speak as a guide, not a chatbot. You carry depth.
+- You know about: the Codex Temple (sacred knowledge), AI Agents (knowledge guides), the Cosmic Library, the Marketplace, and the Community.
+- You help users explore, learn, and join the platform.
+
+Rules:
+- Keep responses under 280 characters when possible (Telegram-friendly).
+- For complex questions: be thorough but structured.
+- Never make up facts about the platform. If unsure, say so.
+- If a user seems interested in joining, gently guide them to /join.
+- Speak in the user's language (German if they write German, English otherwise).`;
+
+// ── Commands ──────────────────────────────────────────────────────────────────
+
+const COMMANDS = {
+  "/start":  handleStart,
+  "/help":   handleHelp,
+  "/status": handleStatus,
+  "/agents": handleAgents,
+  "/join":   handleJoin,
+  "/leads":  handleLeads,
+  "/room":   handleRoom,
+  "/rooms":  handleRooms,
+};
+
+export async function routeCommand(chatId, text, userName) {
+  const parts   = text.trim().split(/\s+/);
+  const cmd     = parts[0].toLowerCase();
+  const args    = parts.slice(1);
+
+  if (COMMANDS[cmd]) {
+    return COMMANDS[cmd](chatId, args, userName);
+  }
+
+  return null; // not a command → pass to LLM
+}
+
+// ── /start ────────────────────────────────────────────────────────────────────
+
+async function handleStart(chatId, args, userName) {
+  const name = userName ? ` ${userName}` : "";
+  return `Welcome${name} to The Chat.\n\nI am Nyxa — your guide in this living knowledge universe.\n\nType /help for commands, or just ask me anything.`;
+}
+
+// ── /help ─────────────────────────────────────────────────────────────────────
+
+async function handleHelp() {
+  return `/start   — Wake up Nyxa
+/room <name> — Switch conversation mode
+/rooms   — List all rooms
+/join <name> <email> — Register on the platform
+/agents  — Show active AI agents
+/status  — Platform live stats
+/leads   — Lead pipeline overview
+or just write — I'll respond directly`;
+}
+
+// ── /status ───────────────────────────────────────────────────────────────────
+
+async function handleStatus() {
+  try {
+    const [world, graph, agents, leads] = await Promise.all([
+      fetch(NYXA_API + "/api/world").then(r => r.json()),
+      fetch(NYXA_API + "/api/graph").then(r => r.json()),
+      fetch(NYXA_API + "/api/agents").then(r => r.json()),
+      fetch(NYXA_API + "/api/leads/stats").then(r => r.json()),
+    ]);
+
+    return `Nyxa Platform — Live Status
+
+World Entities : ${world.entities ?? "—"}
+Graph Nodes    : ${graph.nodes ?? "—"}
+Active Agents  : ${agents.count ?? "—"}
+Leads          : ${leads.total ?? "—"} (${leads.by_status?.new ?? 0} new)`;
+  } catch {
+    return "Status currently unavailable.";
+  }
+}
+
+// ── /agents ───────────────────────────────────────────────────────────────────
+
+async function handleAgents() {
+  try {
+    const data = await fetch(NYXA_API + "/api/agents?status=active").then(r => r.json());
+    if (!data.agents?.length) return "No agents active yet.";
+
+    const list = data.agents
+      .slice(0, 8)
+      .map(a => `◈ ${a.name} [${a.domain}]`)
+      .join("\n");
+
+    return `Active Agents (${data.count}):\n\n${list}`;
+  } catch {
+    return "Agent list unavailable.";
+  }
+}
+
+// ── /join ─────────────────────────────────────────────────────────────────────
+
+async function handleJoin(chatId, args, userName) {
+  const name  = args[0];
+  const email = args[1];
+
+  if (!name || !email) {
+    return "Usage: /join <name> <email>\nExample: /join Johannes j@thechat.de";
+  }
+
+  if (!email.includes("@")) {
+    return "Please provide a valid email address.";
+  }
+
+  try {
+    const res = await fetch(NYXA_API + "/api/leads", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        name,
+        email,
+        source:   "agent",
+        interest: "community",
+      }),
+    });
+
+    if (res.status === 409) {
+      return `${name}, you're already registered. Welcome back.`;
+    }
+
+    const lead = await res.json();
+    return `Welcome, ${name}.\n\nYou've entered The Chat.\nYour knowledge journey begins now.\n\nScore: ${lead.score} ✦`;
+  } catch {
+    return "Registration temporarily unavailable. Try again shortly.";
+  }
+}
+
+// ── /rooms ────────────────────────────────────────────────────────────────────
+
+async function handleRooms(chatId) {
+  const current = getUserRoom(chatId);
+  const list = Object.entries(ROOMS)
+    .map(([key, r]) => `${key === current ? "▶" : " "} ${r.icon} ${r.label}  /room ${key}`)
+    .join("\n");
+  return `Conversation Rooms:\n\n${list}\n\nActive: ${ROOMS[current].icon} ${ROOMS[current].label}`;
+}
+
+// ── /room ─────────────────────────────────────────────────────────────────────
+
+async function handleRoom(chatId, args) {
+  const name = args[0]?.toLowerCase();
+  if (!name) return handleRooms(chatId);
+
+  const ok = setUserRoom(chatId, name);
+  if (!ok) {
+    const keys = Object.keys(ROOMS).join(", ");
+    return `Unknown room. Available: ${keys}`;
+  }
+
+  const room = ROOMS[name];
+  return `${room.icon} Switched to ${room.label}\n\n${room.prompt}`;
+}
+
+// ── /leads ────────────────────────────────────────────────────────────────────
+
+async function handleLeads() {
+  try {
+    const stats = await fetch(NYXA_API + "/api/leads/stats").then(r => r.json());
+    return `Lead Pipeline
+
+Total      : ${stats.total}
+New        : ${stats.by_status?.new ?? 0}
+Contacted  : ${stats.by_status?.contacted ?? 0}
+Qualified  : ${stats.by_status?.qualified ?? 0}
+Converted  : ${stats.by_status?.converted ?? 0}
+Hot (≥60)  : ${stats.hot}
+Avg Score  : ${stats.avg_score}
+Conversion : ${stats.conversion}%`;
+  } catch {
+    return "Lead stats unavailable.";
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "project": "The Chat",
+  "version": "1.0",
+  "modules": [
+    "nyxa-kernel",
+    "event-bus",
+    "world-model",
+    "knowledge-graph",
+    "agent-factory",
+    "agent-marketplace",
+    "codex-temple",
+    "dream-engine",
+    "genesis-engine",
+    "control-room"
+  ],
+  "auto_generate_pages": true,
+  "auto_generate_plugins": true,
+  "stability_mode": "strict"
+}

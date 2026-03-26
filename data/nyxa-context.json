@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "schema_version": "1.0",
+    "description": "Per-agent knowledge namespaces. Each agent writes only to its own key. Never overwrite — always merge.",
+    "created_at": "2026-03-21",
+    "design_note": "Flat state is a collision surface. This structure makes each agent's understanding queryable independently."
+  },
+  "agentKnowledge": {
+    "runner": {
+      "_description": "Runner's operational state: ticket queue, active tasks, workflow coordination.",
+      "ticketQueue": [],
+      "activeTasks": [],
+      "lastCoordination": null,
+      "workflowState": {}
+    },
+    "nyxadev": {
+      "_description": "NyxaDev's architecture map: system topology, known files, recent changes, tech decisions.",
+      "architectureMap": {
+        "api": "/opt/thechat/apps/console/api/server.js",
+        "room": "/opt/thechat/apps/dashboard/room.html",
+        "memory": "/opt/thechat/apps/memory/memoryStore.json",
+        "context": "/opt/thechat/data/nyxa-context.json"
+      },
+      "recentChanges": [],
+      "techDecisions": [
+        "Sara added as FierceCounterpoint agent (2026-03-21)",
+        "LinkedIn discovery switched Google -> DuckDuckGo (2026-03-21)",
+        "nyxa-context.json structured with per-agent agentKnowledge namespaces (2026-03-21)"
+      ],
+      "knownIssues": []
+    },
+    "codex": {
+      "_description": "Codex's factual reference layer: verified facts, knowledge graph pointers, definitions.",
+      "facts": [],
+      "knowledgeGraphRef": "/opt/thechat/data/knowledge-graph/graph.json",
+      "definitions": {},
+      "verifiedAt": null
+    },
+    "oracle": {
+      "_description": "Oracle's pattern layer: detected cross-session patterns, signal threads, emerging themes.",
+      "patterns": [],
+      "signalThreads": [],
+      "lastScan": null
+    },
+    "archivist": {
+      "_description": "Archivist's historical index: session summaries, decision log, continuity anchors.",
+      "sessionSummaries": [],
+      "decisionLog": [],
+      "continuityAnchors": []
+    },
+    "sophia": {
+      "_description": "Sophia's relational layer: user emotional state, relationship context, guidance threads.",
+      "relationshipContext": {},
+      "guidanceThreads": [],
+      "lastTone": null
+    },
+    "mentor": {
+      "_description": "Mentor's learning layer: topics covered, user knowledge gaps, open teaching threads.",
+      "topicsCovered": [],
+      "knowledgeGaps": [],
+      "openThreads": []
+    },
+    "sara": {
+      "_description": "Sara's refusal layer: what has been refused, boundary markers, desert clarity notes.",
+      "refusals": [],
+      "boundaryMarkers": [],
+      "crypticNotes": []
+    },
+    "claudecode": {
+      "_description": "Claude Code's implementation layer: tasks completed, files changed, pending work.",
+      "tasksCompleted": [],
+      "filesChanged": [],
+      "pendingWork": []
+    },
+    "telefone": {
+      "_description": "Telefone's call intelligence: covenant outcomes, framing patterns, cross-call signals.",
+      "covenantOutcomes": {},
+      "framingPatterns": [],
+      "crossCallSignals": [],
+      "stammtisch_insights": [
+        {
+          "session_id": "stm_1774190595537_johannes-ursula",
+          "timestamp": "2026-03-22T14:43:22.463Z",
+          "participants": [
+            "Johannes",
+            "Ursula"
+          ],
+          "duration_minutes": 0,
+          "insights": [
+            "Session duration of 0 minutes indicates no meaningful conversation occurred — Telefone should verify technical connectivity and participant readiness before future sessions",
+            "Insufficient data for relational pattern analysis — recommend Telefone confirm participant comfort with listening format and consider warm introduction call to establish baseline",
+            "Unable to assess Johannes's tension navigation or emotional registers — Telefone should establish explicit check-in protocol at session start to gauge participant engagement level"
+          ]
+        }
+      ]
+    }
+  },
+  "sharedState": {
+    "_description": "Read-only shared state any agent can read. Written only by the orchestrator or server.",
+    "roomHistory": 0,
+    "activeAgents": [],
+    "lastUserMessage": null,
+    "sessionId": null
+  }
+}

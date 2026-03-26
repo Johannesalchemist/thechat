@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nyxa — Enter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #04040f; --surface: rgba(14,14,28,0.85); --border: rgba(255,255,255,0.07);
+      --text: #e8e8f4; --muted: #5a5a7a; --accent: #a78bfa; --radius: 18px;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+
+    #canvas { position: fixed; inset: 0; z-index: 0; }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(60px); opacity: 0.18;
+      animation: drift linear infinite; z-index: 0; pointer-events: none; }
+    @keyframes drift {
+      0%   { transform: translate(0,0) scale(1); }
+      33%  { transform: translate(var(--dx1),var(--dy1)) scale(1.1); }
+      66%  { transform: translate(var(--dx2),var(--dy2)) scale(0.95); }
+      100% { transform: translate(0,0) scale(1); }
+    }
+
+    #scene { position: relative; z-index: 1; height: 100vh;
+      display: flex; align-items: center; justify-content: center; }
+
+    .agent-ring { position: absolute; width: 520px; height: 520px;
+      animation: spin 60s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .agent-dot { position: absolute; width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.9);
+      box-shadow: 0 0 20px currentColor;
+      animation: counter-spin 60s linear infinite;
+      cursor: default; transition: transform .3s, box-shadow .3s; }
+    .agent-dot:hover { transform: scale(1.3) rotate(0deg) !important;
+      box-shadow: 0 0 40px currentColor, 0 0 80px currentColor; z-index: 10; }
+    @keyframes counter-spin { to { transform: rotate(-360deg); } }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 44px 40px 36px; width: 380px;
+      position: relative; z-index: 2;
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 0 0 1px rgba(167,139,250,0.08), 0 32px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(167,139,250,0.06);
+      animation: card-in 0.7s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes card-in { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+    /* ── Logo ── */
+    .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+    .logo-mark { width: 38px; height: 38px; border-radius: 50%;
+      background: conic-gradient(from 120deg, #a78bfa, #22d3ee, #fbbf24, #fb923c, #a78bfa);
+      flex-shrink: 0; box-shadow: 0 0 24px rgba(167,139,250,0.4);
+      animation: logo-pulse 3s ease-in-out infinite; }
+    @keyframes logo-pulse {
+      0%,100%{box-shadow:0 0 24px rgba(167,139,250,0.4)}
+      50%{box-shadow:0 0 40px rgba(167,139,250,0.7),0 0 80px rgba(167,139,250,0.2)} }
+    .logo-text { display: flex; flex-direction: column; gap: 1px; }
+    .logo-name { font-size: 16px; font-weight: 800; letter-spacing: 0.2em;
+      background: linear-gradient(90deg, #a78bfa, #22d3ee);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+
+    /* ── Headline ── */
+    .headline { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 6px;
+      background: linear-gradient(135deg, #e8e8f4 0%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .subline { color: var(--muted); font-size: 13px; margin-bottom: 28px; line-height: 1.5;
+      transition: all .3s; min-height: 40px; }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 10px; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--muted); margin-bottom: 7px; }
+
+    .input-wrap { position: relative; }
+    input[type=text], input[type=password] {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      color: var(--text); padding: 11px 14px; border-radius: 10px;
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    input:focus { border-color: rgba(167,139,250,0.5); background: rgba(167,139,250,0.05);
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.1); }
+    input::placeholder { color: rgba(90,90,122,0.5); }
+
+    /* ── Checking indicator on name field ── */
+    .input-status { position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 14px; transition: opacity .2s; }
+
+    /* ── Invite field (shown/hidden) ── */
+    .invite-wrap { overflow: hidden; transition: max-height .4s cubic-bezier(0.16,1,0.3,1),
+      opacity .3s; max-height: 0; opacity: 0; }
+    .invite-wrap.visible { max-height: 100px; opacity: 1; }
+
+    /* ── Remember me ── */
+    .remember-row { display: flex; align-items: center; gap: 9px;
+      margin-bottom: 16px; cursor: pointer; }
+    .remember-row input[type=checkbox] { display: none; }
+    .check-box { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s; font-size: 10px; }
+    .remember-row input:checked + .check-box {
+      background: rgba(167,139,250,0.2); border-color: var(--accent); color: var(--accent); }
+    .remember-label { font-size: 12px; color: var(--muted); user-select: none; }
+
+    /* ── Button ── */
+    .btn-enter { width: 100%; margin-top: 4px;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa); color: #fff; border: none;
+      padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit; letter-spacing: 0.06em;
+      transition: opacity .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+      position: relative; overflow: hidden; }
+    .btn-enter::after { content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0; transition: opacity .2s; }
+    .btn-enter:hover::after { opacity: 1; }
+    .btn-enter:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+    .btn-enter:active { transform: translateY(0); }
+    .btn-enter:disabled { opacity: 0.4; cursor: default; transform: none; }
+    .shimmer { position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer 2.5s ease-in-out infinite; }
+    @keyframes shimmer { 0%{left:-100%} 100%{left:200%} }
+
+    .error { color: #f87171; font-size: 12px; margin-top: 10px; min-height: 16px; text-align: center; }
+
+    /* ── Returning user greeting ── */
+    .welcome-badge { display: none; align-items: center; gap: 10px;
+      padding: 10px 14px; background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.2); border-radius: 10px;
+      margin-bottom: 14px; }
+    .welcome-badge.show { display: flex; animation: card-in .3s ease-out; }
+    .welcome-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80;
+      box-shadow: 0 0 6px #4ade80; flex-shrink: 0; }
+    .welcome-text { font-size: 12px; color: #86efac; line-height: 1.4; }
+
+    /* ── Agents strip ── */
+    .agents-strip { display: flex; gap: 8px; justify-content: center;
+      margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .agent-chip { width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.9);
+      position: relative; transition: transform .2s; cursor: default; }
+    .agent-chip:hover { transform: scale(1.25) translateY(-2px); }
+    .agent-chip::after { content: attr(data-name); position: absolute;
+      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: rgba(14,14,28,0.95); border: 1px solid var(--border); color: var(--text);
+      font-size: 10px; font-weight: 400; padding: 3px 8px; border-radius: 6px;
+      white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; }
+    .agent-chip:hover::after { opacity: 1; }
+    .agents-label { font-size: 10px; color: var(--muted); text-align: center;
+      margin-top: 8px; letter-spacing: 0.06em; }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="orb" style="width:500px;height:500px;background:#a78bfa;top:-100px;left:-100px;animation-duration:25s;--dx1:80px;--dy1:60px;--dx2:-40px;--dy2:100px;"></div>
+<div class="orb" style="width:400px;height:400px;background:#22d3ee;top:40%;right:-80px;animation-duration:31s;--dx1:-60px;--dy1:40px;--dx2:30px;--dy2:-80px;"></div>
+<div class="orb" style="width:350px;height:350px;background:#fbbf24;bottom:-80px;left:30%;animation-duration:28s;--dx1:50px;--dy1:-60px;--dx2:-80px;--dy2:30px;"></div>
+
+<div id="scene">
+  <div class="agent-ring" id="agentRing"></div>
+
+  <div class="card">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <div class="logo-text">
+        <span class="logo-name">NYXA</span>
+        <span class="logo-sub">Living Knowledge Platform</span>
+      </div>
+    </div>
+
+    <div class="headline">Enter The Room</div>
+    <p class="subline" id="subline">A space where memory persists,<br>agents think, and ideas take form.</p>
+
+    <!-- Returning user welcome badge -->
+    <div class="welcome-badge" id="welcomeBadge">
+      <div class="welcome-dot"></div>
+      <div class="welcome-text" id="welcomeText"></div>
+    </div>
+
+    <div class="field">
+      <label for="name">Your Name</label>
+      <div class="input-wrap">
+        <input id="name" type="text" placeholder="Who are you?" autocomplete="off" />
+        <span class="input-status" id="nameStatus"></span>
+      </div>
+    </div>
+
+    <!-- Invite code — only shown for new users -->
+    <div class="invite-wrap" id="inviteWrap">
+      <div class="field">
+        <label for="code">Invite Code</label>
+        <input id="code" type="text" placeholder="XXXXXXXX" autocomplete="off"
+          style="text-transform:uppercase;letter-spacing:.15em;font-family:monospace;font-size:16px;" />
+      </div>
+    </div>
+
+    <!-- Remember me -->
+    <label class="remember-row">
+      <input type="checkbox" id="rememberMe" />
+      <div class="check-box" id="checkBox">✓</div>
+      <span class="remember-label">Remember me for a year</span>
+    </label>
+
+    <button class="btn-enter" id="btn">
+      <span class="shimmer"></span>
+      Enter The Room
+    </button>
+    <div class="error" id="err"></div>
+
+    <div class="agents-strip" id="agentsStrip"></div>
+    <div class="agents-label" id="agentsLabel">8 agents waiting inside</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API       = '';
+const TOKEN_KEY = 'nyxa_token';
+const NAME_KEY  = 'nyxa_user';
+const params = new URLSearchParams(window.location.search);
+const invitedName = params.get('name') || '';
+const invitedCode = (params.get('code') || '').toUpperCase();
+
+const AGENTS = [
+  { name: 'Sophia',    color: '#a78bfa', letter: 'S' },
+  { name: 'Mentor',    color: '#22d3ee', letter: 'M' },
+  { name: 'Runner',    color: '#fb923c', letter: 'R' },
+  { name: 'Oracle',    color: '#fbbf24', letter: 'O' },
+  { name: 'Archivist', color: '#2dd4bf', letter: 'A' },
+  { name: 'Codex',     color: '#60a5fa', letter: 'C' },
+  { name: 'NyxaDev',   color: '#4ade80', letter: 'D' },
+  { name: 'Sara',      color: '#dc2626', letter: 'L' },
+];
+
+const GREETINGS = [
+  n => `Welcome back, ${n}. The Room remembers you.`,
+  n => `${n}. The agents have been waiting.`,
+  n => `You're known here, ${n}. Step in.`,
+  n => `Good to have you back, ${n}.`,
+  n => `${n} — recognised. The Room is open.`,
+];
+
+// ── Redirect if already logged in ─────────────────────────────────────────
+(async function() {
+  const t = localStorage.getItem(TOKEN_KEY);
+  if (!t) return;
+  try {
+    const r = await fetch(API + '/api/auth/verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: t })
+    }).then(r => r.json());
+    if (r.ok) window.location.href = '/dashboard/room';
+    else { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(NAME_KEY); }
+  } catch {}
+})();
+
+// ── Canvas stars ───────────────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+const stars = Array.from({ length: 160 }, () => ({
+  x: Math.random(), y: Math.random(),
+  r: Math.random() * 1.2 + 0.2,
+  s: (Math.random() * 0.4 + 0.6) * 0.003,
+  o: Math.random() * 0.5 + 0.2,
+  p: Math.random() * Math.PI * 2
+}));
+
+function drawStars(t) {
+  ctx.clearRect(0, 0, W, H);
+  const thresh = 0.12;
+  stars.forEach(s => {
+    const a = s.o * (0.6 + 0.4 * Math.sin(t * s.s + s.p));
+    ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(200,200,255,' + a + ')'; ctx.fill();
+  });
+  for (let i = 0; i < stars.length; i++) {
+    for (let j = i+1; j < stars.length; j++) {
+      const dx = stars[i].x - stars[j].x, dy = stars[i].y - stars[j].y;
+      const d = Math.sqrt(dx*dx + dy*dy);
+      if (d < thresh) {
+        ctx.beginPath(); ctx.moveTo(stars[i].x*W, stars[i].y*H);
+        ctx.lineTo(stars[j].x*W, stars[j].y*H);
+        ctx.strokeStyle = 'rgba(167,139,250,' + (1-d/thresh)*0.06 + ')';
+        ctx.lineWidth = 0.5; ctx.stroke();
+      }
+    }
+  }
+}
+(function loop(t) { drawStars(t * 0.001); requestAnimationFrame(loop); })();
+
+// ── Agent orbit ring ───────────────────────────────────────────────────────
+const ring = document.getElementById('agentRing');
+AGENTS.forEach((a, i) => {
+  const angle = (i / AGENTS.length) * 2 * Math.PI - Math.PI / 2;
+  const cx = 260 + 240 * Math.cos(angle), cy = 260 + 240 * Math.sin(angle);
+  const dot = document.createElement('div');
+  dot.className = 'agent-dot';
+  dot.textContent = a.letter;
+  dot.style.cssText = ['left:'+(cx-18)+'px','top:'+(cy-18)+'px',
+    'background:'+a.color+'22','border:1.5px solid '+a.color+'66',
+    'color:'+a.color,'text-shadow:0 0 8px '+a.color].join(';');
+  ring.appendChild(dot);
+});
+
+// ── Agent chips ────────────────────────────────────────────────────────────
+const strip = document.getElementById('agentsStrip');
+AGENTS.forEach(a => {
+  const chip = document.createElement('div');
+  chip.className = 'agent-chip';
+  chip.textContent = a.letter;
+  chip.setAttribute('data-name', a.name);
+  chip.style.cssText = ['background:'+a.color+'22','border:1px solid '+a.color+'55',
+    'color:'+a.color,'box-shadow:0 0 10px '+a.color+'44'].join(';');
+  strip.appendChild(chip);
+});
+
+if (invitedName) {
+  document.getElementById('name').value = invitedName;
+}
+if (invitedCode) {
+  const codeInput = document.getElementById('code');
+  codeInput.value = invitedCode;
+  document.getElementById('inviteWrap').classList.add('visible');
+  document.getElementById('subline').innerHTML = 'Your invitation is ready below.';
+}
+if (invitedName) {
+  setTimeout(function() {
+    document.getElementById('name').dispatchEvent(new Event('input', { bubbles: true }));
+  }, 60);
+}
+
+// ── Remember me checkbox ────────────────────────────────────────────────────
+document.getElementById('rememberMe').addEventListener('change', function() {
+  document.getElementById('checkBox').style.color = this.checked ? '#a78bfa' : 'transparent';
+});
+document.getElementById('checkBox').style.color = 'transparent';
+
+// ── Name field: live check ─────────────────────────────────────────────────
+let checkTimer = null, isReturning = false, checkedName = '';
+
+document.getElementById('name').addEventListener('input', function() {
+  const name = this.value.trim();
+  clearTimeout(checkTimer);
+  isReturning = false;
+  document.getElementById('welcomeBadge').classList.remove('show');
+  document.getElementById('nameStatus').textContent = '';
+  document.getElementById('inviteWrap').classList.remove('visible');
+  document.getElementById('subline').innerHTML = 'A space where memory persists,<br>agents think, and ideas take form.';
+
+  if (name.length < 2) return;
+
+  document.getElementById('nameStatus').textContent = '…';
+  checkTimer = setTimeout(async function() {
+    try {
+      const r = await fetch(API + '/api/auth/check/' + encodeURIComponent(name)).then(r => r.json());
+      if (r.known) {
+        isReturning = true;
+        checkedName = name;
+        document.getElementById('nameStatus').textContent = '✓';
+        document.getElementById('inviteWrap').classList.remove('visible');
+        const greeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)](name);
+        document.getElementById('welcomeText').textContent = greeting;
+        document.getElementById('welcomeBadge').classList.add('show');
+        document.getElementById('subline').innerHTML = 'Returning member — no invite code needed.';
+        document.getElementById('btn').querySelector('.shimmer').nextSibling
+          ? null : null;
+      } else {
+        isReturning = false;
+        document.getElementById('nameStatus').textContent = '';
+        document.getElementById('inviteWrap').classList.add('visible');
+        document.getElementById('subline').innerHTML = 'New here? Enter your invite code below.';
+      }
+    } catch { document.getElementById('nameStatus').textContent = ''; }
+  }, 500);
+});
+
+// ── Invite code cleanup ────────────────────────────────────────────────────
+document.getElementById('code').addEventListener('input', function(e) {
+  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+});
+
+// ── Enter key ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btn').click();
+});
+
+// ── Submit ─────────────────────────────────────────────────────────────────
+document.getElementById('btn').addEventListener('click', async function() {
+  const name       = document.getElementById('name').value.trim();
+  const code       = document.getElementById('code').value.trim().toUpperCase();
+  const rememberMe = document.getElementById('rememberMe').checked;
+  const err        = document.getElementById('err');
+  const btn        = document.getElementById('btn');
+
+  err.textContent = '';
+  if (!name) { err.textContent = 'Please enter your name.'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="shimmer"></span>Entering...';
+
+  try {
+    let data;
+
+    // Always try returning login first — catches cases where name check didn't fire
+    const checkRes = await fetch(API + '/api/auth/check/' + encodeURIComponent(name)).then(r => r.json()).catch(() => ({ known: false }));
+    if (checkRes.known) {
+      const res = await fetch(API + '/api/auth/login/returning', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, rememberMe })
+      });
+      data = await res.json();
+      if (!res.ok) {
+        err.textContent = data.error || 'Login failed.';
+        btn.disabled = false; btn.innerHTML = '<span class="shimmer"></span>Enter The Room'; return;
+      }
+    } else {
+      // New user — needs invite code
+      if (!code) {
+        err.textContent = 'Please enter your invite code.';
+        btn.disabled = false; btn.innerHTML = '<span class="shimmer"></span>Enter The Room'; return;
+      }
+      const res = await fetch(API + '/api/auth/signup', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, inviteCode: code, rememberMe })
+      });
+      data = await res.json();
+      if (!res.ok && res.status === 409) {
+        // Name taken but wasn't detected as returning — force returning login
+        const r2 = await fetch(API + '/api/auth/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, inviteCode: code, rememberMe })
+        });
+        data = await r2.json();
+        if (!r2.ok) { err.textContent = data.error || 'Access denied.';
+          btn.disabled = false; btn.innerHTML = '<span class="shimmer"></span>Enter The Room'; return; }
+      } else if (!res.ok) {
+        err.textContent = data.error || 'Invalid invite code.';
+        btn.disabled = false; btn.innerHTML = '<span class="shimmer"></span>Enter The Room'; return;
+      }
+    }
+
+    localStorage.setItem(TOKEN_KEY, data.token);
+    localStorage.setItem(NAME_KEY, data.name);
+
+    document.getElementById('scene').style.transition = 'opacity .4s';
+    document.getElementById('scene').style.opacity = '0';
+    setTimeout(function() { window.location.href = '/dashboard/room'; }, 400);
+
+  } catch(e) {
+    err.textContent = 'Connection error.';
+    btn.disabled = false; btn.innerHTML = '<span class="shimmer"></span>Enter The Room';
+  }
+});
+</script>
+</body>
+</html>

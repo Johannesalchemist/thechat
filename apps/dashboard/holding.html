@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyxa — Before You Enter</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #06060f; overflow: hidden;
+  width: 100vw; height: 100vh;
+  font-family: 'Georgia', serif;
+}
+
+canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+}
+
+#ui {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 10; padding: 2rem;
+  text-align: center;
+}
+
+#glyph {
+  font-size: 2.4rem;
+  opacity: 0; transition: opacity 2s ease;
+  filter: drop-shadow(0 0 18px var(--accent, #c4b5fd));
+  margin-bottom: 1.4rem;
+}
+#glyph.on { opacity: 0.7; }
+
+#world-label {
+  font-size: clamp(11px, 1.3vw, 14px);
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(196,181,253,0.4);
+  opacity: 0; transition: opacity 1.8s ease;
+  margin-bottom: 2.8rem;
+}
+#world-label.on { opacity: 1; }
+
+#message-wrap {
+  max-width: 560px; width: 100%;
+  opacity: 0; transition: opacity 2s ease;
+}
+#message-wrap.on { opacity: 1; }
+
+#watcher-label {
+  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(196,181,253,0.3); margin-bottom: 0.7rem;
+}
+
+#message {
+  font-size: clamp(14px, 1.6vw, 18px);
+  line-height: 1.85; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.82);
+  text-shadow: 0 0 40px rgba(196,181,253,0.1);
+}
+
+#response-wrap {
+  margin-top: 2.4rem; width: 100%; max-width: 480px;
+  opacity: 0; transition: opacity 1.4s ease; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 0.9rem;
+}
+#response-wrap.on { opacity: 1; pointer-events: all; }
+
+#response-input {
+  width: 100%; background: none; border: none;
+  border-bottom: 1px solid rgba(196,181,253,0.2);
+  color: rgba(255,255,255,0.8); font-size: clamp(13px,1.4vw,16px);
+  font-family: 'Georgia', serif; letter-spacing: 0.06em;
+  padding: 0.5rem 0; text-align: center; outline: none;
+  caret-color: rgba(196,181,253,0.8);
+  transition: border-color 0.3s;
+}
+#response-input::placeholder { color: rgba(255,255,255,0.18); font-style: italic; }
+#response-input:focus { border-bottom-color: rgba(196,181,253,0.5); }
+
+#response-controls {
+  display: flex; gap: 0.6rem; align-items: center;
+}
+
+#mic-btn {
+  background: none; border: 1px solid rgba(196,181,253,0.18);
+  color: rgba(255,255,255,0.4); font-size: 13px;
+  padding: 0.4rem 0.7rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.3s;
+}
+#mic-btn:hover { border-color: rgba(196,181,253,0.6); color: rgba(196,181,253,0.85); }
+#mic-btn.active {
+  border-color: rgba(248,113,113,0.6); color: rgba(248,113,113,0.85);
+  animation: pulse-mic 1.2s ease-in-out infinite;
+}
+@keyframes pulse-mic { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 8px rgba(248,113,113,0.3)} }
+
+#response-btn {
+  background: none; border: 1px solid rgba(196,181,253,0.18);
+  color: rgba(255,255,255,0.3); font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; padding: 0.45rem 1.4rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.3s;
+}
+#response-btn:hover { border-color: rgba(196,181,253,0.6); color: rgba(196,181,253,0.85); }
+#response-btn:disabled { opacity: 0.25; cursor: default; }
+
+#reply-wrap {
+  margin-top: 2rem; max-width: 560px; width: 100%;
+  opacity: 0; transition: opacity 1.8s ease;
+}
+#reply-wrap.on { opacity: 1; }
+#reply-text {
+  font-size: clamp(13px, 1.4vw, 16px);
+  line-height: 1.85; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.75); font-style: italic;
+}
+
+#enter-btn {
+  margin-top: 3rem;
+  background: none; border: 1px solid var(--accent, rgba(196,181,253,0.3));
+  color: var(--accent, rgba(196,181,253,0.6)); font-size: 10px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  padding: 0.75rem 2.8rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  opacity: 0; transition: opacity 2s ease, box-shadow 0.4s;
+  pointer-events: none;
+}
+#enter-btn.on { opacity: 1; pointer-events: all; }
+#enter-btn:hover { box-shadow: 0 0 30px color-mix(in srgb, var(--accent,#c4b5fd) 25%, transparent); }
+
+#speaking-dot {
+  position: fixed; bottom: 1.8rem; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(196,181,253,0.6);
+  opacity: 0; transition: opacity 0.3s;
+}
+#speaking-dot.active { opacity: 1; animation: pulse-dot 1.2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{transform:translateX(-50%) scale(1)} 50%{transform:translateX(-50%) scale(1.6)} }
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div id="ui">
+  <div id="glyph"></div>
+  <div id="world-label"></div>
+
+  <div id="message-wrap">
+    <div id="watcher-label">The Watcher</div>
+    <div id="message"></div>
+  </div>
+
+  <div id="response-wrap">
+    <input id="response-input" placeholder="say something, or enter directly…" autocomplete="off" spellcheck="false" />
+    <div id="response-controls">
+      <button id="mic-btn" title="Speak">🎙</button>
+      <button id="response-btn">send</button>
+    </div>
+  </div>
+
+  <div id="reply-wrap">
+    <div id="reply-text"></div>
+  </div>
+
+  <button id="enter-btn">enter study</button>
+</div>
+
+<div id="speaking-dot"></div>
+
+<script>
+// ── Storage + world state ─────────────────────────────────────────────────────
+const store = (() => {
+  try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return localStorage; }
+  catch { return sessionStorage; }
+})();
+
+const state = (() => { try { return JSON.parse(store.getItem('nyxa_world_state_v1')); } catch { return null; } })();
+const design = state?.portal_design || null;
+
+const visitorName = state?.visitor_name || '';
+const worldName   = state?.world_name   || '';
+const worldSeed   = state?.world_seed   || '';
+const painSeed    = state?.pain_seed    || '';
+
+const accent = design?.accent || '#c4b5fd';
+document.documentElement.style.setProperty('--accent', accent);
+
+// ── Canvas — soft particle field ──────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let W, H;
+let particles = [];
+
+function hexToRgb(h) {
+  return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+}
+const [ar, ag, ab] = (() => { try { return hexToRgb(accent); } catch { return [196,181,253]; } })();
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  buildParticles();
+}
+window.addEventListener('resize', resize);
+
+function buildParticles() {
+  particles = [];
+  const n = Math.floor(W * H / 3200);
+  for (let i = 0; i < n; i++) {
+    particles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
+      r: Math.random() * 1.2 + 0.2, a: Math.random() * 0.25 + 0.04
+    });
+  }
+}
+
+function frame() {
+  ctx.clearRect(0,0,W,H);
+  const bg = design?.bg_from || '#06060f';
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${ar},${ag},${ab},${p.a})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(frame);
+}
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+const WATCHER_VOICE = '5Zug9ENtDqE2S2hmPtMl';
+const dot = document.getElementById('speaking-dot');
+
+async function speak(text) {
+  try {
+    dot.classList.add('active');
+    const r = await fetch('/api/tts', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voiceId: WATCHER_VOICE })
+    });
+    if (!r.ok) throw new Error();
+    const buf = await r.arrayBuffer();
+    const actx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = actx.createBufferSource();
+    src.buffer = await actx.decodeAudioData(buf);
+    src.connect(actx.destination);
+    await new Promise(res => { src.onended = res; src.start(0); });
+  } catch {}
+  dot.classList.remove('active');
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function show(el) { requestAnimationFrame(() => el.classList.add('on')); }
+
+// ── Orientation message ───────────────────────────────────────────────────────
+async function loadOrientation() {
+  // Reveal world identity
+  document.getElementById('glyph').textContent = design?.world_glyph || '◈';
+  show(document.getElementById('glyph'));
+  setTimeout(() => {
+    document.getElementById('world-label').textContent = worldName.toUpperCase();
+    show(document.getElementById('world-label'));
+  }, 600);
+
+  // Fetch orientation from Watcher
+  let msg = '';
+  try {
+    const r = await fetch('/api/watcher/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: '[HOLDING] This visitor just came through the Threshold and is about to enter the Room. Speak to them directly — briefly. Tell them: we are still learning each other. Tell them what this space asks of them and what it is for. Help them understand how to hold the world they are building here. Speak with weight. Two to three sentences. No pleasantries.',
+        visitor_name: visitorName,
+        world_name:   worldName,
+        world_seed:   worldSeed,
+        pain_seed:    painSeed,
+        history: []
+      })
+    }).then(r => r.json());
+    msg = r.reply || '';
+  } catch {}
+
+  if (!msg) msg = 'We are still learning each other. What you bring into this room shapes what it becomes — so bring it honestly. This space is built for the version of you that is willing to not already know.';
+
+  // Reveal message after 1.4s
+  setTimeout(async () => {
+    document.getElementById('message').textContent = msg;
+    show(document.getElementById('message-wrap'));
+    await new Promise(res => setTimeout(res, 800));
+    await speak(msg);
+    // Show response input and enter button together
+    setTimeout(() => show(document.getElementById('response-wrap')), 600);
+    setTimeout(showEnter, 1200);
+  }, 1400);
+}
+
+// ── User response + Watcher reply ─────────────────────────────────────────────
+let responded = false;
+
+async function sendResponse() {
+  if (responded) return;
+  const inp = document.getElementById('response-input');
+  const text = inp.value.trim();
+  if (!text) { showEnter(); return; }
+
+  responded = true;
+  inp.disabled = true;
+  document.getElementById('response-btn').disabled = true;
+
+  let reply = '';
+  try {
+    const r = await fetch('/api/watcher/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        visitor_name: visitorName,
+        world_name:   worldName,
+        world_seed:   worldSeed,
+        pain_seed:    painSeed,
+        history: [{ role: 'assistant', content: document.getElementById('message').textContent }]
+      })
+    }).then(r => r.json());
+    reply = r.reply || '';
+  } catch {}
+
+  if (reply) {
+    await new Promise(res => setTimeout(res, 350));
+    document.getElementById('reply-text').textContent = reply;
+    show(document.getElementById('reply-wrap'));
+    await speak(reply);
+  }
+
+  setTimeout(showEnter, 1200);
+}
+
+function showEnter() {
+  show(document.getElementById('enter-btn'));
+}
+
+// ── Enter the Room ────────────────────────────────────────────────────────────
+document.getElementById('enter-btn').addEventListener('click', () => {
+  window.location.href = '/learn';
+});
+
+document.getElementById('response-btn').addEventListener('click', sendResponse);
+document.getElementById('response-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); sendResponse(); }
+});
+
+// ── Mic / STT ─────────────────────────────────────────────────────────────────
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+let micRec = null, micOn = false, micFinal = '', micSilence = null;
+const SILENCE_MS = 1800;
+
+document.getElementById('mic-btn').addEventListener('click', () => {
+  if (!SpeechRec) { alert('Speech recognition not supported in this browser.'); return; }
+  micOn ? stopMic() : startMic();
+});
+
+function startMic() {
+  micOn = true; micFinal = '';
+  const btn = document.getElementById('mic-btn');
+  btn.classList.add('active'); btn.textContent = '⏹';
+
+  micRec = new SpeechRec();
+  micRec.lang = 'en-US'; micRec.interimResults = true; micRec.continuous = true;
+
+  micRec.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      e.results[i].isFinal
+        ? (micFinal += e.results[i][0].transcript + ' ')
+        : (interim += e.results[i][0].transcript);
+    }
+    const inp = document.getElementById('response-input');
+    inp.value = micFinal + interim;
+    clearTimeout(micSilence);
+    if ((micFinal + interim).trim()) {
+      micSilence = setTimeout(() => {
+        if (micFinal.trim()) { stopMic(); sendResponse(); }
+      }, SILENCE_MS);
+    }
+  };
+  micRec.onerror = e => { if (e.error !== 'aborted') stopMic(); };
+  micRec.onend   = () => { if (micOn) { try { micRec.start(); } catch { stopMic(); } } };
+  micRec.start();
+}
+
+function stopMic() {
+  micOn = false;
+  clearTimeout(micSilence);
+  if (micRec) { try { micRec.stop(); } catch {} micRec = null; }
+  const btn = document.getElementById('mic-btn');
+  btn.classList.remove('active'); btn.textContent = '🎙';
+  const inp = document.getElementById('response-input');
+  inp.value = micFinal.trim();
+  micFinal = '';
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+resize();
+frame();
+loadOrientation();
+</script>
+</body>
+</html>

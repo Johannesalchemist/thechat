@@ -1,0 +1,6 @@
+{
+  "entities": [
+    "Person", "Agent", "Idea", "Concept",
+    "Book", "Project", "Dream", "Goal", "Organization"
+  ]
+}

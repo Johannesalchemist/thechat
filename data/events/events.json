@@ -1,0 +1,680 @@
+{
+  "events": [
+    {
+      "id": "evt_2d4f1b02",
+      "type": "concept_added",
+      "payload": {
+        "id": "nyxa_system",
+        "type": "System",
+        "label": "Nyxa System"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_08e37e76",
+      "type": "concept_added",
+      "payload": {
+        "id": "knowledge_graph",
+        "type": "System",
+        "label": "Knowledge Graph"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_be0253c5",
+      "type": "concept_added",
+      "payload": {
+        "id": "agent_orchestration",
+        "type": "System",
+        "label": "Agent Orchestration"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_21720f10",
+      "type": "concept_added",
+      "payload": {
+        "id": "lead_pipeline",
+        "type": "System",
+        "label": "Lead Pipeline"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_11b7debe",
+      "type": "concept_added",
+      "payload": {
+        "id": "event_memory",
+        "type": "System",
+        "label": "Event Memory"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_71a9836c",
+      "type": "concept_added",
+      "payload": {
+        "id": "world_model",
+        "type": "System",
+        "label": "World Model"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_17aa8083",
+      "type": "concept_added",
+      "payload": {
+        "id": "consciousness",
+        "type": "Concept",
+        "label": "Consciousness"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_a4a2d9a5",
+      "type": "concept_added",
+      "payload": {
+        "id": "learning",
+        "type": "Concept",
+        "label": "Learning"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_189341ca",
+      "type": "concept_added",
+      "payload": {
+        "id": "guidance",
+        "type": "Concept",
+        "label": "Guidance"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_d752e4b8",
+      "type": "concept_added",
+      "payload": {
+        "id": "memory",
+        "type": "Concept",
+        "label": "Memory"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_78741278",
+      "type": "concept_added",
+      "payload": {
+        "id": "insight",
+        "type": "Concept",
+        "label": "Insight"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_91c980a7",
+      "type": "concept_added",
+      "payload": {
+        "id": "mediation",
+        "type": "Concept",
+        "label": "Mediation"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_8a30a470",
+      "type": "concept_added",
+      "payload": {
+        "id": "development",
+        "type": "Concept",
+        "label": "Development"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_01f54f1d",
+      "type": "concept_added",
+      "payload": {
+        "id": "civilization",
+        "type": "Concept",
+        "label": "Civilization"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_fc98da66",
+      "type": "concept_added",
+      "payload": {
+        "id": "johannes",
+        "type": "Person",
+        "label": "Johannes"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_55390b3f",
+      "type": "concept_added",
+      "payload": {
+        "id": "the_chat",
+        "type": "Project",
+        "label": "The Chat"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_a2aaf90d",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "nyxa_system",
+        "to": "knowledge_graph",
+        "type": "contains"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_d9442459",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "nyxa_system",
+        "to": "agent_orchestration",
+        "type": "contains"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_7ab654c2",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "nyxa_system",
+        "to": "event_memory",
+        "type": "contains"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_38243f39",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "nyxa_system",
+        "to": "world_model",
+        "type": "contains"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_4ab1c9de",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "agent_orchestration",
+        "to": "lead_pipeline",
+        "type": "manages"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_528701cd",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "johannes",
+        "to": "the_chat",
+        "type": "created"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_7c8d0880",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "the_chat",
+        "to": "nyxa_system",
+        "type": "contains"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_14433e51",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "consciousness",
+        "to": "learning",
+        "type": "enables"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_9d095af8",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "learning",
+        "to": "memory",
+        "type": "requires"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_4a2dba5f",
+      "type": "knowledge_edge_added",
+      "payload": {
+        "from": "guidance",
+        "to": "consciousness",
+        "type": "emerges_from"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_986a30f5",
+      "type": "agent_created",
+      "payload": {
+        "id": "agent_da8747f9",
+        "name": "Sophia",
+        "type": "GuideAgent",
+        "domain": "guidance",
+        "status": "active",
+        "capabilities": [
+          "guide_user",
+          "conversation",
+          "emotional_support",
+          "onboard_lead",
+          "answer_questions"
+        ],
+        "knowledge_nodes": [],
+        "metadata": {
+          "persona": "Warm, wise, and precise. Primary interface between Nyxa and the world.",
+          "role": "Primary Guide"
+        },
+        "created": "2026-03-19T21:38:32+00:00"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_96331802",
+      "type": "agent_created",
+      "payload": {
+        "id": "agent_95f0e335",
+        "name": "Runner",
+        "type": "MediatorAgent",
+        "domain": "orchestration",
+        "status": "active",
+        "capabilities": [
+          "run_flow",
+          "dispatch_task",
+          "coordinate_agents",
+          "agent_handoff",
+          "sync_world"
+        ],
+        "knowledge_nodes": [],
+        "metadata": {
+          "role": "Flow Runner & Orchestrator"
+        },
+        "created": "2026-03-19T21:38:32+00:00"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_ad8181bf",
+      "type": "agent_created",
+      "payload": {
+        "id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "type": "DevAgent",
+        "domain": "development",
+        "status": "active",
+        "capabilities": [
+          "execute_command",
+          "spawn_agent",
+          "modify_graph",
+          "run_commandlet",
+          "system_check",
+          "debug"
+        ],
+        "knowledge_nodes": [],
+        "metadata": {
+          "role": "Development Agent",
+          "service": "nyxa-dev-agent",
+          "port": 3001
+        },
+        "created": "2026-03-19T21:38:32+00:00"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_35c66574",
+      "type": "agent_created",
+      "payload": {
+        "id": "agent_890ec132",
+        "name": "Archivist",
+        "type": "ArchivistAgent",
+        "domain": "memory",
+        "status": "active",
+        "capabilities": [
+          "archive_knowledge",
+          "retrieve_memory",
+          "synthesize_history",
+          "knowledge_query"
+        ],
+        "knowledge_nodes": [],
+        "metadata": {
+          "role": "Memory Keeper"
+        },
+        "created": "2026-03-19T21:38:32+00:00"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_4aa5b574",
+      "type": "agent_created",
+      "payload": {
+        "id": "agent_ea0c37c3",
+        "name": "Oracle",
+        "type": "OracleAgent",
+        "domain": "insights",
+        "status": "active",
+        "capabilities": [
+          "predict",
+          "analyze",
+          "synthesize",
+          "pattern_recognition",
+          "knowledge_query"
+        ],
+        "knowledge_nodes": [],
+        "metadata": {
+          "role": "Insight Engine"
+        },
+        "created": "2026-03-19T21:38:32+00:00"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_a6397488",
+      "type": "agent_created",
+      "payload": {
+        "id": "agent_c6d5ff38",
+        "name": "Mentor",
+        "type": "TeacherAgent",
+        "domain": "education",
+        "status": "active",
+        "capabilities": [
+          "teach",
+          "explain",
+          "guide_learning",
+          "onboard_lead"
+        ],
+        "knowledge_nodes": [],
+        "metadata": {
+          "role": "Teacher & Mentor"
+        },
+        "created": "2026-03-19T21:38:32+00:00"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_686b834b",
+      "type": "agent_created",
+      "payload": {
+        "id": "agent_a937a7f3",
+        "name": "Codex",
+        "type": "KnowledgeAgent",
+        "domain": "knowledge",
+        "status": "active",
+        "capabilities": [
+          "store_knowledge",
+          "retrieve_knowledge",
+          "knowledge_query",
+          "search_graph",
+          "add_concept"
+        ],
+        "knowledge_nodes": [],
+        "metadata": {
+          "role": "Knowledge Keeper"
+        },
+        "created": "2026-03-19T21:38:32+00:00"
+      },
+      "source": "system",
+      "timestamp": "2026-03-19T21:38:32+00:00",
+      "ts": 1773956312
+    },
+    {
+      "id": "evt_a3i5ea0v",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-19T21:38:42.794Z",
+      "ts": 1773956322794
+    },
+    {
+      "id": "evt_0bj52sye",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-21T16:13:02.037Z",
+      "ts": 1774109582037
+    },
+    {
+      "id": "evt_lqefvxl2",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-22T13:04:33.651Z",
+      "ts": 1774184673651
+    },
+    {
+      "id": "evt_ovkariev",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-22T13:10:03.798Z",
+      "ts": 1774185003798
+    },
+    {
+      "id": "evt_yvz91td3",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-23T18:13:42.014Z",
+      "ts": 1774289622014
+    },
+    {
+      "id": "evt_jycx0foz",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-23T23:16:57.873Z",
+      "ts": 1774307817873
+    },
+    {
+      "id": "evt_16opfssc",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T00:47:51.661Z",
+      "ts": 1774313271661
+    },
+    {
+      "id": "evt_orchrqz8",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T16:03:33.568Z",
+      "ts": 1774368213568
+    },
+    {
+      "id": "evt_ak8m94mk",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T16:04:30.489Z",
+      "ts": 1774368270489
+    },
+    {
+      "id": "evt_j5fzltkv",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T16:11:18.270Z",
+      "ts": 1774368678270
+    },
+    {
+      "id": "evt_tiq2jhb8",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T16:15:41.081Z",
+      "ts": 1774368941082
+    },
+    {
+      "id": "evt_pessnx0x",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T16:19:40.336Z",
+      "ts": 1774369180336
+    },
+    {
+      "id": "evt_fisllzsp",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T16:30:49.694Z",
+      "ts": 1774369849694
+    },
+    {
+      "id": "evt_1q8spk0b",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T16:33:21.109Z",
+      "ts": 1774370001109
+    },
+    {
+      "id": "evt_qh3m13ep",
+      "type": "agent_online",
+      "payload": {
+        "agent_id": "agent_6da58cb9",
+        "name": "NyxaDev",
+        "port": 3001
+      },
+      "source": "nyxa-dev-agent",
+      "timestamp": "2026-03-24T17:18:42.322Z",
+      "ts": 1774372722322
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "executions": [
+    {
+      "id": "exec_mn32i3m0",
+      "session_id": "test_001",
+      "decision": "REJECTED",
+      "execution": {
+        "type": "note",
+        "context": {},
+        "content": "test"
+      },
+      "created_at": "2026-03-23T10:53:26.088Z",
+      "cloudtalk": null
+    },
+    {
+      "id": "exec_mn32m3kd",
+      "session_id": "test-001",
+      "decision": "APPROVED",
+      "execution": {
+        "type": "phone_action",
+        "context": {
+          "phone": "+491788082716",
+          "name": "Johannes"
+        },
+        "content": "Testanruf zur Qualifizierung fuer Webdesign und KI-Automationen von Digitalleria."
+      },
+      "created_at": "2026-03-23T10:56:32.653Z",
+      "cloudtalk": {
+        "error": "Unexpected end of JSON input"
+      }
+    },
+    {
+      "id": "exec_mn32mok2",
+      "session_id": "test-001",
+      "decision": "APPROVED",
+      "execution": {
+        "type": "phone_action",
+        "context": {
+          "phone": "+491788082716",
+          "name": "Johannes"
+        },
+        "content": "Testanruf zur Qualifizierung fuer Webdesign und KI-Automationen von Digitalleria."
+      },
+      "created_at": "2026-03-23T10:56:59.858Z",
+      "cloudtalk": {
+        "status": 204,
+        "response": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyxa — The Threshold</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; overflow: hidden; width: 100vw; height: 100vh; font-family: 'Georgia', serif; }
+
+canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: block; }
+
+#overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start;
+  padding-top: max(13vh, 80px); padding-bottom: 5rem;
+  pointer-events: none; z-index: 10;
+  overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+}
+#overlay::-webkit-scrollbar { display: none; }
+
+.wline {
+  color: rgba(255,255,255,0); font-size: clamp(15px,1.85vw,21px);
+  letter-spacing: 0.14em; text-align: center; max-width: 580px;
+  padding: 0 2rem; line-height: 1.9; transition: color 2.2s ease;
+  text-shadow: 0 0 60px rgba(167,139,250,0.25);
+}
+.wline.on { color: rgba(255,255,255,0.88); }
+
+.iwrap {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  margin-top: 2rem; width: 100%; max-width: 420px; padding: 0 2rem;
+  opacity: 0; transition: opacity 1.5s ease; pointer-events: none;
+}
+.iwrap.on { opacity: 1; pointer-events: all; }
+
+.winput {
+  width: 100%; background: none; border: none;
+  border-bottom: 1px solid rgba(167,139,250,0.28);
+  color: rgba(255,255,255,0.85); font-size: clamp(13px,1.45vw,17px);
+  font-family: 'Georgia', serif; letter-spacing: 0.07em;
+  padding: 0.55rem 0; text-align: center; outline: none;
+  caret-color: rgba(167,139,250,0.9); transition: border-color 0.4s;
+}
+.winput::placeholder { color: rgba(255,255,255,0.18); font-style: italic; }
+.winput:focus { border-bottom-color: rgba(167,139,250,0.6); }
+
+.wbtn {
+  background: none; border: 1px solid rgba(167,139,250,0.22);
+  color: rgba(255,255,255,0.35); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; padding: 0.48rem 1.5rem; cursor: pointer;
+  font-family: inherit; transition: all 0.3s; border-radius: 1px;
+}
+.wbtn:hover { border-color: rgba(167,139,250,0.6); color: rgba(255,255,255,0.8); }
+
+/* World assignment reveal */
+#world-assigned {
+  display: none; flex-direction: column; align-items: center; gap: 0.8rem;
+  margin-top: 2rem; opacity: 0; transition: opacity 2s ease;
+  text-align: center; max-width: 480px; padding: 0 2rem;
+}
+#world-assigned.on { opacity: 1; display: flex; }
+#assigned-glyph { font-size: 2.8rem; filter: drop-shadow(0 0 18px #c4b5fd); }
+#assigned-name {
+  font-size: clamp(20px,3.5vw,38px); letter-spacing: 0.2em;
+  text-transform: uppercase; color: rgba(196,181,253,0.92);
+  text-shadow: 0 0 60px rgba(196,181,253,0.4); font-weight: normal;
+}
+#assigned-sub {
+  font-size: clamp(11px,1.2vw,14px); letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4); font-style: italic; margin-top: 0.2rem;
+}
+
+#ack {
+  margin-top: 2rem; font-size: clamp(11px,1.2vw,14px); letter-spacing: 0.12em;
+  font-style: italic; color: rgba(167,139,250,0); transition: color 2.4s ease; text-align: center;
+}
+#ack.on { color: rgba(167,139,250,0.6); }
+
+#watcher-reply {
+  margin-top: 2.4rem; max-width: 560px; padding: 0 2rem; text-align: center;
+  color: rgba(255,255,255,0); font-size: clamp(14px,1.6vw,18px); line-height: 1.9;
+  letter-spacing: 0.05em; transition: color 2.8s ease;
+  text-shadow: 0 0 50px rgba(196,181,253,0.2);
+}
+#watcher-reply.on { color: rgba(255,255,255,0.82); }
+#watcher-sig {
+  margin-top: 0.8rem; font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: rgba(196,181,253,0); transition: color 2s ease;
+}
+#watcher-sig.on { color: rgba(196,181,253,0.45); }
+
+#enter-btn {
+  margin-top: 2.8rem; background: none; border: 1px solid rgba(196,181,253,0.35);
+  color: rgba(196,181,253,0); font-size: clamp(11px,1.2vw,14px); letter-spacing: 0.28em;
+  text-transform: uppercase; padding: 0.7rem 2.4rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px; display: none;
+  transition: color 2.2s ease, border-color 0.4s, box-shadow 0.4s; pointer-events: none;
+}
+#enter-btn.on { color: rgba(196,181,253,0.75); pointer-events: all; display: block; }
+#enter-btn:hover { border-color: rgba(196,181,253,0.7); color: rgba(196,181,253,1); box-shadow: 0 0 30px rgba(167,139,250,0.15); }
+
+/* Returning: world-reveal panel */
+#world-reveal {
+  display: none; flex-direction: column; align-items: center; gap: 1rem;
+  margin-top: 1.8rem; opacity: 0; transition: opacity 1.8s ease; pointer-events: none;
+  text-align: center; max-width: 500px; padding: 0 2rem;
+}
+#world-reveal.on { opacity: 1; pointer-events: all; display: flex; }
+#rev-glyph  { font-size: 2.4rem; filter: drop-shadow(0 0 16px #c4b5fd); }
+#rev-name   { font-size: clamp(20px,3.5vw,40px); letter-spacing: 0.2em; text-transform: uppercase; color: rgba(196,181,253,0.9); text-shadow: 0 0 60px rgba(196,181,253,0.4); font-weight: normal; }
+#rev-atm    { display: flex; gap: 1.4rem; }
+#rev-insc   { font-size: clamp(12px,1.4vw,16px); line-height: 1.9; letter-spacing: 0.06em; font-style: italic; color: rgba(255,255,255,0.62); }
+#dive-q     { margin-top: 1.4rem; font-size: clamp(13px,1.5vw,17px); letter-spacing: 0.1em; color: rgba(255,255,255,0.82); }
+#dive-btns  { display: flex; gap: 1.2rem; margin-top: 0.8rem; }
+
+#guest-tag  { position: fixed; bottom: 1.2rem; right: 1.5rem; color: rgba(255,255,255,0.07); font-size: 9px; letter-spacing: 0.1em; font-family: monospace; z-index: 20; }
+#speaking-dot { position: fixed; bottom: 1.2rem; left: 1.5rem; width: 6px; height: 6px; border-radius: 50%; background: rgba(196,181,253,0); transition: background 0.4s; z-index: 20; }
+#speaking-dot.active { background: rgba(196,181,253,0.7); animation: pdot 1.4s infinite; }
+@keyframes pdot { 0%,100%{box-shadow:0 0 0 0 rgba(196,181,253,0.4)} 50%{box-shadow:0 0 0 6px rgba(196,181,253,0)} }
+#fallback { display: none; position: fixed; inset: 0; background: radial-gradient(ellipse at center,#1a1030 0%,#0a0a0f 65%); }
+
+#mute-btn {
+  position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+  background: none; border: none; cursor: pointer; z-index: 20;
+  color: rgba(255,255,255,0.12); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; font-family: 'Georgia', serif;
+  transition: color 0.3s; padding: 4px 8px;
+}
+#mute-btn:hover { color: rgba(255,255,255,0.35); }
+
+/* ── Zoom-into-world veil ──────────────────────────────────────────────────── */
+#zoom-veil {
+  position: fixed; inset: 0; z-index: 100;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  clip-path: circle(0px at 50% 50%);
+  transition: clip-path 1.8s cubic-bezier(0.4,0,0.2,1);
+}
+#zoom-msg {
+  text-align: center; max-width: 580px; padding: 2rem;
+  color: rgba(255,255,255,0); font-size: clamp(15px,1.9vw,22px);
+  line-height: 1.85; letter-spacing: 0.05em; font-style: italic;
+  transition: color 1.4s ease 1s;
+  text-shadow: 0 0 60px rgba(255,255,255,0.2);
+}
+#zoom-msg.on { color: rgba(255,255,255,0.88); }
+#zoom-sig2 {
+  margin-top: 1rem; font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: rgba(255,255,255,0);
+  transition: color 1s ease 1.5s;
+}
+#zoom-sig2.on { color: rgba(255,255,255,0.4); }
+#zoom-hint {
+  position: fixed; bottom: 3.5rem; left: 50%; transform: translateX(-50%);
+  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(196,181,253,0); transition: color 2s ease; pointer-events: none;
+  z-index: 15; font-family: 'Georgia', serif;
+}
+#zoom-hint.on { color: rgba(196,181,253,0.45); }
+
+
+/* ── Watcher chatbox ──────────────────────────────────────────────────────── */
+#watcher-chat {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: min(600px, 100vw); z-index: 30;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+#watcher-chat.on { opacity: 1; pointer-events: all; }
+
+#chat-messages {
+  max-height: 38vh; overflow-y: auto; padding: 1rem 1.4rem 0.5rem;
+  display: flex; flex-direction: column; gap: 0.9rem;
+  scrollbar-width: none;
+}
+#chat-messages::-webkit-scrollbar { display: none; }
+
+.chat-bubble {
+  max-width: 82%; font-size: clamp(12px,1.3vw,15px);
+  line-height: 1.75; letter-spacing: 0.03em; padding: 0.6rem 1rem;
+  border-radius: 2px; font-family: 'Georgia', serif;
+}
+.chat-bubble.user {
+  align-self: flex-end; text-align: right;
+  background: rgba(196,181,253,0.07); border: 1px solid rgba(196,181,253,0.18);
+  color: rgba(255,255,255,0.75);
+}
+.chat-bubble.watcher {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.82);
+  opacity: 0; animation: watcher-fadein var(--fade-dur, 0.5s) ease forwards;
+}
+@keyframes watcher-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.watcher-label {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(196,181,253,0.35); margin-bottom: 0.4rem;
+}
+.chat-bubble.thinking {
+  align-self: flex-start; color: rgba(196,181,253,0.4);
+  font-style: italic; font-size: 11px; letter-spacing: 0.12em; border: none;
+  background: none; padding: 0.2rem 0.4rem;
+}
+
+#chat-bar {
+  display: flex; align-items: flex-end; gap: 0.6rem;
+  padding: 0.7rem 1rem 1.2rem;
+  background: linear-gradient(to top, rgba(10,10,15,0.96) 70%, transparent);
+  border-top: 1px solid rgba(196,181,253,0.1);
+}
+#chat-input {
+  flex: 1; background: none; border: none;
+  border-bottom: 1px solid rgba(196,181,253,0.25);
+  color: rgba(255,255,255,0.82); font-size: clamp(12px,1.3vw,15px);
+  font-family: 'Georgia', serif; letter-spacing: 0.06em;
+  padding: 0.4rem 0; outline: none; resize: none;
+  caret-color: rgba(196,181,253,0.8); line-height: 1.5;
+  max-height: 80px; overflow-y: auto;
+  transition: border-color 0.3s;
+}
+#chat-input::placeholder { color: rgba(255,255,255,0.18); font-style: italic; }
+#chat-input:focus { border-bottom-color: rgba(196,181,253,0.55); }
+#chat-send {
+  background: none; border: 1px solid rgba(196,181,253,0.2);
+  color: rgba(196,181,253,0.5); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.4rem 1rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.3s; white-space: nowrap; flex-shrink: 0;
+}
+#chat-send:hover { border-color: rgba(196,181,253,0.7); color: rgba(196,181,253,0.9); }
+#chat-send:disabled { opacity: 0.3; cursor: default; }
+
+
+/* ── Music controls in chat bar ──────────────────────────────────────────── */
+#chat-controls {
+  display: flex; align-items: center; gap: 0.35rem;
+  flex-shrink: 0;
+}
+.ctrl-btn {
+  background: none; border: 1px solid rgba(196,181,253,0.15);
+  color: rgba(255,255,255,0.3); font-size: 9px; letter-spacing: 0.15em;
+  text-transform: uppercase; padding: 0.38rem 0.7rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.3s; white-space: nowrap; flex-shrink: 0;
+}
+.ctrl-btn:hover, .ctrl-btn.active {
+  border-color: rgba(196,181,253,0.6); color: rgba(196,181,253,0.85);
+}
+#playlist-panel {
+  position: absolute; bottom: 100%; left: 0; margin-bottom: 0.5rem;
+  background: rgba(10,10,15,0.97); border: 1px solid rgba(196,181,253,0.18);
+  border-radius: 2px; padding: 0.5rem 0; min-width: 180px;
+  display: none; flex-direction: column; z-index: 50;
+}
+#playlist-panel.on { display: flex; }
+.playlist-track {
+  padding: 0.45rem 1rem; font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(255,255,255,0.45);
+  cursor: pointer; font-family: 'Georgia', serif; transition: all 0.2s;
+  border: none; background: none; text-align: left;
+}
+.playlist-track:hover { color: rgba(196,181,253,0.9); background: rgba(196,181,253,0.06); }
+.playlist-track.playing { color: rgba(196,181,253,0.85); }
+.playlist-track.playing::before { content: '▶  '; }
+
+
+/* ── Right-side action buttons ───────────────────────────────────────────── */
+#chat-actions {
+  display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;
+}
+.action-btn {
+  background: none; border: 1px solid rgba(196,181,253,0.15);
+  color: rgba(255,255,255,0.3); padding: 0.38rem 0.65rem;
+  cursor: pointer; font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.3s; white-space: nowrap; flex-shrink: 0;
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.action-btn:hover { border-color: rgba(196,181,253,0.55); color: rgba(196,181,253,0.85); }
+.action-btn.active {
+  border-color: rgba(248,113,113,0.6); color: rgba(248,113,113,0.85);
+  animation: pulse-btn 1.4s ease-in-out infinite;
+}
+.action-btn.stm-active {
+  border-color: rgba(74,222,128,0.6); color: rgba(74,222,128,0.85);
+  animation: pulse-btn 2s ease-in-out infinite;
+}
+@keyframes pulse-btn {
+  0%,100% { box-shadow: 0 0 0 0 currentColor; }
+  50% { box-shadow: 0 0 8px 2px rgba(196,181,253,0.12); }
+}
+#mic-live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(248,113,113,0.8); display: inline-block;
+  animation: blink-dot 1s infinite; margin-right: 2px; vertical-align: middle;
+}
+@keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── Entry hint ──────────────────────────────────────────────────────────── */
+#entry-hint {
+  padding: 0.55rem 1.4rem 0;
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(196,181,253,0.3); text-align: center; font-style: italic;
+  transition: opacity 0.6s ease;
+}
+
+/* ── State bar ───────────────────────────────────────────────────────────── */
+#state-bar {
+  display: flex; justify-content: center; gap: 1.6rem;
+  padding: 0.3rem 1.4rem 0; opacity: 0;
+  transition: opacity 1.6s ease;
+}
+#state-bar.on { opacity: 1; }
+.state-token {
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.18); font-family: 'Georgia', serif;
+}
+.state-token span { color: rgba(196,181,253,0.5); transition: color 1.5s ease; }
+
+/* ── Supervisor Panel ── */
+#supervisor {
+  position: fixed; top: 0; left: 0; width: 220px; height: 100%;
+  background: rgba(6,6,15,0.97); border-right: 1px solid rgba(196,181,253,0.12);
+  padding: 1.2rem 1rem; font-size: 10px; letter-spacing: 0.08em;
+  color: rgba(196,181,253,0.6); font-family: monospace; z-index: 300;
+  overflow-y: auto; display: none; flex-direction: column; gap: 1rem;
+}
+#supervisor.on { display: flex; }
+#supervisor h4 { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(196,181,253,0.35); font-weight: normal; margin-bottom: 0.4rem; }
+#supervisor .sv-val { color: rgba(196,181,253,0.85); }
+#supervisor .sv-row { display: flex; justify-content: space-between; margin: 3px 0; }
+#supervisor .sv-log { display: flex; flex-direction: column; gap: 3px; }
+#supervisor .sv-entry { color: rgba(255,255,255,0.3); font-size: 9px; }
+#supervisor .sv-entry.active { color: rgba(196,181,253,0.7); }
+.sv-btn {
+  background: none; border: 1px solid rgba(196,181,253,0.18); color: rgba(196,181,253,0.5);
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 8px;
+  border-radius: 3px; cursor: pointer; font-family: monospace; width: 100%;
+  text-align: left; margin-top: 3px; transition: all 0.2s;
+}
+.sv-btn:hover { border-color: rgba(196,181,253,0.5); color: rgba(196,181,253,0.9); }
+.sv-btn.active-override { border-color: rgba(251,191,100,0.6); color: rgba(251,191,100,0.9); }
+#sv-close { position: absolute; top: 0.6rem; right: 0.8rem; background: none; border: none;
+  color: rgba(196,181,253,0.3); cursor: pointer; font-size: 11px; }
+
+</style>
+<script src="/dashboard/nyxa-rule-engine.js"></script>
+</head>
+<body>
+
+<!-- Supervisor Panel (Ctrl+Shift+D) -->
+<div id="supervisor">
+  <button id="sv-close" onclick="toggleSupervisor()">✕</button>
+
+  <div>
+    <h4>Session State</h4>
+    <div class="sv-row"><span>cluster</span><span class="sv-val" id="sv-cluster">—</span></div>
+    <div class="sv-row"><span>depth</span><span class="sv-val" id="sv-depth">—</span></div>
+    <div class="sv-row"><span>confidence</span><span class="sv-val" id="sv-confidence">—</span></div>
+    <div class="sv-row"><span>stability</span><span class="sv-val" id="sv-stability">—</span></div>
+    <div class="sv-row"><span>scene</span><span class="sv-val" id="sv-scene">—</span></div>
+    <div class="sv-row"><span>agents</span><span class="sv-val" id="sv-agents">—</span></div>
+    <div class="sv-row"><span>env tone</span><span class="sv-val" id="sv-env-tone">—</span></div>
+    <div class="sv-row"><span>stability</span><span class="sv-val" id="sv-stability-ind">—</span></div>
+    <div class="sv-row"><span>session type</span><span class="sv-val" id="sv-session-type">—</span></div>
+  </div>
+
+  <div>
+    <h4>Avoidance</h4>
+    <div class="sv-row"><span>detected</span><span class="sv-val" id="sv-avoid-det">—</span></div>
+    <div class="sv-row"><span>type</span><span class="sv-val" id="sv-avoid-type">—</span></div>
+    <div class="sv-row"><span>strength</span><span class="sv-val" id="sv-avoid-str">—</span></div>
+    <div class="sv-row"><span>state</span><span class="sv-val" id="sv-avoid-state">—</span></div>
+    <div class="sv-row"><span>write-lock</span><span class="sv-val" id="sv-wlock">—</span></div>
+    <div class="sv-row"><span>tick ×</span><span class="sv-val" id="sv-tick">—</span></div>
+  </div>
+
+  <div>
+    <h4>Cluster History</h4>
+    <div class="sv-log" id="sv-log"></div>
+  </div>
+
+  <div>
+    <h4>Override Cluster</h4>
+    <button class="sv-btn" onclick="supervisorOverride('exploration')">exploration</button>
+    <button class="sv-btn" onclick="supervisorOverride('friction')">friction</button>
+    <button class="sv-btn" onclick="supervisorOverride('analytical')">analytical</button>
+    <button class="sv-btn" onclick="supervisorOverride('reflective')">reflective</button>
+    <button class="sv-btn" style="margin-top:8px;border-color:rgba(248,113,113,0.3);color:rgba(248,113,113,0.5)"
+      onclick="supervisorOverride(null)">clear override</button>
+  </div>
+
+  <div>
+    <h4>Session</h4>
+    <div class="sv-row"><span>session</span><span class="sv-val" id="sv-session" style="font-size:8px;word-break:break-all">—</span></div>
+    <div class="sv-row"><span>turns</span><span class="sv-val" id="sv-turns">0</span></div>
+    <button class="sv-btn" onclick="saveSessionSnapshot();saveLearnerProfile()" style="margin-top:4px">save now</button>
+  </div>
+
+  <div>
+    <h4>Curriculum</h4>
+    <div class="sv-row"><span>level</span><span class="sv-val" id="sv-level">—</span></div>
+    <div class="sv-row"><span>mastery</span><span class="sv-val" id="sv-mastery">—</span></div>
+    <div class="sv-row"><span>threshold</span><span class="sv-val" id="sv-threshold">—</span></div>
+    <button class="sv-btn" onclick="evaluateCurriculumProgress()" style="margin-top:4px">evaluate now</button>
+  </div>
+
+  <div>
+    <h4>Annotate</h4>
+    <textarea id="sv-note" rows="2" placeholder="note…"
+      style="width:100%;background:none;border:1px solid rgba(196,181,253,0.15);color:rgba(196,181,253,0.7);
+      font-family:monospace;font-size:9px;padding:4px;resize:vertical"></textarea>
+    <button class="sv-btn" onclick="addAnnotation()" style="margin-top:4px">add note</button>
+  </div>
+</div>
+
+<canvas id="cosmos"></canvas>
+<div id="fallback"></div>
+
+<div id="overlay">
+  <div id="q1" class="wline"></div>
+  <div id="w1" class="iwrap"><input id="i1" class="winput" type="text" placeholder="speak here…" autocomplete="off" spellcheck="false"/><button id="b1" class="wbtn">pass through</button></div>
+
+  <div id="q2" class="wline" style="margin-top:2.4rem"></div>
+  <div id="w2" class="iwrap"><input id="i2" class="winput" type="text" placeholder="speak here…" autocomplete="off" spellcheck="false"/><button id="b2" class="wbtn">pass through</button></div>
+
+  <div id="q3" class="wline" style="margin-top:2.4rem"></div>
+  <div id="w3" class="iwrap"><input id="i3" class="winput" type="text" placeholder="your name…" autocomplete="off" spellcheck="false"/><button id="b3" class="wbtn">pass through</button></div>
+
+  <div id="q4" class="wline" style="margin-top:2.4rem"></div>
+  <div id="w4" class="iwrap"><input id="i4" class="winput" type="text" placeholder="name your world…" autocomplete="off" spellcheck="false"/><button id="b4" class="wbtn">seal it</button></div>
+
+  <!-- World assigned confirmation -->
+  <div id="world-assigned">
+    <div id="assigned-glyph">◈</div>
+    <div id="assigned-name"></div>
+    <div id="assigned-sub">your world has been found</div>
+  </div>
+
+  <div id="ack"></div>
+  <div id="watcher-reply"></div>
+  <div id="watcher-sig">— The Watcher</div>
+  <button id="enter-btn">enter</button>
+
+  <!-- Returning: expand panel -->
+  <div id="world-reveal">
+    <div id="rev-glyph">◈</div>
+    <div id="rev-name"></div>
+    <div id="rev-atm"></div>
+    <div id="rev-insc"></div>
+    <div id="dive-q"></div>
+    <div id="dive-btns">
+      <button id="dive-yes" class="wbtn" style="border-color:rgba(196,181,253,0.5);color:rgba(196,181,253,0.85)">dive in</button>
+      <button id="dive-no"  class="wbtn">not yet</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="zoom-veil">
+  <div id="zoom-msg"></div>
+  <div id="zoom-sig2">— The Watcher</div>
+</div>
+<div id="zoom-hint">double-click your world to enter</div>
+
+
+<div id="watcher-chat">
+  <div id="entry-hint">Describe what you want to explore or learn.</div>
+  <div id="chat-messages"></div>
+  <div id="state-bar">
+    <div class="state-token">tone <span id="st-tone">—</span></div>
+    <div class="state-token">stability <span id="st-stability">—</span></div>
+    <div class="state-token">mode <span id="st-mode">—</span></div>
+  </div>
+  <div id="playlist-panel"></div>
+  <div id="chat-bar">
+    <div id="chat-controls">
+      <button class="ctrl-btn" id="chat-mute-btn">♪</button>
+      <button class="ctrl-btn" id="playlist-btn">≡</button>
+    </div>
+    <textarea id="chat-input" rows="1" placeholder="speak to The Watcher…" autocomplete="off" spellcheck="false"></textarea>
+    <button id="chat-send">send</button>
+    <div id="chat-actions">
+      <button class="action-btn" id="thresh-mic-btn" title="Voice input">🎙</button>
+      <button class="action-btn" id="thresh-stm-btn" title="Stammtisch — let The Watcher speak freely">🪑</button>
+    </div>
+  </div>
+</div>
+
+<div id="guest-tag"></div>
+<div id="speaking-dot"></div>
+<button id="mute-btn">♪ music</button>
+<audio id="bg-audio" loop preload="auto" src="/dashboard/threshold-music.mp3"></audio>
+
+<script>
+// ── Storage + Guest Identity ───────────────────────────────────────────────────
+const store = (() => {
+  try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return localStorage; }
+  catch { return sessionStorage; }
+})();
+
+let guestId = store.getItem('nyxa_guest_id');
+if (!guestId) {
+  guestId = (crypto?.randomUUID) ? crypto.randomUUID()
+    : 'g_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  store.setItem('nyxa_guest_id', guestId);
+}
+document.getElementById('guest-tag').textContent = guestId.slice(0,8);
+
+// Read Room username from query param or localStorage
+const urlParams = new URLSearchParams(window.location.search);
+const roomUser  = urlParams.get('u') || store.getItem('nyxa_user') || '';
+
+let worldState = null;
+try { const s = store.getItem('nyxa_world_state_v1'); if (s) worldState = JSON.parse(s); } catch {}
+
+// Returning = has state AND all 4 fields complete
+const hasAll = worldState && worldState.world_seed && worldState.pain_seed
+             && worldState.visitor_name && worldState.world_name;
+const returning = hasAll;
+
+// Assign orbital deterministically from guest_id
+function assignedOrbitalIdx() {
+  let h = 0;
+  for (let i = 0; i < guestId.length; i++) h = (h * 31 + guestId.charCodeAt(i)) >>> 0;
+  return h % 7;
+}
+const ASSIGNED_ORB = assignedOrbitalIdx();
+
+// ── Canvas ────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('cosmos');
+const ctx    = canvas.getContext && canvas.getContext('2d');
+if (!ctx) { canvas.style.display='none'; document.getElementById('fallback').style.display='block'; }
+
+let W, H, cx, cy;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; cx=W/2; cy=H/2; buildStars(); }
+window.addEventListener('resize', resize);
+
+let stars = [];
+function buildStars() {
+  stars = [];
+  const n = Math.floor(W*H/3800);
+  for (let i=0;i<n;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+0.1,a:Math.random()*0.55+0.08,ph:Math.random()*Math.PI*2,sp:Math.random()*0.4+0.1});
+}
+
+const DEFS = [
+  {id:'w1',rf:0.135,spd:0.0092,sz:7, ar:0.52,ori:0.40,col:[167,139,250]},
+  {id:'w2',rf:0.195,spd:0.0058,sz:11,ar:0.38,ori:1.20,col:[34,211,238]},
+  {id:'w3',rf:0.255,spd:0.0040,sz:9, ar:0.68,ori:2.55,col:[251,146,60]},
+  {id:'w4',rf:0.315,spd:0.0028,sz:14,ar:0.32,ori:0.80,col:[74,222,128]},
+  {id:'w5',rf:0.375,spd:0.0018,sz:8, ar:0.58,ori:3.10,col:[251,191,36]},
+  {id:'w6',rf:0.435,spd:0.0012,sz:12,ar:0.44,ori:1.82,col:[232,121,249]},
+  {id:'w7',rf:0.495,spd:0.0008,sz:10,ar:0.62,ori:4.20,col:[248,113,113]},
+];
+const saved = worldState?.orbital_angles || {};
+const orbs = DEFS.map((d,i) => ({
+  ...d,
+  angle: saved[d.id] !== undefined ? saved[d.id] : i*Math.PI*2/DEFS.length,
+  texture:null, texImg:null, x:0, y:0,
+  pulse: 0,       // 0–1 pulse intensity for assignment animation
+  worldLabel: null
+}));
+
+// If returning, mark the assigned orbital
+if (returning && worldState.world_name) {
+  orbs[ASSIGNED_ORB].worldLabel = worldState.world_name;
+  orbs[ASSIGNED_ORB].pulse = 1;
+}
+
+// Load + render other users' worlds
+async function loadOtherWorlds() {
+  try {
+    const r = await fetch(`/api/worlds?exclude=${encodeURIComponent(guestId)}`);
+    const data = await r.json();
+    for (const w of (data.worlds || [])) {
+      const idx = typeof w.orbital_idx === 'number' ? w.orbital_idx % 7 : 0;
+      // Don't overwrite our own assigned orbital
+      if (idx === ASSIGNED_ORB && returning) continue;
+      // Don't overwrite if already labelled
+      if (orbs[idx].worldLabel && orbs[idx].worldLabel !== w.world_name) continue;
+      orbs[idx].worldLabel = w.world_name;
+      orbs[idx].pulse = 0.45; // dim pulse — others' worlds
+      orbs[idx].isOther = true;
+    }
+  } catch {}
+}
+loadOtherWorlds();
+
+const mouse = {x:-9999,y:-9999};
+window.addEventListener('mousemove', e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+
+function orbPos(orb) {
+  const r=orb.rf*Math.min(W,H)*0.92;
+  const ox=r*Math.cos(orb.angle), oy=r*Math.sin(orb.angle)*orb.ar;
+  return {x:cx+ox*Math.cos(orb.ori)-oy*Math.sin(orb.ori),y:cy+ox*Math.sin(orb.ori)+oy*Math.cos(orb.ori),z:Math.sin(orb.angle+orb.ori)};
+}
+
+let tick=0, pulseR=0;
+let enterReady = false;
+// World assignment animation state
+let assignAnim = {active:false, t:0, orbIdx:-1};
+
+function triggerAssignAnim(idx) {
+  assignAnim = {active:true, t:0, orbIdx:idx};
+  orbs[idx].pulse = 1;
+}
+
+function frame() {
+  if (!ctx) { requestAnimationFrame(frame); return; }
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0a0a0f'; ctx.fillRect(0,0,W,H);
+
+  tick+=0.01;
+  for (const s of stars) {
+    const a=s.a*(0.7+0.3*Math.sin(tick*s.sp+s.ph));
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fill();
+  }
+
+  const dc=Math.hypot(mouse.x-cx,mouse.y-cy);
+  if(dc<90) pulseR=Math.min(1,pulseR+0.05); else pulseR=Math.max(0,pulseR-0.025);
+
+  const g1=ctx.createRadialGradient(cx,cy,0,cx,cy,100+pulseR*50);
+  g1.addColorStop(0,`rgba(255,240,200,${0.85+pulseR*0.12})`);
+  g1.addColorStop(0.18,'rgba(255,200,100,0.55)');
+  g1.addColorStop(0.45,`rgba(167,139,250,${0.18+pulseR*0.18})`);
+  g1.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.arc(cx,cy,100+pulseR*50,0,Math.PI*2); ctx.fillStyle=g1; ctx.fill();
+  if(pulseR>0.01){ctx.beginPath();ctx.arc(cx,cy,105+pulseR*70,0,Math.PI*2);ctx.strokeStyle=`rgba(167,139,250,${pulseR*0.22})`;ctx.lineWidth=1.5;ctx.stroke();}
+
+  const gc=ctx.createRadialGradient(cx-4,cy-4,0,cx,cy,20);
+  gc.addColorStop(0,'rgba(255,255,245,1)');gc.addColorStop(0.5,'rgba(255,220,140,0.9)');gc.addColorStop(1,'rgba(180,130,60,0)');
+  ctx.beginPath();ctx.arc(cx,cy,20,0,Math.PI*2);ctx.fillStyle=gc;ctx.fill();
+
+  let nearI=0,nearD=Infinity;
+  orbs.forEach((o,i)=>{const d=Math.hypot(mouse.x-o.x,mouse.y-o.y);if(d<nearD){nearD=d;nearI=i;}});
+
+  for(const orb of orbs){
+    const r=orb.rf*Math.min(W,H)*0.92;
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(orb.ori);ctx.scale(1,orb.ar);
+    ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=0.6;ctx.stroke();ctx.restore();
+  }
+
+  // Assignment animation tick
+  if (assignAnim.active) {
+    assignAnim.t += 0.025;
+    if (assignAnim.t > 1) { assignAnim.active = false; assignAnim.t = 1; }
+  }
+
+  const withPos=orbs.map((orb,i)=>{
+    const slow=(i===nearI&&nearD<130)?0.18:1;
+    orb.angle+=orb.spd*slow;
+    if(orb.angle>Math.PI*2)orb.angle-=Math.PI*2;
+    const p=orbPos(orb);orb.x=p.x;orb.y=p.y;
+    return{orb,p,i};
+  }).sort((a,b)=>a.p.z-b.p.z);
+
+  for(const{orb,p,i}of withPos){
+    const da=0.42+0.58*((p.z+1)/2);
+    const [r,g,b]=orb.col;
+    const isAssigned = i === ASSIGNED_ORB && orb.pulse > 0;
+
+    // Assignment glow rings
+    if (isAssigned) {
+      const at = assignAnim.active ? assignAnim.t : 1;
+      const pulseWave = Math.sin(tick * 3) * 0.5 + 0.5;
+
+      // Outer expanding ring on assignment
+      if (assignAnim.active) {
+        const expandR = orb.sz * (2 + assignAnim.t * 8);
+        ctx.beginPath(); ctx.arc(p.x,p.y,expandR,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(${r},${g},${b},${(1-assignAnim.t)*0.6})`;
+        ctx.lineWidth=2; ctx.stroke();
+      }
+
+      // Persistent pulse ring
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,orb.sz*(3.5+pulseWave*0.8),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(${r},${g},${b},${0.35*da})`;
+      ctx.lineWidth=1.2; ctx.stroke();
+
+      // Second ring
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,orb.sz*(5+pulseWave*0.5),0,Math.PI*2);
+      ctx.strokeStyle=`rgba(${r},${g},${b},${0.12*da})`;
+      ctx.lineWidth=0.7; ctx.stroke();
+    }
+
+    // Sphere — larger if assigned
+    const sizeMulti = isAssigned ? 1 + orb.pulse * 0.55 : 1;
+    const _g=orb._glow||0.8;const gr=ctx.createRadialGradient(p.x-orb.sz*.35*sizeMulti,p.y-orb.sz*.35*sizeMulti,0,p.x,p.y,orb.sz*2.2*sizeMulti*_g);
+    gr.addColorStop(0,`rgba(255,255,255,${da*.88})`);
+    gr.addColorStop(0.28,`rgba(${r},${g},${b},${da*.85})`);
+    gr.addColorStop(0.65,`rgba(${r},${g},${b},${da*.25})`);
+    gr.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(p.x,p.y,orb.sz*2.2*sizeMulti,0,Math.PI*2);ctx.fillStyle=gr;ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,orb.sz*.45*sizeMulti,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${da*.75})`;ctx.fill();
+
+    // World name label
+    if (orb.worldLabel) {
+      const isOwn   = i === ASSIGNED_ORB && !orb.isOther;
+      const baseAlpha = isOwn
+        ? (assignAnim.active ? assignAnim.t * 0.9 : 0.78)
+        : 0.38;
+      const fontSize = isOwn ? Math.max(10, orb.sz * 1.1) : Math.max(8, orb.sz * 0.85);
+      ctx.save();
+      ctx.font = `${fontSize}px Georgia`;
+      ctx.textAlign = 'center';
+      const labelY = p.y - orb.sz * (isOwn ? 3.8 * sizeMulti : 3.2);
+      ctx.fillStyle = `rgba(${r},${g},${b},${baseAlpha})`;
+      ctx.fillText(orb.worldLabel.toUpperCase(), p.x, labelY);
+      // Connector line
+      ctx.beginPath();
+      ctx.moveTo(p.x, labelY + 3);
+      ctx.lineTo(p.x, p.y - orb.sz * (isOwn ? 2.3 * sizeMulti : 2.2));
+      ctx.strokeStyle = `rgba(${r},${g},${b},${baseAlpha * 0.35})`;
+      ctx.lineWidth = isOwn ? 0.6 : 0.3;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    if(i===nearI&&nearD<180){
+      ctx.beginPath();ctx.arc(p.x,p.y,orb.sz*3,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(${r},${g},${b},${(1-nearD/180)*.35*da})`;ctx.lineWidth=1;ctx.stroke();
+    }
+  }
+  tickSceneOrbs();
+  requestAnimationFrame(frame);
+}
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+const WATCHER_VOICE = '5Zug9ENtDqE2S2hmPtMl';
+const dot = document.getElementById('speaking-dot');
+
+function speakWebVoice(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  // Pick a deep male voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const male = voices.find(v => /male/i.test(v.name))
+             || voices.find(v => /david|mark|daniel|george|thomas|alex|fred/i.test(v.name))
+             || voices.find(v => v.lang.startsWith('en'));
+  if (male) utt.voice = male;
+  utt.pitch = 0.82;
+  utt.rate  = 0.88;
+  utt.volume = 1;
+  utt.onstart = () => {
+    dot.classList.add('active');
+    if (!muted && musicStarted) bgAudio.volume = 0.06;
+  };
+  utt.onend = () => {
+    dot.classList.remove('active');
+    if (!muted && musicStarted) {
+      let v = 0.06;
+      const up = setInterval(() => { v = Math.min(0.28, v+0.008); bgAudio.volume = v; if(v>=0.28) clearInterval(up); }, 60);
+    }
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+async function speakWatcher(text) {
+  try {
+    dot.classList.add('active');
+    if (!muted && musicStarted) bgAudio.volume = 0.06;
+    const r = await fetch('/api/tts', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voiceId:WATCHER_VOICE,languageCode:'en'})});
+    if (!r.ok) throw new Error('tts_unavailable');
+    const buf = await r.arrayBuffer();
+    const actx = new (window.AudioContext||window.webkitAudioContext)();
+    const src = actx.createBufferSource();
+    src.buffer = await actx.decodeAudioData(buf);
+    src.connect(actx.destination);
+    src.onended = () => {
+      dot.classList.remove('active');
+      if (!muted && musicStarted) {
+        let v = 0.06;
+        const up = setInterval(() => { v = Math.min(0.28, v+0.008); bgAudio.volume = v; if(v>=0.28) clearInterval(up); }, 60);
+      }
+    };
+    src.start();
+  } catch {
+    dot.classList.remove('active');
+    if (!muted && musicStarted) bgAudio.volume = 0.28;
+    // Fallback to Web Speech API
+    speakWebVoice(text);
+  }
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+const ov   = document.getElementById('overlay');
+function show(el) { el.classList.add('on'); }
+function hide(el) { el.classList.remove('on'); }
+function enableOverlay() { ov.style.pointerEvents = 'all'; }
+
+const API = window.location.origin;
+const Q1='Before we begin — what matters most to you?';
+const Q2='What troubles you, my friend — what is the weight you truly carry?';
+const Q3='What shall I call you?';
+const Q4='And what do you name this world?';
+
+// ── Watcher Sequence ──────────────────────────────────────────────────────────
+function startWatcher() {
+  if (returning) {
+    startReturning();
+    return;
+  }
+
+  // Determine which steps are needed (partial state)
+  const step = !worldState?.world_seed   ? 1
+             : !worldState?.pain_seed    ? 2
+             : !worldState?.visitor_name ? 3
+             : !worldState?.world_name   ? 4
+             : 0;
+
+  // Pre-fill name from Room if we have it
+  if (roomUser && !worldState?.visitor_name) {
+    document.getElementById('i3').value = roomUser;
+  }
+
+  if (step === 1 || !worldState) {
+    document.getElementById('q1').textContent = Q1;
+    setTimeout(() => show(document.getElementById('q1')), 50);
+    setTimeout(() => { show(document.getElementById('w1')); document.getElementById('i1').focus(); }, 2400);
+  } else if (step === 2) {
+    document.getElementById('q2').textContent = Q2;
+    setTimeout(() => show(document.getElementById('q2')), 50);
+    setTimeout(() => { show(document.getElementById('w2')); document.getElementById('i2').focus(); }, 2400);
+  } else if (step === 3) {
+    document.getElementById('q3').textContent = Q3;
+    setTimeout(() => show(document.getElementById('q3')), 50);
+    setTimeout(() => { show(document.getElementById('w3')); document.getElementById('i3').focus(); }, 2400);
+  } else if (step === 4) {
+    document.getElementById('q4').textContent = Q4;
+    setTimeout(() => show(document.getElementById('q4')), 50);
+    setTimeout(() => { show(document.getElementById('w4')); document.getElementById('i4').focus(); }, 2400);
+  }
+}
+
+// ── Step functions ────────────────────────────────────────────────────────────
+function step2() {
+  const v = document.getElementById('i1').value.trim(); if (!v) return;
+  // Save partial
+  savePartial({world_seed: v});
+  hide(document.getElementById('w1'));
+  setTimeout(() => { document.getElementById('q2').textContent = Q2; show(document.getElementById('q2')); }, 500);
+  setTimeout(() => { show(document.getElementById('w2')); document.getElementById('i2').focus(); }, 2800);
+}
+
+function step3() {
+  const v = document.getElementById('i2').value.trim(); if (!v) return;
+  savePartial({pain_seed: v});
+  hide(document.getElementById('w2'));
+  // If Room gave us the name, skip Q3
+  if (roomUser) {
+    savePartial({visitor_name: roomUser});
+    setTimeout(() => { document.getElementById('q4').textContent = Q4; show(document.getElementById('q4')); }, 500);
+    setTimeout(() => { show(document.getElementById('w4')); document.getElementById('i4').focus(); }, 2800);
+  } else {
+    setTimeout(() => { document.getElementById('q3').textContent = Q3; show(document.getElementById('q3')); }, 500);
+    setTimeout(() => { show(document.getElementById('w3')); document.getElementById('i3').focus(); }, 2800);
+  }
+}
+
+function step4() {
+  const v = document.getElementById('i3').value.trim(); if (!v) return;
+  savePartial({visitor_name: v});
+  hide(document.getElementById('w3'));
+  setTimeout(() => { document.getElementById('q4').textContent = Q4; show(document.getElementById('q4')); }, 500);
+  setTimeout(() => { show(document.getElementById('w4')); document.getElementById('i4').focus(); }, 2800);
+}
+
+async function finalStep() {
+  const worldName = document.getElementById('i4').value.trim(); if (!worldName) return;
+  hide(document.getElementById('w4'));
+  ['q1','q2','q3','q4'].forEach(id => hide(document.getElementById(id)));
+
+  const state = {
+    guest_id:     guestId,
+    timestamp:    new Date().toISOString(),
+    world_seed:   worldState?.world_seed   || document.getElementById('i1').value.trim(),
+    pain_seed:    worldState?.pain_seed    || document.getElementById('i2').value.trim(),
+    visitor_name: worldState?.visitor_name || roomUser || document.getElementById('i3').value.trim(),
+    world_name:   worldName,
+    assigned_orbital: ASSIGNED_ORB,
+    depth_score:  null,
+    orbital_angles: Object.fromEntries(orbs.map(o=>[o.id,o.angle]))
+  };
+  try { store.setItem('nyxa_world_state_v1', JSON.stringify(state)); } catch {}
+  window.__nyxa_world_state = state;
+
+  // Trigger orbital assignment animation
+  orbs[ASSIGNED_ORB].worldLabel = worldName;
+  triggerAssignAnim(ASSIGNED_ORB);
+
+  // Show world-assigned panel
+  const aEl = document.getElementById('world-assigned');
+  aEl.style.display = 'flex';
+  document.getElementById('assigned-name').textContent = worldName.toUpperCase();
+  setTimeout(() => show(aEl), 100);
+
+  document.getElementById('ack').textContent = 'The Watcher sees you…';
+  show(document.getElementById('ack'));
+
+  // Register world server-side so other guests can see it
+  fetch('/api/worlds/register', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ guest_id:guestId, world_name:worldName,
+      orbital_idx:ASSIGNED_ORB, visitor_name:state.visitor_name })
+  }).catch(()=>{});
+
+  // Pre-fetch portal design in background
+  prefetchPortalDesign(state);
+
+  try {
+    const r = await fetch(API+'/api/watcher/receive', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({guest_id:guestId, world_seed:state.world_seed,
+        pain_seed:state.pain_seed, visitor_name:state.visitor_name,
+        world_name:worldName, returning:false})
+    }).then(r=>r.json());
+
+    if (r.reply) {
+      setTimeout(() => {
+        document.getElementById('ack').textContent = '';
+        hide(document.getElementById('ack'));
+        document.getElementById('watcher-reply').textContent = r.reply;
+        show(document.getElementById('watcher-reply'));
+        show(document.getElementById('watcher-sig'));
+        speakWatcher(r.reply);
+        enableOverlay();
+        showWatcherChat();
+        setTimeout(() => { ov.scrollTop = ov.scrollHeight; }, 400);
+        setTimeout(() => showEnterBtn(), 3500);
+      }, 800);
+    }
+  } catch {
+    setTimeout(() => showEnterBtn(), 1500);
+  }
+}
+
+function savePartial(fields) {
+  try {
+    const s = store.getItem('nyxa_world_state_v1');
+    const st = s ? JSON.parse(s) : {guest_id:guestId, timestamp:new Date().toISOString()};
+    Object.assign(st, fields);
+    store.setItem('nyxa_world_state_v1', JSON.stringify(st));
+    worldState = st;
+  } catch {}
+}
+
+// ── Returning Guest ───────────────────────────────────────────────────────────
+async function startReturning() {
+  const vname = worldState.visitor_name;
+  const wname = worldState.world_name;
+  enableOverlay();
+
+  // Show greeting
+  const q1el = document.getElementById('q1');
+  q1el.textContent = `${vname}. ${wname} remembers you.`;
+  show(q1el);
+
+  // Separate clickable world button below the greeting
+  const worldBtn = document.createElement('button');
+  worldBtn.id = 'world-link';
+  worldBtn.textContent = wname.toUpperCase();
+  worldBtn.style.cssText = [
+    'margin-top:1.4rem','background:none','border:1px solid rgba(196,181,253,0.35)',
+    'color:rgba(196,181,253,0.85)','font-size:clamp(13px,2vw,20px)',
+    'letter-spacing:0.22em','font-family:Georgia,serif','cursor:pointer',
+    'padding:0.6rem 2rem','border-radius:1px','pointer-events:all',
+    'transition:all 0.3s','text-transform:uppercase'
+  ].join(';');
+  worldBtn.onmouseover = () => { worldBtn.style.borderColor='rgba(196,181,253,0.8)'; worldBtn.style.boxShadow='0 0 24px rgba(196,181,253,0.2)'; };
+  worldBtn.onmouseout  = () => { worldBtn.style.borderColor='rgba(196,181,253,0.35)'; worldBtn.style.boxShadow='none'; };
+  worldBtn.onclick = () => expandWorldReveal(wname);
+
+  // Insert after q1
+  q1el.insertAdjacentElement('afterend', worldBtn);
+  enableOverlay();
+
+  setTimeout(async () => {
+    const ackEl = document.getElementById('ack');
+    ackEl.style.pointerEvents = 'all';
+    ackEl.textContent = 'Touch your world to see it.';
+    show(ackEl);
+
+    const r = await fetch(API+'/api/watcher/receive', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({guest_id:guestId, world_seed:worldState.world_seed||'',
+        pain_seed:worldState.pain_seed||'', visitor_name:vname,
+        world_name:wname, returning:true})
+    }).then(r=>r.json()).catch(()=>null);
+
+    if (r?.reply) {
+      document.getElementById('watcher-reply').textContent = r.reply;
+      show(document.getElementById('watcher-reply'));
+      show(document.getElementById('watcher-sig'));
+      speakWatcher(r.reply);
+      showWatcherChat();
+    }
+    enterReady = true;
+    setTimeout(() => show(document.getElementById('zoom-hint')), 1500);
+  }, 2000);
+}
+
+async function expandWorldReveal(wname) {
+  hide(document.getElementById('q1'));
+  hide(document.getElementById('ack'));
+  hide(document.getElementById('watcher-reply'));
+  hide(document.getElementById('watcher-sig'));
+
+  const panel = document.getElementById('world-reveal');
+  document.getElementById('rev-name').textContent = wname.toUpperCase();
+
+  let design = worldState.portal_design || null;
+  if (!design) {
+    try {
+      const r = await fetch(API+'/api/watcher/portal-design', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({visitor_name:worldState.visitor_name||'',
+          world_name:wname, world_seed:worldState.world_seed||'',
+          pain_seed:worldState.pain_seed||''})
+      }).then(r=>r.json());
+      if (r.design) {
+        design = r.design;
+        savePartial({portal_design: design});
+      }
+    } catch {}
+  }
+
+  if (design) {
+    document.getElementById('rev-glyph').textContent = design.world_glyph || '◈';
+    document.getElementById('rev-insc').textContent  = design.watcher_inscription || '';
+    if (design.atmosphere?.length) {
+      document.getElementById('rev-atm').innerHTML = design.atmosphere.map(w =>
+        `<span style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:#c4b5fd;opacity:0.5">${w}</span>`
+      ).join('');
+    }
+    if (design.accent) {
+      document.getElementById('rev-glyph').style.filter = `drop-shadow(0 0 16px ${design.accent})`;
+      document.getElementById('rev-name').style.color = design.accent;
+    }
+  }
+
+  document.getElementById('dive-q').textContent = `Do you want to dive into ${wname}?`;
+
+  panel.style.display = 'flex';
+  requestAnimationFrame(() => show(panel));
+
+  document.getElementById('dive-yes').onclick = () => { window.location.href = '/portal'; };
+  document.getElementById('dive-no').onclick = () => {
+    hide(panel);
+    setTimeout(() => { panel.style.display = 'none'; }, 1800);
+    setTimeout(() => {
+      show(document.getElementById('q1'));
+      document.getElementById('ack').textContent = 'When you are ready, touch your world.';
+      show(document.getElementById('ack'));
+      ov.scrollTop = 0;
+    }, 1000);
+  };
+}
+
+// ── Portal helpers ────────────────────────────────────────────────────────────
+function showEnterBtn() {
+  const btn = document.getElementById('enter-btn');
+  btn.style.display = 'block';
+  setTimeout(() => show(btn), 100);
+  enterReady = true;
+  setTimeout(() => show(document.getElementById('zoom-hint')), 1200);
+  setTimeout(() => { ov.scrollTop = ov.scrollHeight; }, 200);
+}
+
+function prefetchPortalDesign(state) {
+  fetch(API+'/api/watcher/portal-design', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({visitor_name:state.visitor_name, world_name:state.world_name,
+      world_seed:state.world_seed, pain_seed:state.pain_seed})
+  }).then(r=>r.json()).then(r => {
+    if (r.design) savePartial({portal_design: r.design});
+  }).catch(()=>{});
+}
+
+document.getElementById('enter-btn').addEventListener('click', () => {
+  window.location.href = '/portal';
+});
+
+
+// ── Globe double-click → zoom into world ─────────────────────────────────────
+window.addEventListener('dblclick', (e) => {
+  if (!enterReady) return;
+  // Ignore if clicked inside chat bar
+  if (e.target.closest && e.target.closest('#watcher-chat')) return;
+  const orb = orbs[ASSIGNED_ORB];
+  const dist = Math.hypot(e.clientX - orb.x, e.clientY - orb.y);
+  if (dist <= Math.max(orb.sz * 10, 44)) triggerWorldZoom();
+});
+// Cursor hint when hovering assigned orb
+window.addEventListener('mousemove', (e) => {
+  if (!enterReady) return;
+  const orb = orbs[ASSIGNED_ORB];
+  const dist = Math.hypot(e.clientX - orb.x, e.clientY - orb.y);
+  document.body.style.cursor = dist <= Math.max(orb.sz * 10, 44) ? 'crosshair' : '';
+});
+
+// speakWatcher variant that returns a Promise resolving when audio ends
+async function speakWatcherAwait(text) {
+  return new Promise(async (resolve) => {
+    try {
+      dot.classList.add('active');
+      if (!muted && musicStarted) bgAudio.volume = 0.06;
+      const r = await fetch('/api/tts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voiceId: WATCHER_VOICE, languageCode: 'en' })
+      });
+      if (!r.ok) throw new Error('tts_fail');
+      const buf = await r.arrayBuffer();
+      const actx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = actx.createBufferSource();
+      src.buffer = await actx.decodeAudioData(buf);
+      src.connect(actx.destination);
+      src.onended = src.onerror = () => {
+        dot.classList.remove('active');
+        if (!muted && musicStarted) {
+          let v = 0.06;
+          const up = setInterval(() => { v = Math.min(0.28, v+0.008); bgAudio.volume = v; if(v>=0.28) clearInterval(up); }, 60);
+        }
+        resolve();
+      };
+      src.start();
+    } catch {
+      dot.classList.remove('active');
+      speakWebVoice(text);
+      // fallback: estimate from text length
+      setTimeout(resolve, Math.max(3000, text.length * 55));
+    }
+  });
+}
+
+function triggerWorldZoom() {
+  if (!enterReady) return;
+  enterReady = false;
+  const orb = orbs[ASSIGNED_ORB];
+  const worldName = (worldState?.world_name || '').trim();
+  const [r,g,b] = orb.col;
+
+  const veil = document.getElementById('zoom-veil');
+  // Snapshot live canvas coords at moment of click — the personal anchor
+  const ox = Math.round(orb.x), oy = Math.round(orb.y);
+
+  veil.style.background = `radial-gradient(ellipse at center, rgba(${r},${g},${b},0.22) 0%, #06060f 65%)`;
+  veil.style.clipPath = `circle(${orb.sz * 2.5}px at ${ox}px ${oy}px)`;
+  veil.style.transition = 'none';
+  veil.style.display = 'flex';
+
+  const msg = worldName
+    ? `${worldName} is taking form. The Nyxa system weaves it from everything you have shared — your experiences, your weight, your longing. What emerges will be yours alone: a healing space, shaped to hold you.`
+    : `Your world is taking form. The Nyxa system weaves it from everything you have shared — your experiences, your weight, your longing. What emerges will be yours alone: a healing space, shaped to hold you.`;
+
+  document.getElementById('zoom-msg').textContent = msg;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      veil.style.transition = 'clip-path 1.9s cubic-bezier(0.4,0,0.2,1)';
+      veil.style.clipPath = `circle(160vmax at ${ox}px ${oy}px)`;
+
+      setTimeout(() => {
+        show(document.getElementById('zoom-msg'));
+        show(document.getElementById('zoom-sig2'));
+        // Wait for BOTH: audio ended AND minimum 5.8s floor before entering portal
+        const minFloor = new Promise(res => setTimeout(res, 5800));
+        const ttsFinished = speakWatcherAwait(msg);
+        Promise.all([ttsFinished, minFloor]).then(() => {
+          window.location.href = '/portal';
+        }).catch(() => {
+          minFloor.then(() => { window.location.href = '/portal'; });
+        });
+      }, 1000);
+    });
+  });
+}
+
+
+// ── Watcher Chatbox ───────────────────────────────────────────────────────────
+const chatHistory = [];
+
+// ── Rule Engine Session State ─────────────────────────────────────────────
+const PROFILES_MAP = {
+  exploration: {
+    cluster: 'exploration',
+    interaction: { input_mode: 'open_text', guidance_level: 'low', response_style: 'expansive' },
+    narrative:   { tone: 'curious', pace: 'fluid', structure: 'branching' },
+    environment: { visual_density: 'medium', focus_level: 'wide', transition_style: 'smooth' },
+    depth: {
+      low:    { guidance_level: 'high' },
+      medium: {},
+      high:   { guidance_level: 'minimal' }
+    },
+    rules: [
+      { condition: "confidence < 0.4",         action: 'increase_guidance' },
+      { condition: "depth == 'high'",           action: 'unlock_complexity' },
+      { condition: "stability == 'volatile'",   action: 'stabilize' }
+    ]
+  },
+  friction: {
+    cluster: 'friction',
+    interaction: { input_mode: 'guided', guidance_level: 'high', response_style: 'structured' },
+    narrative:   { tone: 'grounding', pace: 'slow', structure: 'linear' },
+    environment: { visual_density: 'low', focus_level: 'narrow', transition_style: 'gentle' },
+    depth: {
+      low:    { guidance_level: 'high' },
+      medium: {},
+      high:   { guidance_level: 'medium' }
+    },
+    rules: [
+      { condition: "depth == 'low'",            action: 'simplify_environment' },
+      { condition: "confidence < 0.3",          action: 'trigger_stabilization_mode' }
+    ]
+  },
+  analytical: {
+    cluster: 'analytical',
+    interaction: { input_mode: 'structured', guidance_level: 'minimal', response_style: 'precise' },
+    narrative:   { tone: 'analytical', pace: 'fast', structure: 'hierarchical' },
+    environment: { visual_density: 'high', focus_level: 'narrow', transition_style: 'sharp' },
+    depth: {
+      low:    { guidance_level: 'medium' },
+      medium: {},
+      high:   { guidance_level: 'minimal' }
+    },
+    rules: [
+      { condition: "confidence > 0.7 AND depth == 'high'", action: 'unlock_complexity' },
+      { condition: "stability == 'volatile'",              action: 'increase_guidance' }
+    ]
+  },
+  reflective: {
+    cluster: 'reflective',
+    interaction: { input_mode: 'open_text', guidance_level: 'low', response_style: 'narrative' },
+    narrative:   { tone: 'warm', pace: 'slow', structure: 'circular' },
+    environment: { visual_density: 'low', focus_level: 'wide', transition_style: 'smooth' },
+    depth: {
+      low:    { guidance_level: 'medium' },
+      medium: {},
+      high:   { guidance_level: 'minimal' }
+    },
+    rules: [
+      { condition: "confidence < 0.5", action: 'increase_guidance' }
+    ]
+  }
+};
+
+let nxSession = {
+  session_state: { cluster: 'exploration', depth: 'medium', confidence: 0.6, stability: 'stable' },
+  user_state:    { engagement_level: 'medium', tendencies: [], avoidances: [] }
+};
+let nxBehavior = (typeof getColdStartBehavior !== 'undefined')
+  ? getColdStartBehavior({})
+  : null;
+let _sessionType = 'exploratory';  // updated from server on first response
+
+// Map video params → orb visual parameters
+const ORB_PACE_MAP        = { slow: 0.0003, fluid: 0.0006, fast: 0.0010 };
+const ORB_DENSITY_MAP     = { low: 0.55, medium: 0.8, high: 1.0, increasing: 0.85 };
+const ORB_TONE_COLOR_MAP  = {
+  curious:    [196, 181, 253],   // violet
+  warm:       [251, 191, 100],   // amber
+  grounding:  [100, 180, 200],   // teal
+  analytical: [180, 200, 255],   // cool blue
+};
+
+function applyBehaviorToOrb(video) {
+  if (!video || typeof orbs === 'undefined') return;
+  const speedTarget = ORB_PACE_MAP[video.pace]    || 0.0006;
+  const alpha       = ORB_DENSITY_MAP[video.visual_density] || 0.8;
+  const colorTarget = ORB_TONE_COLOR_MAP[video.tone];
+
+  orbs.forEach((orb, i) => {
+    // Smooth speed transition
+    orb.spd = orb.spd + (speedTarget - orb.spd) * 0.08;
+    // Color blend if tone changed
+    if (colorTarget) {
+      orb.col = orb.col.map((ch, ci) =>
+        Math.round(ch + (colorTarget[ci] - ch) * 0.05)
+      );
+    }
+    // Store alpha for draw loop
+    orb._alpha = (orb._alpha || 0.8) + (alpha - (orb._alpha || 0.8)) * 0.05;
+  });
+
+  console.log('[Nyxa] behavior applied:', video.tone, video.pace, video.visual_density);
+}
+
+
+// ── Scene Engine ──────────────────────────────────────────────────────────────
+// Derived from config — never toggled manually.
+// state → cluster → config → scene → render
+
+const SCENE_MAP = {
+  // [visual_density]-[interaction_mode or tone]
+  'low-guided':       'cocoon',      // friction/guided: safe, contracted, warm
+  'low-open':         'void',        // reflective/low: open dark space
+  'medium-expansive': 'threshold',   // exploration/medium: default Threshold feel
+  'medium-precise':   'chamber',     // analytical/medium: focused, cooler
+  'medium-narrative': 'hearth',      // reflective/medium: warm, circular
+  'high-expanded':    'observatory', // analytical/high + unlocked: full complexity
+  'high-expansive':   'cosmos',      // exploration/high: wide open, fast
+};
+
+const SCENE_DEFS = {
+  cocoon: {
+    bgTint:  [12, 8, 20],      orbGlow: 0.5,  orbAlpha: 0.6,
+    chatBorder: 'rgba(100,180,200,0.35)', chatBg: 'rgba(6,6,20,0.92)',
+    placeholder: 'What is weighing on you…',
+    bodyHue: 'rgba(8,12,22,1)'
+  },
+  void: {
+    bgTint:  [6, 6, 15],       orbGlow: 0.35, orbAlpha: 0.45,
+    chatBorder: 'rgba(196,181,253,0.15)', chatBg: 'rgba(6,6,15,0.88)',
+    placeholder: 'Describe what you feel…',
+    bodyHue: 'rgba(6,6,15,1)'
+  },
+  threshold: {
+    bgTint:  [10, 8, 20],      orbGlow: 0.8,  orbAlpha: 0.8,
+    chatBorder: 'rgba(196,181,253,0.28)', chatBg: 'rgba(8,8,18,0.90)',
+    placeholder: 'Speak to The Watcher…',
+    bodyHue: 'rgba(10,8,20,1)'
+  },
+  chamber: {
+    bgTint:  [8, 12, 24],      orbGlow: 0.7,  orbAlpha: 0.85,
+    chatBorder: 'rgba(160,190,255,0.32)', chatBg: 'rgba(8,12,24,0.93)',
+    placeholder: 'What do you want to understand…',
+    bodyHue: 'rgba(8,12,24,1)'
+  },
+  hearth: {
+    bgTint:  [18, 12, 8],      orbGlow: 0.65, orbAlpha: 0.7,
+    chatBorder: 'rgba(251,191,100,0.28)', chatBg: 'rgba(14,10,8,0.91)',
+    placeholder: 'What are you thinking about…',
+    bodyHue: 'rgba(14,10,8,1)'
+  },
+  observatory: {
+    bgTint:  [6, 10, 28],      orbGlow: 1.0,  orbAlpha: 1.0,
+    chatBorder: 'rgba(180,210,255,0.45)', chatBg: 'rgba(6,10,28,0.95)',
+    placeholder: 'Go deeper…',
+    bodyHue: 'rgba(6,10,28,1)'
+  },
+  cosmos: {
+    bgTint:  [12, 6, 28],      orbGlow: 1.0,  orbAlpha: 0.95,
+    chatBorder: 'rgba(196,181,253,0.50)', chatBg: 'rgba(10,6,24,0.88)',
+    placeholder: 'Where does this take you…',
+    bodyHue: 'rgba(10,6,24,1)'
+  }
+};
+
+let _currentScene = 'threshold';
+let _sceneTarget  = { ...SCENE_DEFS.threshold };
+
+function deriveScene(video) {
+  const key = `${video.visual_density}-${video.response_style || video.tone}`;
+  return SCENE_MAP[key] || 'threshold';
+}
+
+function renderScene(video) {
+  const sceneName = deriveScene(video);
+  if (sceneName === _currentScene) return;
+  _currentScene = sceneName;
+  _sceneTarget  = SCENE_DEFS[sceneName] || SCENE_DEFS.threshold;
+
+  // Morph UI elements smoothly
+  const chatEl = document.getElementById('watcher-chat');
+  const inputEl = document.getElementById('chat-input');
+  if (chatEl) {
+    chatEl.style.transition = 'border-color 2.5s ease, background 2.5s ease';
+    chatEl.style.borderColor = _sceneTarget.chatBorder;
+    chatEl.style.background  = _sceneTarget.chatBg;
+  }
+  if (inputEl && inputEl.placeholder !== _sceneTarget.placeholder) {
+    // Fade placeholder change
+    inputEl.style.transition = 'opacity 0.6s';
+    inputEl.style.opacity = '0';
+    setTimeout(() => {
+      inputEl.placeholder = _sceneTarget.placeholder;
+      inputEl.style.opacity = '1';
+    }, 600);
+  }
+
+  // Body background tint (very subtle shift)
+  document.body.style.transition = 'background-color 3s ease';
+  document.body.style.backgroundColor = _sceneTarget.bodyHue;
+
+  console.log('[Scene]', sceneName, video);
+}
+
+// Called each animation frame — smoothly blends orb visuals toward scene target
+function tickSceneOrbs() {
+  if (!_sceneTarget || typeof orbs === 'undefined') return;
+  orbs.forEach(orb => {
+    // Blend glow multiplier
+    orb._glow = (orb._glow || 0.8) + (_sceneTarget.orbGlow - (orb._glow || 0.8)) * 0.02;
+    // Blend alpha
+    orb._alpha = (orb._alpha || 0.8) + (_sceneTarget.orbAlpha - (orb._alpha || 0.8)) * 0.02;
+    // Blend bg tint into orb color slightly
+    if (_sceneTarget.bgTint) {
+      orb.col = orb.col.map((ch, ci) => {
+        const bg = _sceneTarget.bgTint[ci];
+        return Math.round(ch + (Math.min(ch + 40, 255) - ch) * 0.005);
+      });
+    }
+  });
+}
+
+// Extend applyBehaviorToOrb to also trigger scene
+const _origApplyBehavior = applyBehaviorToOrb;
+function applyBehaviorToOrb(video) {
+  _origApplyBehavior(video);
+  renderScene(video);
+}
+
+
+// ── Agent Presence Layer ──────────────────────────────────────────────────────
+// Agents are scene entities — activated by config + cluster, not manually.
+// Each has a persistent context buffer across the session.
+
+const THRESHOLD_AGENTS = {
+  watcher: {
+    id: 'watcher',     name: 'The Watcher',
+    style: 'observant, poetic, minimal',
+    visibility: 'always',
+    memory: []
+  },
+  jo: {
+    id: 'jo',          name: 'Jo',
+    style: 'warm, present, practical',
+    visibility: 'reflective',   // appears in reflective/hearth scenes
+    memory: []
+  },
+  sophia: {
+    id: 'sophia',      name: 'Sophia',
+    style: 'analytical, precise, curious',
+    visibility: 'analytical',   // appears in chamber/observatory scenes
+    memory: []
+  }
+};
+
+// Scene → active agents
+const SCENE_AGENTS = {
+  cocoon:      ['watcher'],
+  void:        ['watcher'],
+  threshold:   ['watcher'],
+  chamber:     ['watcher', 'sophia'],
+  hearth:      ['watcher', 'jo'],
+  observatory: ['watcher', 'sophia'],
+  cosmos:      ['watcher', 'jo', 'sophia']
+};
+
+let _activeAgentIds = ['watcher'];
+
+function getActiveAgents(sceneName) {
+  return (SCENE_AGENTS[sceneName] || ['watcher'])
+    .map(id => THRESHOLD_AGENTS[id])
+    .filter(Boolean);
+}
+
+function updateActiveAgents(sceneName) {
+  const agents = getActiveAgents(sceneName);
+  _activeAgentIds = agents.map(a => a.id);
+
+  // Render presence indicators (subtle, non-intrusive)
+  renderAgentPresence(agents);
+  return agents;
+}
+
+function renderAgentPresence(agents) {
+  let el = document.getElementById('agent-presence');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'agent-presence';
+    el.style.cssText = [
+      'position:fixed', 'bottom:5.5rem', 'right:1.2rem',
+      'display:flex', 'flex-direction:column', 'gap:5px',
+      'z-index:15', 'pointer-events:none',
+      'transition:opacity 1.5s ease'
+    ].join(';');
+    document.body.appendChild(el);
+  }
+
+  el.innerHTML = agents.map(a => {
+    const isWatcher = a.id === 'watcher';
+    return `<div style="
+      font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
+      color:rgba(196,181,253,${isWatcher ? '0.35' : '0.20'});
+      font-family:Georgia,serif; text-align:right;
+      transition:opacity 1.5s ease;
+    ">${a.name}</div>`;
+  }).join('');
+}
+
+// Add agent context memory per turn
+function recordAgentContext(agentId, role, content) {
+  const agent = THRESHOLD_AGENTS[agentId];
+  if (!agent) return;
+  agent.memory.push({ role, content });
+  if (agent.memory.length > 12) agent.memory.shift(); // rolling window
+}
+
+// Get memory context for a given agent
+function getAgentMemory(agentId) {
+  return (THRESHOLD_AGENTS[agentId]?.memory || []).slice(-8);
+}
+
+// Hook into scene changes — update agent presence when scene changes
+const _origRenderScene = renderScene;
+function renderScene(video) {
+  _origRenderScene(video);
+  updateActiveAgents(_currentScene);
+}
+
+
+// ── Supervisor Dashboard ──────────────────────────────────────────────────────
+let _supervisorOverride = null;
+const _clusterLog = [];   // { cluster, depth, confidence, ts }
+
+function toggleSupervisor() {
+  const el = document.getElementById('supervisor');
+  if (el) el.classList.toggle('on');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'D') { e.preventDefault(); toggleSupervisor(); }
+});
+
+function supervisorOverride(cluster) {
+  _supervisorOverride = cluster;
+  document.querySelectorAll('.sv-btn').forEach(b => b.classList.remove('active-override'));
+  if (cluster) {
+    event.target.classList.add('active-override');
+    // Immediately apply the override to current session
+    nxSession.session_state.cluster = cluster;
+    const profile = PROFILES_MAP[cluster];
+    if (profile) {
+      nxBehavior = evaluateBehavior(profile, nxSession);
+      applyBehaviorToOrb(nxBehavior.video);
+    }
+  }
+  updateSupervisorPanel();
+}
+
+function addAnnotation() {
+  const note = document.getElementById('sv-note')?.value?.trim();
+  if (!note) return;
+  _clusterLog.push({ type: 'annotation', note, ts: Date.now() });
+  document.getElementById('sv-note').value = '';
+  updateSupervisorPanel();
+}
+
+function updateSupervisorPanel() {
+  if (!document.getElementById('supervisor')?.classList.contains('on')) return;
+
+  const s = nxSession.session_state;
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  setText('sv-cluster',    (_supervisorOverride ? '⚠ ' : '') + (s.cluster || '—'));
+  setText('sv-depth',      s.depth      || '—');
+  setText('sv-confidence', s.confidence != null ? s.confidence.toFixed(2) : '—');
+  setText('sv-stability',  s.stability  || '—');
+  setText('sv-scene',      _currentScene || '—');
+  setText('sv-agents',     _activeAgentIds.join(', ') || '—');
+  const _qd = nxSession.session_state;
+  setText('sv-env-tone',   _qd.environment_tone || '—');
+  setText('sv-stability-ind', _qd.stability_indicator != null ? (_qd.stability_indicator*100).toFixed(0)+'%' : '—');
+  setText('sv-session-type', _sessionType || '—');
+  const _av = _qd.avoidance || {};
+  setText('sv-avoid-det',  _av.detected ? '⚠ yes' : 'no');
+  setText('sv-avoid-type', _av.type || '—');
+  setText('sv-avoid-str',  _av.strength != null ? (_av.strength*100).toFixed(0)+'%' : '—');
+  setText('sv-avoid-state',_qd.avoidance_state || '—');
+  setText('sv-wlock',      _qd.write_locked ? '🔒 on' : 'off');
+  setText('sv-tick',       _qd.tick_rate_modifier != null ? _qd.tick_rate_modifier.toFixed(2)+'×' : '—');
+  setText('sv-session',    typeof _sessionId !== 'undefined' ? _sessionId.slice(-12) : '—');
+  setText('sv-turns',      chatHistory.length);
+
+  const logEl = document.getElementById('sv-log');
+  if (logEl) {
+    logEl.innerHTML = _clusterLog.slice(-8).reverse().map(e => {
+      if (e.type === 'annotation') {
+        return `<div class="sv-entry" style="color:rgba(251,191,100,0.5);font-style:italic">✎ ${e.note}</div>`;
+      }
+      const t = new Date(e.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      const isLatest = e === _clusterLog.slice(-1)[0];
+      return `<div class="sv-entry${isLatest?' active':''}">${t} ${e.cluster}/${e.depth} ${(e.confidence*100).toFixed(0)}%</div>`;
+    }).join('');
+  }
+}
+
+
+// ── Session Persistence + Learner Profile ─────────────────────────────────────
+const _sessionId = 'thresh_' + (localStorage.getItem('nyxa_user') || 'guest') + '_' +
+                   new Date().toISOString().slice(0,10).replace(/-/g,'');
+const _userId    = localStorage.getItem('nyxa_user') || 'guest';
+
+async function loadLearnerProfile() {
+  try {
+    const r = await fetch('/api/learner/' + encodeURIComponent(_userId));
+    if (!r.ok) return null;
+    const profile = await r.json();
+    if (!profile) return null;
+    // Apply saved preferences to initial session state
+    if (profile.last_cluster)  nxSession.session_state.cluster  = profile.last_cluster;
+    if (profile.last_depth)    nxSession.session_state.depth    = profile.last_depth;
+    if (profile.preferences?.guidance_level)
+      nxSession.session_state.confidence = profile.preferences.guidance_level === 'low' ? 0.75 : 0.45;
+    console.log('[Profile] loaded for', _userId, profile.long_term_trends || {});
+    return profile;
+  } catch { return null; }
+}
+
+async function saveSessionSnapshot() {
+  const snapshot = {
+    user_id:     _userId,
+    cluster_log: _clusterLog.slice(-20),
+    cluster_summary: computeClusterSummary(),
+    session_state: nxSession.session_state,
+    chat_turns: chatHistory.length,
+    updated_at: new Date().toISOString()
+  };
+  try {
+    await fetch('/api/session/' + _sessionId, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(snapshot)
+    });
+  } catch {}
+}
+
+async function saveLearnerProfile() {
+  const summary = computeClusterSummary();
+  const update = {
+    last_cluster: nxSession.session_state.cluster,
+    last_depth:   nxSession.session_state.depth,
+    last_seen:    new Date().toISOString(),
+    long_term_trends: {
+      cluster_distribution: summary.counts,
+      avg_confidence:       summary.avgConfidence,
+      session_count:        1  // server merges/increments
+    }
+  };
+  try {
+    await fetch('/api/learner/' + encodeURIComponent(_userId), {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(update)
+    });
+  } catch {}
+}
+
+function computeClusterSummary() {
+  const counts = {};
+  let totalConf = 0;
+  _clusterLog.forEach(e => {
+    if (e.type === 'annotation') return;
+    counts[e.cluster] = (counts[e.cluster] || 0) + 1;
+    totalConf += (e.confidence || 0);
+  });
+  const n = _clusterLog.filter(e => !e.type).length || 1;
+  return { counts, avgConfidence: totalConf / n };
+}
+
+// Auto-save every 60s + on page hide
+setInterval(() => { saveSessionSnapshot(); saveLearnerProfile(); }, 60000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { saveSessionSnapshot(); saveLearnerProfile(); }
+});
+
+// Load profile on start (after DOM ready)
+loadLearnerProfile();
+
+
+// ── Curriculum Engine (client) ────────────────────────────────────────────────
+const _curriculumId = 'nyxa_onboarding';
+let _curriculumProgress = null;
+
+async function evaluateCurriculumProgress() {
+  try {
+    const r = await fetch(`/api/progress/${encodeURIComponent(_userId)}/${_curriculumId}`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ cluster_log: _clusterLog.slice(-20) })
+    });
+    const data = await r.json();
+    _curriculumProgress = data;
+    updateSupervisorPanel();
+    // Feed mastery into session state confidence
+    if (data.mastery != null) {
+      nxSession.session_state.confidence = 0.3 + data.mastery * 0.65;
+    }
+    if (data.advanced) {
+      console.log('[Curriculum] advanced to', data.progress?.current_level);
+    }
+  } catch {}
+}
+
+// Evaluate curriculum every 5 turns
+let _turnCount = 0;
+
+function updateSessionFromMessage(msg) {
+  const detected = detectCluster(msg, nxSession.session_state, _clusterLog);
+  if (_supervisorOverride) detected.cluster = _supervisorOverride;
+  nxSession.session_state = { ...nxSession.session_state, ...detected };
+  _clusterLog.push({ ...detected, ts: Date.now() });
+  if (_clusterLog.length > 50) _clusterLog.shift();
+
+  const profile = PROFILES_MAP[detected.cluster];
+  if (!profile) return;
+
+  nxBehavior = evaluateBehavior(profile, nxSession);
+  applyBehaviorToOrb(nxBehavior.video);
+  updateSupervisorPanel();
+
+  // Return style hints for Watcher
+  return nxBehavior.video;
+}
+
+let chatBusy = false;
+let _entryHintDismissed = false;
+
+const TONE_COLORS = {
+  calm: '#93c5fd', reflective: '#a5b4fc', exploratory: '#fbbf24',
+  curious: '#34d399', tense: '#f87171', stuck: '#f87171', grounded: '#86efac'
+};
+
+function renderStateBar() {
+  const ss = nxSession?.session_state;
+  if (!ss) return;
+  const bar = document.getElementById('state-bar');
+  if (!bar) return;
+  bar.classList.add('on');
+  const tone = ss.environment_tone || ss.cluster || '—';
+  const stability = ss.confidence != null ? Math.round(ss.confidence * 100) + '%' : '—';
+  const mode = ss.subtype || ss.intent || '—';
+  const toneEl = document.getElementById('st-tone');
+  const stabEl = document.getElementById('st-stability');
+  const modeEl = document.getElementById('st-mode');
+  toneEl.textContent = tone;
+  toneEl.style.color = TONE_COLORS[tone] || 'rgba(196,181,253,0.55)';
+  stabEl.textContent = stability;
+  modeEl.textContent = mode;
+}
+
+function showWatcherChat() {
+  const el = document.getElementById('watcher-chat');
+  el.classList.add('on');
+
+  // Hide standalone mute-btn — controls are now in the chat bar
+  const mb = document.getElementById('mute-btn');
+  if (mb) mb.style.opacity = '0';
+  // Sync mute state to chat mute btn
+  syncChatMuteBtn();
+}
+
+function chatScrollBottom() {
+  const el = document.getElementById('chat-messages');
+  el.scrollTop = el.scrollHeight;
+}
+
+function addChatBubble(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const b = document.createElement('div');
+  b.className = 'chat-bubble ' + role;
+  if (role === 'watcher') {
+    const pace = nxBehavior?.config?.pace || 'moderate';
+    const dur = pace === 'slow' ? '0.8s' : pace === 'fast' ? '0.2s' : '0.45s';
+    b.style.setProperty('--fade-dur', dur);
+    const label = document.createElement('div');
+    label.className = 'watcher-label';
+    label.textContent = 'Watcher';
+    b.appendChild(label);
+    const body = document.createElement('div');
+    body.textContent = text;
+    b.appendChild(body);
+  } else {
+    b.textContent = text;
+  }
+  msgs.appendChild(b);
+  chatScrollBottom();
+  return b;
+}
+
+async function sendChatMessage() {
+  if (chatBusy) return;
+  const inp = document.getElementById('chat-input');
+  const msg = inp.value.trim();
+  if (!msg) return;
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  chatBusy = true;
+  document.getElementById('chat-send').disabled = true;
+
+  // Dismiss entry hint on first message
+  if (!_entryHintDismissed) {
+    _entryHintDismissed = true;
+    const hint = document.getElementById('entry-hint');
+    if (hint) { hint.style.opacity = '0'; setTimeout(() => { hint.style.display = 'none'; }, 650); }
+  }
+
+  addChatBubble('user', msg);
+  const _nxVideo = updateSessionFromMessage(msg);
+  renderStateBar();
+  chatHistory.push({ role: 'user', content: msg });
+  _turnCount++;
+  if (_turnCount % 5 === 0) evaluateCurriculumProgress();
+  recordAgentContext('watcher', 'user', msg);
+
+  const thinking = addChatBubble('thinking', 'The Watcher listens…');
+
+  try {
+    const state = worldState || {};
+    const r = await fetch('/api/watcher/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: msg,
+        visitor_name: state.visitor_name || roomUser || '',
+        world_name:   state.world_name   || '',
+        world_seed:   state.world_seed   || '',
+        pain_seed:    state.pain_seed    || '',
+        history: chatHistory.slice(-8),
+        behavior: nxBehavior?.config || null,
+        level_objectives: _curriculumProgress?.current_level?.objectives || null,
+        level_name: _curriculumProgress?.current_level?.id || null,
+        qce: {
+          environment_tone: nxSession.session_state?.environment_tone || null,
+          avoidance:        nxSession.session_state?.avoidance || null,
+          subtype:          nxSession.session_state?.subtype || null,
+          intent:           nxSession.session_state?.intent || null
+        },
+        session_id: _sessionId || null,
+        user_id:    _userId    || null
+      })
+    }).then(r => r.json());
+
+    // 350ms processing pause — makes intelligence feel present, not instant
+    await new Promise(res => setTimeout(res, 350));
+    thinking.remove();
+
+    if (r.reply) {
+      addChatBubble('watcher', r.reply);
+      chatHistory.push({ role: 'assistant', content: r.reply });
+      recordAgentContext('watcher', 'assistant', r.reply);
+      speakWatcher(r.reply);
+      // Update session-type from server
+      if (r.session_type) {
+        if (r.session_type_evolved && r.session_type !== _sessionType) {
+          console.log('[Session] type evolved →', r.session_type);
+          // Re-init cold-start behavior for new type
+          if (typeof getColdStartBehavior !== 'undefined') {
+            const _evolved = getColdStartBehavior({ firstMessage: r.session_type });
+            // Blend with current: keep cluster/avoidance, update tone/pace/guidance
+            if (nxBehavior) nxBehavior.config = { ...nxBehavior.config, ..._evolved.config };
+          }
+        }
+        _sessionType = r.session_type;
+        updateSupervisorPanel();
+      }
+      renderStateBar();
+    }
+  } catch {
+    thinking.textContent = 'The Watcher is silent…';
+  }
+
+  chatBusy = false;
+  document.getElementById('chat-send').disabled = false;
+  inp.focus();
+}
+
+document.getElementById('chat-send').addEventListener('click', sendChatMessage);
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+});
+// Auto-resize textarea
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+});
+
+
+// ── Playlist & chat music controls ───────────────────────────────────────────
+const TRACKS = [
+  { label: 'Threshold', src: '/dashboard/threshold-music.mp3' },
+];
+let currentTrack = 0;
+
+function buildPlaylistPanel() {
+  const panel = document.getElementById('playlist-panel');
+  panel.innerHTML = '';
+  TRACKS.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'playlist-track' + (i === currentTrack ? ' playing' : '');
+    btn.textContent = t.label;
+    btn.onclick = () => {
+      currentTrack = i;
+      bgAudio.src = t.src;
+      bgAudio.load();
+      if (musicStarted) bgAudio.play().catch(()=>{});
+      buildPlaylistPanel();
+      closePlaylist();
+    };
+    panel.appendChild(btn);
+  });
+}
+
+function closePlaylist() {
+  document.getElementById('playlist-panel').classList.remove('on');
+  document.getElementById('playlist-btn').classList.remove('active');
+}
+
+function syncChatMuteBtn() {
+  const btn = document.getElementById('chat-mute-btn');
+  if (!btn) return;
+  btn.textContent = muted ? '♪ off' : '♪';
+  btn.classList.toggle('active', !muted);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildPlaylistPanel();
+
+  const chatMute = document.getElementById('chat-mute-btn');
+  if (chatMute) {
+    chatMute.addEventListener('click', (e) => {
+      e.stopPropagation();
+      muted = !muted;
+      bgAudio.volume = muted ? 0 : 0.28;
+      // keep standalone btn in sync
+      const mb = document.getElementById('mute-btn');
+      if (mb) mb.textContent = muted ? '♪ unmute' : '♪ music';
+      syncChatMuteBtn();
+      if (!musicStarted) startMusic();
+    });
+  }
+
+  const plBtn = document.getElementById('playlist-btn');
+  if (plBtn) {
+    plBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const panel = document.getElementById('playlist-panel');
+      const open = panel.classList.toggle('on');
+      plBtn.classList.toggle('active', open);
+    });
+  }
+
+  // Close playlist on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#playlist-btn') && !e.target.closest('#playlist-panel')) {
+      closePlaylist();
+    }
+  });
+});
+
+
+// ── Threshold Mic Mode ────────────────────────────────────────────────────────
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+let threshRecognition = null;
+let threshListening   = false;
+let threshFinal       = '';
+let threshSilence     = null;
+const THRESH_SILENCE  = 1800;
+
+function threshMicToggle() {
+  if (!SpeechRec) { alert('Speech recognition not supported in this browser.'); return; }
+  threshListening ? threshStopMic() : threshStartMic();
+}
+
+function threshStartMic() {
+  threshListening = true;
+  threshFinal = '';
+  const btn = document.getElementById('thresh-mic-btn');
+  btn.classList.add('active');
+  btn.innerHTML = '<span id="mic-live-dot"></span>listening';
+
+  threshRecognition = new SpeechRec();
+  threshRecognition.lang = 'en-US';
+  threshRecognition.interimResults = true;
+  threshRecognition.continuous = true;
+
+  threshRecognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      e.results[i].isFinal
+        ? (threshFinal += e.results[i][0].transcript + ' ')
+        : (interim += e.results[i][0].transcript);
+    }
+    const inp = document.getElementById('chat-input');
+    if (inp) { inp.value = threshFinal + interim; inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight,80)+'px'; }
+    // Auto-send after silence
+    clearTimeout(threshSilence);
+    if ((threshFinal + interim).trim()) {
+      threshSilence = setTimeout(() => {
+        if (threshFinal.trim()) { threshStopMic(); sendChatMessage(); }
+      }, THRESH_SILENCE);
+    }
+  };
+
+  threshRecognition.onerror = (e) => { if (e.error !== 'aborted') threshStopMic(); };
+  threshRecognition.onend   = () => { if (threshListening) { try { threshRecognition.start(); } catch { threshStopMic(); } } };
+  threshRecognition.start();
+}
+
+function threshStopMic() {
+  threshListening = false;
+  clearTimeout(threshSilence);
+  if (threshRecognition) { try { threshRecognition.stop(); } catch {} threshRecognition = null; }
+  const btn = document.getElementById('thresh-mic-btn');
+  if (btn) { btn.classList.remove('active'); btn.innerHTML = '🎙'; }
+  const inp = document.getElementById('chat-input');
+  if (inp) { inp.value = threshFinal.trim(); inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight,80)+'px'; }
+  threshFinal = '';
+}
+
+// Pause mic while Watcher TTS plays — resume after
+const _origSpeakWatcher = speakWatcher;
+speakWatcher = async function(text) {
+  if (threshListening) { try { threshRecognition?.stop(); } catch {} }
+  await _origSpeakWatcher(text);
+  if (threshListening) {
+    try {
+      threshRecognition = new SpeechRec();
+      threshRecognition.lang = 'en-US';
+      threshRecognition.interimResults = true;
+      threshRecognition.continuous = true;
+      threshRecognition.onresult = threshRecognition?.onresult;
+      threshRecognition.onerror = (e) => { if (e.error !== 'aborted') threshStopMic(); };
+      threshRecognition.onend = () => { if (threshListening) { try { threshRecognition.start(); } catch { threshStopMic(); } } };
+      threshRecognition.start();
+    } catch {}
+  }
+};
+
+// ── Threshold Stammtisch Mode ─────────────────────────────────────────────────
+let threshStmActive = false;
+let threshStmTimer  = null;
+const THRESH_STM_INTERVAL = 12000; // Watcher muses every 12s
+
+function threshStmToggle() {
+  const btn = document.getElementById('thresh-stm-btn');
+  if (!threshStmActive) {
+    threshStmActive = true;
+    btn.classList.add('stm-active');
+    btn.textContent = '🪑 on';
+    threshStmSpeak();
+  } else {
+    threshStmActive = false;
+    clearTimeout(threshStmTimer);
+    btn.classList.remove('stm-active');
+    btn.textContent = '🪑';
+  }
+}
+
+async function threshStmSpeak() {
+  if (!threshStmActive) return;
+  const state = worldState || {};
+  try {
+    const r = await fetch('/api/watcher/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: '[Stammtisch] Speak a short unsolicited reflection, observation, or question to the visitor. Something true. Something they might not have considered. Do not wait to be asked.',
+        visitor_name: state.visitor_name || roomUser || '',
+        world_name:   state.world_name   || '',
+        world_seed:   state.world_seed   || '',
+        pain_seed:    state.pain_seed    || '',
+        history: chatHistory.slice(-6),
+        behavior: nxBehavior?.config || null,
+        level_objectives: _curriculumProgress?.current_level?.objectives || null,
+        level_name: _curriculumProgress?.current_level?.id || null,
+        qce: {
+          environment_tone: nxSession.session_state?.environment_tone || null,
+          avoidance:        nxSession.session_state?.avoidance || null,
+          subtype:          nxSession.session_state?.subtype || null,
+          intent:           nxSession.session_state?.intent || null
+        },
+        session_id: _sessionId || null,
+        user_id:    _userId    || null
+      })
+    }).then(r => r.json());
+
+    if (r.reply && threshStmActive) {
+      addChatBubble('watcher', r.reply);
+      chatHistory.push({ role: 'assistant', content: r.reply });
+      recordAgentContext('watcher', 'assistant', r.reply);
+      await speakWatcher(r.reply);
+    }
+  } catch {}
+
+  if (threshStmActive) {
+    const _tickMod = nxBehavior?.qce?.tick_rate_modifier || nxSession.session_state?.tick_rate_modifier || 1.0;
+    threshStmTimer = setTimeout(threshStmSpeak, THRESH_STM_INTERVAL / _tickMod);
+  }
+}
+
+document.getElementById('thresh-mic-btn').addEventListener('click', threshMicToggle);
+document.getElementById('thresh-stm-btn').addEventListener('click', threshStmToggle);
+
+// ── Wire inputs ───────────────────────────────────────────────────────────────
+document.getElementById('b1').addEventListener('click', step2);
+document.getElementById('b2').addEventListener('click', step3);
+document.getElementById('b3').addEventListener('click', step4);
+document.getElementById('b4').addEventListener('click', finalStep);
+document.getElementById('i1').addEventListener('keydown', e=>{if(e.key==='Enter')step2();});
+document.getElementById('i2').addEventListener('keydown', e=>{if(e.key==='Enter')step3();});
+document.getElementById('i3').addEventListener('keydown', e=>{if(e.key==='Enter')step4();});
+document.getElementById('i4').addEventListener('keydown', e=>{if(e.key==='Enter')finalStep();});
+
+window.addEventListener('visibilitychange', () => {
+  if (!document.hidden) return;
+  try {
+    const s = store.getItem('nyxa_world_state_v1');
+    const st = s ? JSON.parse(s) : {};
+    st.orbital_angles = Object.fromEntries(orbs.map(o=>[o.id,o.angle]));
+    store.setItem('nyxa_world_state_v1', JSON.stringify(st));
+  } catch {}
+});
+
+// ── Background Music ──────────────────────────────────────────────────────────
+const bgAudio = document.getElementById('bg-audio');
+const muteBtn = document.getElementById('mute-btn');
+let musicStarted = false;
+let muted = false;
+
+bgAudio.volume = 0;
+
+function startMusic() {
+  if (musicStarted) return;
+  musicStarted = true;
+  bgAudio.play().then(() => {
+    // Fade in over 4s
+    let v = 0;
+    const fadeIn = setInterval(() => {
+      v = Math.min(0.28, v + 0.005);
+      bgAudio.volume = v;
+      if (v >= 0.28) clearInterval(fadeIn);
+    }, 80);
+  }).catch(() => {});
+}
+
+// Start on first user interaction
+['click','keydown','touchstart'].forEach(ev =>
+  document.addEventListener(ev, startMusic, {once: true})
+);
+
+muteBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  muted = !muted;
+  bgAudio.volume = muted ? 0 : 0.28;
+  muteBtn.textContent = muted ? '♪ unmute' : '♪ music';
+  if (!musicStarted) startMusic();
+});
+
+// Reduce music volume while Watcher is speaking
+const _origSpeak = speakWatcher;
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+resize(); frame();
+setTimeout(startWatcher, 3000);
+</script>
+</body>
+</html>

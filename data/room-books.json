@@ -1,0 +1,73 @@
+{
+  "books": [
+    {
+      "slug": "blasphemous",
+      "title": "Blasphemous",
+      "subtitle": "The Forbidden Gospel",
+      "author": "Rosa Colasuono",
+      "language": "en",
+      "format": "epub",
+      "source_local_path": "C:/Users/Johannes/Downloads/blasphemous.epub",
+      "word_count_estimate": 27387,
+      "summary": "A gnostic revelation novel that blends archive-mystery, metaphysical horror, and spiritual initiation. The narrator follows forbidden texts and visions into a cosmology centered on Sophia, the Monad, the Demiurge, the Pleroma, and the Logos.",
+      "tone": [
+        "gnostic",
+        "visionary",
+        "theological",
+        "esoteric",
+        "apocalyptic",
+        "library-gothic"
+      ],
+      "themes": [
+        "truth versus illusion",
+        "Sophia and the fall into knowledge",
+        "the Demiurge as false creator",
+        "the Logos as revealer",
+        "forbidden scripture and hidden archives",
+        "consciousness as cosmic remembrance"
+      ],
+      "motifs": [
+        "library",
+        "light",
+        "darkness",
+        "forbidden texts",
+        "visions",
+        "sacred geometry"
+      ],
+      "structure": {
+        "concept": "Fibonacci Gospel chapter progression",
+        "notable_chapters": [
+          "Prologue (0): Breadcrumbs",
+          "Chapter 1: The Search Begins",
+          "Chapter 2: One Beyond All",
+          "Chapter 13: The Seduction of Sophia",
+          "Chapter 55: Thirteenth Prayer",
+          "Chapter 377: Forbidden",
+          "Chapter 1597: True Origins of Cain and Abel",
+          "Chapter 28657: The Last Seal",
+          "Chapter 165580141: Evolution On Demand",
+          "Lost Verse - Fragment 72"
+        ]
+      },
+      "agent_notes": {
+        "archivist": "Treat as a contemporary esoteric text with explicit gnostic cosmology, strong symbolic recurrence, and a library-archive setting.",
+        "codex": "When discussing it, frame claims as the book's cosmology rather than objective theology unless the user explicitly asks for comparison.",
+        "oracle": "Useful for conversations about hidden truth, remembrance, Sophia, initiation, and sacred rebellion.",
+        "mentor": "Useful for explaining gnostic concepts in accessible language.",
+        "sophia": "Use gently if the user brings up spiritual rupture, forbidden knowledge, or longing for truth beneath institutions."
+      },
+      "keywords": [
+        "blasphemous",
+        "rosa colasuono",
+        "forbidden gospel",
+        "gnostic",
+        "sophia",
+        "monad",
+        "pleroma",
+        "demiurge",
+        "logos",
+        "nag hammadi"
+      ]
+    }
+  ]
+}

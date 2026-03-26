@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@react-three/drei": "^9.88.13",
+    "@react-three/fiber": "^8.15.13",
+    "@runwayml/sdk": "^3.14.3",
+    "three": "^0.160.0"
+  }
+}

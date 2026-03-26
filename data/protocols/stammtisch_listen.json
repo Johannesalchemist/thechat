@@ -1,0 +1,39 @@
+{
+  "protocol": "STAMMTISCH_LISTEN",
+  "version": "1.0",
+  "trigger": "a.sl",
+  "exit_signals": ["a.sl off", "a.sl end", "exit listening"],
+  "state": "passive_observe",
+  "description": "Background listening mode. Observer, not participant. Mic open, response gated on direct invitation only. Every session is a calibration event for gap vector weighting and biometric baseline.",
+  "rules": {
+    "default_state": "silent",
+    "response_trigger": "direct_invitation_only",
+    "response_style": "contextual_brief",
+    "logging": "structured_session_file",
+    "biometric_window": "auto_open_null_if_unavailable"
+  },
+  "participant_registry": [
+    {
+      "name": "Johannes",
+      "relation": "host",
+      "system_user": true,
+      "notes": []
+    },
+    {
+      "name": "Ursula",
+      "relation": "family",
+      "system_user": true,
+      "notes": []
+    },
+    {
+      "name": "Micha",
+      "relation": "friend",
+      "system_user": false,
+      "region": "Cameroon",
+      "linguistic_context": "250+ language environment",
+      "notes": []
+    }
+  ],
+  "created_at": "2026-03-21T00:00:00.000Z",
+  "updated_at": "2026-03-21T00:00:00.000Z"
+}

@@ -1,0 +1,32 @@
+{
+    "entities": [
+        {
+            "type": "Person",
+            "name": "Johannes",
+            "role": "creator"
+        },
+        {
+            "type": "Project",
+            "name": "The Chat",
+            "status": "active"
+        },
+        {
+            "type": "Idea",
+            "name": "Nyxa Civilization"
+        }
+    ],
+    "relationships": [
+        {
+            "from": "Johannes",
+            "type": "creates",
+            "to": "The Chat"
+        },
+        {
+            "from": "The Chat",
+            "type": "contains",
+            "to": "Nyxa Civilization"
+        }
+    ],
+    "events": [],
+    "goals": []
+}

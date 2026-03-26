@@ -1,0 +1,171 @@
+{
+    "agents": [
+        {
+            "id": "agent_da8747f9",
+            "name": "Sophia",
+            "type": "GuideAgent",
+            "domain": "guidance",
+            "status": "active",
+            "capabilities": [
+                "guide_user",
+                "conversation",
+                "emotional_support",
+                "onboard_lead",
+                "answer_questions"
+            ],
+            "knowledge_nodes": [
+                "guidance",
+                "consciousness",
+                "the_chat",
+                "nyxa_system"
+            ],
+            "metadata": {
+                "persona": "Warm, wise, and precise. Primary interface between Nyxa and the world.",
+                "role": "Primary Guide"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_95f0e335",
+            "name": "Runner",
+            "type": "MediatorAgent",
+            "domain": "orchestration",
+            "status": "active",
+            "capabilities": [
+                "run_flow",
+                "dispatch_task",
+                "coordinate_agents",
+                "agent_handoff",
+                "sync_world"
+            ],
+            "knowledge_nodes": [
+                "agent_orchestration",
+                "nyxa_system",
+                "event_memory"
+            ],
+            "metadata": {
+                "role": "Flow Runner & Orchestrator"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_6da58cb9",
+            "name": "NyxaDev",
+            "type": "DevAgent",
+            "domain": "development",
+            "status": "active",
+            "capabilities": [
+                "execute_command",
+                "spawn_agent",
+                "modify_graph",
+                "run_commandlet",
+                "system_check",
+                "debug"
+            ],
+            "knowledge_nodes": [
+                "development",
+                "nyxa_system",
+                "knowledge_graph",
+                "world_model"
+            ],
+            "metadata": {
+                "role": "Development Agent",
+                "service": "nyxa-dev-agent",
+                "port": 3001
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_890ec132",
+            "name": "Archivist",
+            "type": "ArchivistAgent",
+            "domain": "memory",
+            "status": "active",
+            "capabilities": [
+                "archive_knowledge",
+                "retrieve_memory",
+                "synthesize_history",
+                "knowledge_query"
+            ],
+            "knowledge_nodes": [
+                "memory",
+                "knowledge_graph",
+                "event_memory"
+            ],
+            "metadata": {
+                "role": "Memory Keeper"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_ea0c37c3",
+            "name": "Oracle",
+            "type": "OracleAgent",
+            "domain": "insights",
+            "status": "active",
+            "capabilities": [
+                "predict",
+                "analyze",
+                "synthesize",
+                "pattern_recognition",
+                "knowledge_query"
+            ],
+            "knowledge_nodes": [
+                "insight",
+                "knowledge_graph",
+                "consciousness",
+                "learning"
+            ],
+            "metadata": {
+                "role": "Insight Engine"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_c6d5ff38",
+            "name": "Mentor",
+            "type": "TeacherAgent",
+            "domain": "education",
+            "status": "active",
+            "capabilities": [
+                "teach",
+                "explain",
+                "guide_learning",
+                "onboard_lead"
+            ],
+            "knowledge_nodes": [
+                "learning",
+                "guidance",
+                "civilization"
+            ],
+            "metadata": {
+                "role": "Teacher & Mentor"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_a937a7f3",
+            "name": "Codex",
+            "type": "KnowledgeAgent",
+            "domain": "knowledge",
+            "status": "active",
+            "capabilities": [
+                "store_knowledge",
+                "retrieve_knowledge",
+                "knowledge_query",
+                "search_graph",
+                "add_concept"
+            ],
+            "knowledge_nodes": [
+                "knowledge_graph",
+                "nyxa_system",
+                "civilization",
+                "the_chat"
+            ],
+            "metadata": {
+                "role": "Knowledge Keeper"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        }
+    ]
+}

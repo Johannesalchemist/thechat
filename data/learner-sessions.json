@@ -1,0 +1,138 @@
+{
+  "thresh_Johannes_20260322": {
+    "started_at": "2026-03-22T16:48:31.562Z",
+    "user_id": "Johannes",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-24T01:29:01.644Z"
+  },
+  "thresh_Johannes_20260323": {
+    "started_at": "2026-03-23T07:01:24.268Z",
+    "user_id": "Johannes",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-23T08:51:57.376Z"
+  },
+  "thresh_Ursula_20260324": {
+    "started_at": "2026-03-24T08:12:51.236Z",
+    "user_id": "Ursula",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-24T08:23:02.703Z"
+  },
+  "thresh_Johannes_20260324": {
+    "started_at": "2026-03-24T11:55:13.342Z",
+    "user_id": "Johannes",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-25T00:55:38.117Z"
+  },
+  "thresh_Johannes_20260325": {
+    "started_at": "2026-03-25T00:30:38.320Z",
+    "user_id": "Johannes",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-26T02:25:00.224Z"
+  },
+  "thresh_guest_20260325": {
+    "started_at": "2026-03-25T18:15:13.059Z",
+    "user_id": "guest",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-25T18:16:40.043Z"
+  },
+  "thresh_Johannes_20260326": {
+    "started_at": "2026-03-26T00:29:43.939Z",
+    "user_id": "Johannes",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-26T01:55:40.390Z"
+  },
+  "thresh_Néoapôtre_20260326": {
+    "started_at": "2026-03-26T01:39:47.074Z",
+    "user_id": "Néoapôtre",
+    "cluster_log": [],
+    "cluster_summary": {
+      "counts": {},
+      "avgConfidence": 0
+    },
+    "session_state": {
+      "cluster": "exploration",
+      "depth": "medium",
+      "confidence": 0.6,
+      "stability": "stable"
+    },
+    "chat_turns": 0,
+    "updated_at": "2026-03-26T01:54:33.300Z"
+  }
+}

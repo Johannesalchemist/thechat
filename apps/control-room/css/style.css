@@ -1,0 +1,248 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:   #00ffcc;
+  --secondary: #00ff88;
+  --dim:       #00ffcc30;
+  --bg:        #06060f;
+  --panel-bg:  #12121f;
+  --text-dim:  #7ecfc0;
+  --text-mid:  #c0e8e0;
+  --text-high: #e8f8f5;
+  --border:    #243330;
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background: var(--bg);
+  color: var(--primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--dim);
+  background: #080810ee;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#logo {
+  font-size: 1rem;
+  letter-spacing: 6px;
+  color: var(--primary);
+}
+
+#status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-mid);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--secondary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+#panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: var(--border);
+}
+
+.span2 { grid-column: span 2; }
+
+.panel {
+  background: var(--panel-bg);
+  padding: 22px;
+  min-height: 160px;
+  border: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 0.75rem;
+  letter-spacing: 4px;
+  color: var(--primary);
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.metric-label { color: var(--text-mid); }
+.metric-value { color: var(--primary); font-weight: bold; font-size: 1rem; }
+
+#agent-list {
+  font-size: 0.9rem;
+  color: var(--text-high);
+  line-height: 2;
+}
+
+#cmd-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 10px 12px;
+  font-family: monospace;
+  font-size: 0.95rem;
+  outline: none;
+  margin-bottom: 10px;
+}
+
+#cmd-input:focus { border-color: var(--primary); }
+
+button {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 9px 28px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  transition: background 0.2s;
+}
+
+button:hover { background: var(--dim); }
+
+#cmd-output {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--secondary);
+  min-height: 40px;
+  white-space: pre-wrap;
+}
+
+#event-log {
+  font-size: 0.9rem;
+  color: var(--text-high);
+  min-height: 80px;
+  line-height: 1.9;
+}
+
+#scene-wrap {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0d0d2a 0%, var(--bg) 70%);
+}
+
+#scene-label {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  letter-spacing: 6px;
+  color: var(--text-dim);
+}
+
+canvas { display: block; }
+
+/* ─── Agent rows ─────────────────────────────────────────────── */
+.agent-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.agent-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-on  { background: var(--secondary); box-shadow: 0 0 6px var(--secondary); }
+.dot-off { background: #445; }
+.agent-name   { color: var(--text-high); flex: 1; font-weight: bold; }
+.agent-type   { color: var(--text-mid); font-size: 0.8rem; }
+.agent-domain { color: var(--text-dim); font-size: 0.78rem; }
+
+/* ─── Lead status chips ──────────────────────────────────────── */
+#lead-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.status-chip {
+  font-size: 0.8rem;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+}
+.status-chip b { color: var(--primary); font-size: 0.9rem; }
+
+/* ─── Event rows ─────────────────────────────────────────────── */
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.ev-time { color: var(--text-dim); width: 68px; flex-shrink: 0; }
+.ev-type { color: var(--primary); font-weight: bold; }
+
+/* ─── Poll indicator ─────────────────────────────────────────── */
+.poll-indicator {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--secondary);
+  opacity: 0.2;
+  transition: opacity 0.3s;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ─── Dim helper ─────────────────────────────────────────────── */
+.dim { color: var(--text-dim); }
+
+#agent-count-badge { color: var(--text-mid); font-size: 0.75rem; }
+
+#status-bar { color: var(--text-mid); }
+
+.nav-link {
+  color: var(--text-mid);
+  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  border: 1px solid var(--border);
+  padding: 3px 10px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-link:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}

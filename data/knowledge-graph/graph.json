@@ -1,0 +1,454 @@
+{
+    "nodes": [
+        {
+            "id": "nyxa_system",
+            "type": "System",
+            "label": "Nyxa System",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "knowledge_graph",
+            "type": "System",
+            "label": "Knowledge Graph",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_orchestration",
+            "type": "System",
+            "label": "Agent Orchestration",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "lead_pipeline",
+            "type": "System",
+            "label": "Lead Pipeline",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "event_memory",
+            "type": "System",
+            "label": "Event Memory",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "world_model",
+            "type": "System",
+            "label": "World Model",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "consciousness",
+            "type": "Concept",
+            "label": "Consciousness",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "learning",
+            "type": "Concept",
+            "label": "Learning",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "guidance",
+            "type": "Concept",
+            "label": "Guidance",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "memory",
+            "type": "Concept",
+            "label": "Memory",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "insight",
+            "type": "Concept",
+            "label": "Insight",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "mediation",
+            "type": "Concept",
+            "label": "Mediation",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "development",
+            "type": "Concept",
+            "label": "Development",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "civilization",
+            "type": "Concept",
+            "label": "Civilization",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "johannes",
+            "type": "Person",
+            "label": "Johannes",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "the_chat",
+            "type": "Project",
+            "label": "The Chat",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_da8747f9",
+            "type": "Agent",
+            "label": "Sophia",
+            "metadata": {
+                "domain": "guidance",
+                "type": "GuideAgent"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_95f0e335",
+            "type": "Agent",
+            "label": "Runner",
+            "metadata": {
+                "domain": "orchestration",
+                "type": "MediatorAgent"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_6da58cb9",
+            "type": "Agent",
+            "label": "NyxaDev",
+            "metadata": {
+                "domain": "development",
+                "type": "DevAgent"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_890ec132",
+            "type": "Agent",
+            "label": "Archivist",
+            "metadata": {
+                "domain": "memory",
+                "type": "ArchivistAgent"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_ea0c37c3",
+            "type": "Agent",
+            "label": "Oracle",
+            "metadata": {
+                "domain": "insights",
+                "type": "OracleAgent"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_c6d5ff38",
+            "type": "Agent",
+            "label": "Mentor",
+            "metadata": {
+                "domain": "education",
+                "type": "TeacherAgent"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "agent_a937a7f3",
+            "type": "Agent",
+            "label": "Codex",
+            "metadata": {
+                "domain": "knowledge",
+                "type": "KnowledgeAgent"
+            },
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "id": "nyxa_civilization",
+            "type": "Idea",
+            "label": "Nyxa Civilization",
+            "metadata": [],
+            "created": "2026-03-19T21:38:32+00:00"
+        }
+    ],
+    "edges": [
+        {
+            "from": "nyxa_system",
+            "to": "knowledge_graph",
+            "type": "contains",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "nyxa_system",
+            "to": "agent_orchestration",
+            "type": "contains",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "nyxa_system",
+            "to": "event_memory",
+            "type": "contains",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "nyxa_system",
+            "to": "world_model",
+            "type": "contains",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_orchestration",
+            "to": "lead_pipeline",
+            "type": "manages",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "johannes",
+            "to": "the_chat",
+            "type": "created",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "the_chat",
+            "to": "nyxa_system",
+            "type": "contains",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "consciousness",
+            "to": "learning",
+            "type": "enables",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "learning",
+            "to": "memory",
+            "type": "requires",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "guidance",
+            "to": "consciousness",
+            "type": "emerges_from",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_da8747f9",
+            "to": "guidance",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_da8747f9",
+            "to": "consciousness",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_da8747f9",
+            "to": "the_chat",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_da8747f9",
+            "to": "nyxa_system",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_95f0e335",
+            "to": "agent_orchestration",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_95f0e335",
+            "to": "nyxa_system",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_95f0e335",
+            "to": "event_memory",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_6da58cb9",
+            "to": "development",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_6da58cb9",
+            "to": "nyxa_system",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_6da58cb9",
+            "to": "knowledge_graph",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_6da58cb9",
+            "to": "world_model",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_890ec132",
+            "to": "memory",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_890ec132",
+            "to": "knowledge_graph",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_890ec132",
+            "to": "event_memory",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_ea0c37c3",
+            "to": "insight",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_ea0c37c3",
+            "to": "knowledge_graph",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_ea0c37c3",
+            "to": "consciousness",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_ea0c37c3",
+            "to": "learning",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_c6d5ff38",
+            "to": "learning",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_c6d5ff38",
+            "to": "guidance",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_c6d5ff38",
+            "to": "civilization",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_a937a7f3",
+            "to": "knowledge_graph",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_a937a7f3",
+            "to": "nyxa_system",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_a937a7f3",
+            "to": "civilization",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "agent_a937a7f3",
+            "to": "the_chat",
+            "type": "trained_on",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "johannes",
+            "to": "the_chat",
+            "type": "creates",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        },
+        {
+            "from": "the_chat",
+            "to": "nyxa_civilization",
+            "type": "contains",
+            "weight": 1,
+            "created": "2026-03-19T21:38:32+00:00"
+        }
+    ]
+}

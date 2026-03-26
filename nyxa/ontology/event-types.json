@@ -1,0 +1,6 @@
+{
+  "events": [
+    "book_created", "dream_logged", "idea_generated",
+    "agent_created", "project_started", "marketplace_purchase"
+  ]
+}

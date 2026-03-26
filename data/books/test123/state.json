@@ -1,0 +1,10 @@
+{
+  "bookId": "test123",
+  "state": "DRAFT",
+  "version": 1,
+  "stability": 0,
+  "sourceBookId": null,
+  "createdAt": "2026-03-23T09:20:39.672Z",
+  "updatedAt": "2026-03-23T09:20:39.672Z",
+  "artDirectorConstraints": []
+}

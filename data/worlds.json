@@ -1,0 +1,23 @@
+[
+  {
+    "guest_id": "60006384-8f8e-485d-9175-ba5d825c8a22",
+    "world_name": "emotiones",
+    "orbital_idx": 1,
+    "visitor_name": "Johannes",
+    "timestamp": "2026-03-22T13:11:54.503Z"
+  },
+  {
+    "guest_id": "7d3b1348-afde-4d76-91bb-ee5ea27fe211",
+    "world_name": "knownot",
+    "orbital_idx": 0,
+    "visitor_name": "Johannes",
+    "timestamp": "2026-03-22T18:32:28.609Z"
+  },
+  {
+    "guest_id": "6320f085-d8ba-4017-82f4-5b88657a299e",
+    "world_name": "Nacht",
+    "orbital_idx": 6,
+    "visitor_name": "Johannes",
+    "timestamp": "2026-03-22T21:41:24.970Z"
+  }
+]

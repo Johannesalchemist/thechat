@@ -1,0 +1,49 @@
+﻿services:
+  api:
+    build: ../apps/api
+    container_name: thechat-api
+    ports:
+      - "4100:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - thechat_net
+
+  frontend:
+    build: ../apps/frontend
+    container_name: thechat-frontend
+    ports:
+      - "4101:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:4100
+    depends_on:
+      - api
+    networks:
+      - thechat_net
+
+  db:
+    image: postgres:13
+    container_name: thechat-db
+    environment:
+      POSTGRES_USER: thechat
+      POSTGRES_PASSWORD: thechat
+      POSTGRES_DB: thechat
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - thechat_net
+
+  redis:
+    image: redis:latest
+    container_name: thechat-redis
+    networks:
+      - thechat_net
+
+networks:
+  thechat_net:
+
+volumes:
+  postgres_data:

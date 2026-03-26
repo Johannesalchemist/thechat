@@ -1,0 +1,14 @@
+{
+  "bookId": "book_umn5956gd",
+  "state": "SHAPING",
+  "version": 1,
+  "stability": 46,
+  "sourceBookId": null,
+  "createdAt": "2026-03-24T23:34:53.114Z",
+  "updatedAt": "2026-03-24T23:37:45.728Z",
+  "artDirectorConstraints": [
+    "Avoid directly stating the narrator's crime or the particulars of his relationship with Elara and Silas.",
+    "Emphasize the ambiguity of the situation; is he *truly* guilty, or is he merely haunted by the *perception* of guilt?",
+    "Prioritize visceral descriptions over emotional declarations."
+  ]
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nyxa Control Room</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header id="header">
+    <div id="logo">NYXA CONTROL ROOM</div>
+    <div id="status-bar">
+      <span class="status-dot" id="kernel-dot"></span>
+      <span id="kernel-status">Kernel: Initializing...</span>
+      <a class="nav-link" href="https://thechat.future24.eu/leads" target="_blank" rel="noopener">↗ LEADFLOW</a>
+      <a class="nav-link" href="https://thechat.future24.eu/dashboard/room.html" target="_blank" rel="noopener">↗ THE ROOM</a>
+      <span id="clock"></span>
+    </div>
+  </header>
+
+  <div id="panels">
+
+    <div class="panel" id="world-panel">
+      <div class="panel-title">WORLD MODEL</div>
+      <div class="metric"><span class="metric-label">Entities</span><span class="metric-value" id="entity-count">—</span></div>
+      <div class="metric"><span class="metric-label">Relations</span><span class="metric-value" id="relation-count">—</span></div>
+      <div class="metric"><span class="metric-label">Events</span><span class="metric-value" id="event-count">—</span></div>
+      <div class="metric"><span class="metric-label">Graph Nodes</span><span class="metric-value" id="graph-nodes">—</span></div>
+      <div class="metric"><span class="metric-label">Graph Edges</span><span class="metric-value" id="graph-edges">—</span></div>
+    </div>
+
+    <div class="panel" id="agent-panel">
+      <div class="panel-title">AGENT NETWORK <span id="agent-count-badge"></span></div>
+      <div id="agent-list"><span class="dim">Loading...</span></div>
+    </div>
+
+    <div class="panel" id="leads-panel">
+      <div class="panel-title">LEAD ENGINE</div>
+      <div class="metric"><span class="metric-label">Total</span><span class="metric-value" id="lead-total">—</span></div>
+      <div class="metric"><span class="metric-label">Hot (≥60)</span><span class="metric-value" id="lead-hot">—</span></div>
+      <div class="metric"><span class="metric-label">Avg Score</span><span class="metric-value" id="lead-avg">—</span></div>
+      <div class="metric"><span class="metric-label">Conversion</span><span class="metric-value" id="lead-conv">—%</span></div>
+      <div id="lead-status-row"></div>
+    </div>
+
+    <div class="panel" id="console-panel">
+      <div class="panel-title">COMMAND CONSOLE</div>
+      <input type="text" id="cmd-input" placeholder="nyxa create-agent meditation" autocomplete="off">
+      <button onclick="sendCommand()">EXECUTE</button>
+      <div id="cmd-output"></div>
+    </div>
+
+    <div class="panel span2" id="event-panel">
+      <div class="panel-title">EVENT MONITOR <span class="poll-indicator" id="poll-dot"></span></div>
+      <div id="event-log"><span class="dim">Waiting for events...</span></div>
+    </div>
+
+  </div>
+
+  <div id="scene-wrap">
+    <canvas id="scene"></canvas>
+    <div id="scene-label">NYXA KNOWLEDGE UNIVERSE</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/control-room.js"></script>
+
+</body>
+</html>

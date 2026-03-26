@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyxa — Learn</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #07070f;
+  width: 100vw; height: 100vh; overflow: hidden;
+  font-family: 'Georgia', serif;
+  --accent: #c4b5fd;
+  --speed: 1;       /* animation speed multiplier — 1=adult, 1.4=teen, 1.8=child */
+  --anim-weight: subtle; /* subtle | playful | vivid */
+}
+
+/* ── Canvas ──────────────────────────────────────────────────────────────── */
+canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+#app {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+#header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: rgba(7,7,15,0.8); backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+#teacher-id {
+  font-size: clamp(14px,1.6vw,18px); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); font-weight: normal;
+  text-shadow: 0 0 28px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+#world-id {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); margin-top: 0.2rem;
+}
+#header-right { display: flex; align-items: center; gap: 0.8rem; }
+
+.nav-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.3); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.3rem 0.8rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.25s;
+}
+.nav-btn:hover { border-color: rgba(196,181,253,0.4); color: rgba(196,181,253,0.7); }
+#exit-btn:hover { border-color: rgba(248,113,113,0.4); color: rgba(248,113,113,0.6); }
+
+/* ── State bar (subtle, secondary info) ──────────────────────────────────── */
+#state-bar {
+  display: flex; gap: 1.4rem;
+  padding: 0.25rem 1.6rem;
+  background: rgba(7,7,15,0.4);
+  flex-shrink: 0; opacity: 0;
+  transition: opacity 1.4s ease;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+#state-bar.on { opacity: 1; }
+.state-token {
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+}
+.state-token span { color: rgba(196,181,253,0.6); transition: color 1.5s ease; }
+
+/* ── Level bar (prominent objective) ────────────────────────────────────── */
+#level-bar {
+  padding: 0.55rem 1.6rem;
+  background: rgba(7,7,15,0.5);
+  display: flex; align-items: center; gap: 1rem;
+  flex-shrink: 0; opacity: 0; transition: opacity 1.4s ease;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+#level-bar.on { opacity: 1; }
+#level-label {
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.25); flex-shrink: 0;
+}
+#level-name {
+  font-size: clamp(11px,1.2vw,13px); letter-spacing: 0.08em;
+  color: rgba(196,181,253,0.75);
+  flex: 1; transition: color 1s ease;
+}
+#level-track {
+  height: 2px;
+  background: rgba(255,255,255,0.07); border-radius: 2px;
+  width: 100px; flex-shrink: 0;
+}
+#level-fill {
+  height: 100%; background: var(--accent); border-radius: 2px;
+  width: 0%; transition: width 1.8s ease;
+  opacity: 0.55;
+}
+#level-pct {
+  font-size: 10px; letter-spacing: 0.1em;
+  color: rgba(196,181,253,0.35); flex-shrink: 0; min-width: 28px; text-align: right;
+}
+
+/* ── Chat ────────────────────────────────────────────────────────────────── */
+#chat {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 1.8rem 2rem 1rem;
+  display: flex; flex-direction: column; gap: 1.2rem;
+  scrollbar-width: none;
+}
+#chat::-webkit-scrollbar { display: none; }
+
+/* ── Message bubbles ─────────────────────────────────────────────────────── */
+.msg {
+  max-width: 76%; font-size: clamp(14px,1.5vw,17px);
+  line-height: 1.85; letter-spacing: 0.03em;
+  padding: 0.85rem 1.2rem; border-radius: 3px;
+  font-family: 'Georgia', serif;
+}
+
+.msg-label {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 0.35rem; opacity: 0.4;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: rgba(196,181,253,0.07);
+  border: 1px solid rgba(196,181,253,0.15);
+  color: rgba(255,255,255,0.75);
+  animation: msg-rise calc(0.3s / var(--speed)) ease forwards;
+}
+
+.msg.teacher {
+  align-self: flex-start;
+  background: rgba(196,181,253,0.08);
+  border: 1px solid rgba(196,181,253,0.22);
+  color: rgba(255,255,255,0.95);
+  opacity: 0;
+  animation: msg-fade calc(0.6s / var(--speed)) ease forwards;
+}
+
+.msg-label {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent); opacity: 0.7; margin-bottom: 0.4rem;
+}
+
+.msg.watcher {
+  align-self: center; text-align: center;
+  background: rgba(196,181,253,0.04);
+  border: 1px solid rgba(196,181,253,0.12);
+  color: rgba(196,181,253,0.75);
+  font-style: italic; font-size: clamp(12px,1.2vw,14px);
+  letter-spacing: 0.06em; max-width: 480px;
+  padding: 0.5rem 1rem;
+  opacity: 0;
+  animation: msg-fade calc(1.2s / var(--speed)) ease forwards;
+}
+
+.msg.thinking {
+  align-self: flex-start;
+  background: none; border: none;
+  color: rgba(196,181,253,0.3);
+  font-style: italic; font-size: 11px;
+  letter-spacing: 0.12em; padding: 0.2rem 0;
+  animation: thinking-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes msg-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes msg-fade {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes thinking-pulse {
+  0%,100% { opacity: 0.2; } 50% { opacity: 0.6; }
+}
+
+/* ── Playful mode (younger users) ────────────────────────────────────────── */
+body.playful .msg.teacher {
+  border-radius: 12px;
+  background: rgba(196,181,253,0.08);
+}
+body.playful .msg.user {
+  border-radius: 12px;
+}
+body.playful #teacher-id {
+  font-size: 13px;
+}
+
+/* ── Vivid mode (children) ───────────────────────────────────────────────── */
+body.vivid .msg.teacher {
+  border-radius: 16px;
+  background: rgba(196,181,253,0.12);
+  border-color: rgba(196,181,253,0.3);
+  font-size: clamp(15px,1.8vw,19px);
+  line-height: 2;
+}
+body.vivid .msg.user {
+  border-radius: 16px;
+  font-size: clamp(15px,1.8vw,19px);
+}
+body.vivid #teacher-id { font-size: 15px; letter-spacing: 0.1em; }
+body.vivid #state-bar { display: none; }
+
+/* ── Input bar ───────────────────────────────────────────────────────────── */
+#input-bar {
+  display: flex; align-items: flex-end; gap: 0.6rem;
+  padding: 0.7rem 1rem 1.1rem;
+  background: linear-gradient(to top, rgba(7,7,15,0.97) 70%, transparent);
+  border-top: 1px solid rgba(196,181,253,0.08);
+  flex-shrink: 0;
+}
+
+#msg-input {
+  flex: 1; background: none; border: none;
+  border-bottom: 1px solid rgba(196,181,253,0.2);
+  color: rgba(255,255,255,0.82); font-size: clamp(12px,1.3vw,15px);
+  font-family: 'Georgia', serif; letter-spacing: 0.06em;
+  padding: 0.4rem 0; outline: none; resize: none;
+  caret-color: rgba(196,181,253,0.8); line-height: 1.5;
+  max-height: 80px; overflow-y: auto;
+  transition: border-color 0.3s;
+}
+#msg-input::placeholder { color: rgba(255,255,255,0.18); font-style: italic; }
+#msg-input:focus { border-bottom-color: rgba(196,181,253,0.5); }
+
+body.vivid #msg-input { font-size: clamp(15px,1.8vw,19px); }
+
+.bar-btn {
+  background: none; border: 1px solid rgba(196,181,253,0.15);
+  color: rgba(255,255,255,0.3); cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.3s; flex-shrink: 0; white-space: nowrap;
+}
+.bar-btn:hover { border-color: rgba(196,181,253,0.6); color: rgba(196,181,253,0.85); }
+.bar-btn:disabled { opacity: 0.2; cursor: default; }
+
+#mic-btn { font-size: 13px; padding: 0.4rem 0.7rem; }
+#mic-btn.active {
+  border-color: rgba(248,113,113,0.6); color: rgba(248,113,113,0.85);
+  animation: pulse-mic 1.2s ease-in-out infinite;
+}
+#send-btn {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 0.42rem 1.4rem;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: var(--accent); color: var(--accent);
+}
+#send-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+@keyframes pulse-mic { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 8px rgba(248,113,113,0.3)} }
+
+/* ── Exit / donation overlay ─────────────────────────────────────────────── */
+#exit-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(7,7,15,0.92); backdrop-filter: blur(12px);
+  flex-direction: column; align-items: center; justify-content: flex-start;
+  gap: 1.6rem; padding: 2.5rem 2rem; text-align: center;
+  overflow-y: auto;
+}
+#exit-cards-row {
+  display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap;
+  width: 100%;
+}
+#exit-overlay.on { display: flex; animation: msg-fade 1s ease forwards; }
+
+#exit-watcher-line {
+  font-size: clamp(13px,1.4vw,16px); line-height: 1.85;
+  color: rgba(196,181,253,0.75); font-style: italic;
+  max-width: 480px; letter-spacing: 0.04em;
+  opacity: 0; transition: opacity 1.6s ease;
+}
+#exit-watcher-line.on { opacity: 1; }
+
+#exit-watcher-label {
+  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(196,181,253,0.3); margin-bottom: 0.5rem;
+}
+
+#donate-card {
+  border: 1px solid rgba(196,181,253,0.14);
+  padding: 1.4rem 2rem; max-width: 380px; width: 100%;
+  opacity: 0; transition: opacity 1.8s ease;
+}
+#donate-card.on { opacity: 1; }
+#donate-title {
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-bottom: 0.6rem;
+}
+#donate-body {
+  font-size: clamp(12px,1.3vw,14px); line-height: 1.75;
+  color: rgba(255,255,255,0.5); margin-bottom: 1.2rem;
+}
+#donate-btn {
+  display: inline-block; text-decoration: none;
+  background: none; border: 1px solid rgba(196,181,253,0.35);
+  color: rgba(196,181,253,0.8); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.55rem 1.8rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.3s;
+}
+#donate-btn:hover {
+  border-color: rgba(196,181,253,0.7);
+  box-shadow: 0 0 20px rgba(196,181,253,0.15);
+  color: rgba(196,181,253,1);
+}
+
+/* ── Merch card ────────────────────────────────────────────────────────────── */
+#merch-card {
+  border: 1px solid rgba(52,211,153,0.12);
+  padding: 1.4rem 2rem; max-width: 380px; width: 100%;
+  opacity: 0; transition: opacity 1.8s ease;
+  text-align: center;
+}
+#merch-card.on { opacity: 1; }
+#merch-title {
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(52,211,153,0.4); margin-bottom: 0.6rem;
+}
+#merch-body {
+  font-size: clamp(12px,1.3vw,14px); line-height: 1.75;
+  color: rgba(255,255,255,0.45); margin-bottom: 1.2rem;
+}
+.merch-items {
+  display: flex; justify-content: center; gap: 10px; margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+.merch-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 14px; border-radius: 6px; cursor: pointer;
+  border: 1px solid rgba(52,211,153,0.12);
+  background: rgba(52,211,153,0.04);
+  transition: all 0.2s;
+  font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+}
+.merch-item:hover { border-color: rgba(52,211,153,0.3); color: rgba(52,211,153,0.8); background: rgba(52,211,153,0.06); }
+.merch-item .merch-icon { font-size: 1.6rem; }
+.merch-world-preview {
+  display: inline-block; padding: 4px 12px; border-radius: 3px; margin-bottom: 1rem;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  font-family: 'Georgia', serif; opacity: 0.7;
+}
+#merch-btn {
+  display: inline-block; text-decoration: none;
+  background: none; border: 1px solid rgba(52,211,153,0.35);
+  color: rgba(52,211,153,0.8); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.55rem 1.8rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px; transition: all 0.3s;
+}
+#merch-btn:hover {
+  border-color: rgba(52,211,153,0.7);
+  box-shadow: 0 0 20px rgba(52,211,153,0.12);
+  color: rgba(52,211,153,1);
+}
+
+#exit-proceed {
+  background: none; border: none;
+  color: rgba(255,255,255,0.2); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; cursor: pointer;
+  font-family: 'Georgia', serif; padding: 0.3rem;
+  transition: color 0.3s;
+  opacity: 0; transition: opacity 2s ease;
+}
+#exit-proceed.on { opacity: 1; }
+#exit-proceed:hover { color: rgba(255,255,255,0.5); }
+
+/* ── Artifact CTA on exit overlay ───────────────────────────────────────── */
+#artifact-cta {
+  opacity: 0; transition: opacity 2s ease;
+  text-align: center;
+}
+#artifact-cta.on { opacity: 1; }
+#artifact-cta-label {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(255,255,255,0.2); margin-bottom: 0.5rem;
+}
+#artifact-cta-text {
+  font-size: clamp(12px,1.3vw,14px); color: rgba(255,255,255,0.45);
+  line-height: 1.7; margin-bottom: 1rem; max-width: 340px;
+}
+#artifact-cta-btn {
+  background: none; border: 1px solid rgba(244,114,182,0.4);
+  color: rgba(244,114,182,0.8); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.5rem 1.6rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px; transition: all 0.3s;
+}
+#artifact-cta-btn:hover {
+  border-color: rgba(244,114,182,0.8);
+  box-shadow: 0 0 20px rgba(244,114,182,0.15);
+  color: rgba(244,114,182,1);
+}
+
+/* ── Designer modal ──────────────────────────────────────────────────────── */
+#designer-modal {
+  display: none; position: fixed; inset: 0; z-index: 80;
+  background: rgba(7,7,15,0.96); backdrop-filter: blur(16px);
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem;
+}
+#designer-modal.on { display: flex; animation: msg-fade 0.6s ease forwards; }
+#designer-header {
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(244,114,182,0.5); margin-bottom: 1.8rem; text-align: center;
+}
+#designer-chat {
+  width: 100%; max-width: 520px; max-height: 50vh;
+  overflow-y: auto; scrollbar-width: none;
+  display: flex; flex-direction: column; gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+#designer-chat::-webkit-scrollbar { display: none; }
+.d-msg-designer {
+  align-self: flex-start; max-width: 88%;
+  font-size: clamp(13px,1.4vw,16px); line-height: 1.85;
+  color: rgba(255,255,255,0.88); font-style: italic;
+  padding: 0.7rem 0; border-left: 1px solid rgba(244,114,182,0.3);
+  padding-left: 1rem;
+  animation: msg-fade 0.5s ease forwards;
+}
+.d-msg-user {
+  align-self: flex-end; max-width: 80%;
+  font-size: clamp(13px,1.4vw,15px); line-height: 1.8;
+  color: rgba(255,255,255,0.55);
+  animation: msg-fade 0.4s ease forwards;
+}
+.d-label {
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(244,114,182,0.4); margin-bottom: 0.3rem;
+}
+#designer-input-row {
+  display: flex; gap: 0.7rem; width: 100%; max-width: 520px;
+}
+#designer-input {
+  flex: 1; background: none; border: none;
+  border-bottom: 1px solid rgba(244,114,182,0.25);
+  color: rgba(255,255,255,0.82); font-size: clamp(13px,1.4vw,15px);
+  font-family: 'Georgia', serif; letter-spacing: 0.06em;
+  padding: 0.4rem 0; outline: none;
+  caret-color: rgba(244,114,182,0.8);
+  transition: border-color 0.3s;
+}
+#designer-input:focus { border-bottom-color: rgba(244,114,182,0.5); }
+#designer-send {
+  background: none; border: 1px solid rgba(244,114,182,0.3);
+  color: rgba(244,114,182,0.7); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.4rem 1.2rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px; transition: all 0.25s;
+}
+#designer-send:hover { border-color: rgba(244,114,182,0.7); color: rgba(244,114,182,1); }
+#designer-send:disabled { opacity: 0.25; cursor: default; }
+
+/* ── Generation progress + result ────────────────────────────────────────── */
+#artifact-status {
+  display: none; text-align: center; max-width: 480px; width: 100%;
+}
+#artifact-status.on { display: block; animation: msg-fade 0.6s ease forwards; }
+#artifact-status-text {
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); margin-bottom: 1.2rem;
+  animation: fade-pulse 2s ease-in-out infinite;
+}
+#artifact-result {
+  display: none;
+}
+#artifact-result.on { display: block; animation: msg-fade 0.8s ease forwards; }
+#artifact-video {
+  width: 100%; max-width: 480px; border: 1px solid rgba(244,114,182,0.2);
+  margin-bottom: 1rem;
+}
+#artifact-download {
+  display: inline-block; text-decoration: none;
+  border: 1px solid rgba(244,114,182,0.35); color: rgba(244,114,182,0.8);
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 0.4rem 1.2rem; font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.25s;
+}
+#artifact-download:hover { border-color: rgba(244,114,182,0.7); color: rgba(244,114,182,1); }
+
+#artifact-feedback {
+  margin-top: 1.2rem; display: none;
+}
+#artifact-feedback.on { display: block; animation: msg-fade 0.8s ease forwards; }
+#artifact-feedback-label {
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.2); margin-bottom: 0.6rem;
+}
+.feedback-row { display: flex; gap: 0.6rem; margin-bottom: 0.5rem; }
+.feedback-input {
+  flex: 1; background: none; border: none;
+  border-bottom: 1px solid rgba(244,114,182,0.18);
+  color: rgba(255,255,255,0.7); font-size: 12px;
+  font-family: 'Georgia', serif; padding: 0.3rem 0; outline: none;
+  caret-color: rgba(244,114,182,0.8);
+}
+.feedback-input::placeholder { color: rgba(255,255,255,0.2); font-style: italic; }
+#artifact-evolve-btn {
+  margin-top: 0.8rem;
+  background: none; border: 1px solid rgba(244,114,182,0.25);
+  color: rgba(244,114,182,0.6); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.4rem 1.2rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px; transition: all 0.25s;
+}
+#artifact-evolve-btn:hover {
+  border-color: rgba(244,114,182,0.7); color: rgba(244,114,182,1);
+}
+#artifact-version-badge {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(244,114,182,0.35); margin-bottom: 0.4rem;
+}
+
+#designer-close {
+  position: fixed; top: 1.2rem; right: 1.5rem;
+  background: none; border: none; color: rgba(255,255,255,0.2);
+  font-size: 18px; cursor: pointer; line-height: 1; padding: 0.3rem;
+  transition: color 0.2s;
+}
+#designer-close:hover { color: rgba(255,255,255,0.5); }
+
+/* ── Topic choices ───────────────────────────────────────────────────────── */
+#topic-choices {
+  display: flex; flex-wrap: wrap; gap: 0.6rem;
+  padding: 0.4rem 0; justify-content: flex-start;
+  animation: msg-fade 0.6s ease forwards;
+}
+.topic-btn {
+  background: none;
+  border: 1px solid rgba(196,181,253,0.2);
+  color: rgba(196,181,253,0.65);
+  font-size: 11px; letter-spacing: 0.1em;
+  padding: 0.4rem 0.9rem; cursor: pointer;
+  font-family: 'Georgia', serif; border-radius: 1px;
+  transition: all 0.25s;
+}
+.topic-btn:hover {
+  border-color: rgba(196,181,253,0.6);
+  color: rgba(196,181,253,0.95);
+  background: rgba(196,181,253,0.06);
+}
+
+/* ── Speaking dot ────────────────────────────────────────────────────────── */
+#speaking-dot {
+  position: fixed; bottom: 5.2rem; right: 1.2rem; z-index: 20;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); opacity: 0; transition: opacity 0.3s;
+}
+#speaking-dot.active { opacity: 0.7; animation: pulse-dot 1s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.7)} }
+
+/* ── Loading screen ──────────────────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #07070f; gap: 1.2rem;
+  transition: opacity 1.4s ease;
+}
+#loading-glyph {
+  font-size: 2.4rem; opacity: 0.5;
+  animation: spin-glyph 4s linear infinite;
+}
+@keyframes spin-glyph { to { transform: rotate(360deg); } }
+#loading-text {
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  animation: fade-pulse 1.8s ease-in-out infinite;
+}
+@keyframes fade-pulse { 0%,100%{opacity:0.3} 50%{opacity:0.8} }
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div id="loading">
+  <div id="loading-glyph">◈</div>
+  <div id="loading-text">finding your teacher…</div>
+</div>
+
+<div id="app">
+  <div id="header">
+    <div>
+      <div id="teacher-id">—</div>
+      <div id="world-id">—</div>
+    </div>
+    <div id="header-right">
+      <button class="nav-btn" id="room-btn" title="Return to The Room">the room</button>
+      <button class="nav-btn" id="exit-btn" title="Leave">leave</button>
+      <div id="speaking-dot"></div>
+    </div>
+  </div>
+
+  <div id="state-bar">
+    <div class="state-token">tone <span id="st-tone">—</span></div>
+    <div class="state-token">stability <span id="st-stability">—</span></div>
+    <div class="state-token">level <span id="st-level">—</span></div>
+  </div>
+
+  <div id="level-bar">
+    <div id="level-label">focus</div>
+    <div id="level-name">—</div>
+    <div id="level-track"><div id="level-fill"></div></div>
+    <div id="level-pct">0%</div>
+  </div>
+
+  <div id="teacher-intro" style="display:none; flex-direction:column; align-items:center; justify-content:center; flex:1; padding:2rem; text-align:center; gap:1rem; opacity:0; transition:opacity 1.2s ease;">
+    <div id="intro-glyph" style="font-size:2.8rem; filter:drop-shadow(0 0 18px var(--accent)); opacity:0.7;"></div>
+    <div id="intro-name" style="font-size:clamp(18px,3vw,28px); letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); text-shadow:0 0 40px color-mix(in srgb,var(--accent) 35%,transparent);"></div>
+    <div id="intro-role" style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-top:-0.3rem;">your personal teacher</div>
+    <div id="intro-focus" style="font-size:clamp(13px,1.4vw,16px); line-height:1.75; color:rgba(255,255,255,0.6); max-width:420px; font-style:italic; margin-top:0.5rem;"></div>
+  </div>
+
+  <div id="chat" style="display:none;"></div>
+
+  <div id="exit-overlay">
+    <div>
+      <div id="exit-watcher-label">The Watcher</div>
+      <div id="exit-watcher-line"></div>
+    </div>
+    <div id="exit-cards-row">
+    <div id="donate-card">
+      <div id="donate-title">Keep this space alive</div>
+      <div id="donate-body">Every session runs on API calls and server time. If something here mattered to you, a small contribution keeps it open for others.</div>
+      <a id="donate-btn" href="https://www.paypal.com/donate?business=js%40qrmedien.net&currency_code=EUR" target="_blank" rel="noopener">support with paypal</a>
+    </div>
+    <div id="merch-card">
+      <div id="merch-title">Carry your world with you</div>
+      <div id="merch-body">Your world has a name, a colour, a story. Wear it.</div>
+      <div id="merch-world-preview-wrap"></div>
+      <div class="merch-items">
+        <div class="merch-item" onclick="openMerch('tshirt')">
+          <span class="merch-icon">👕</span>T-Shirt
+        </div>
+        <div class="merch-item" onclick="openMerch('mug')">
+          <span class="merch-icon">☕</span>Mug
+        </div>
+        <div class="merch-item" onclick="openMerch('poster')">
+          <span class="merch-icon">🖼</span>Poster
+        </div>
+      </div>
+      <button id="merch-btn" onclick="openMerch('tshirt')">design my piece</button>
+    </div>
+    </div><!-- /exit-cards-row -->
+
+    <div id="artifact-cta">
+      <div id="artifact-cta-label">your personal artifact</div>
+      <div id="artifact-cta-text">Dein Song. Dein Film. Dein Buch.<br>Created from everything you brought here.</div>
+      <button id="artifact-cta-btn">create my artifact</button>
+    </div>
+
+    <button id="exit-proceed">enter the room</button>
+  </div>
+
+  <!-- Designer modal -->
+  <div id="designer-modal">
+    <button id="designer-close">×</button>
+    <div id="designer-header">The Designer</div>
+    <div id="designer-chat"></div>
+    <div id="designer-input-row">
+      <input id="designer-input" placeholder="…" autocomplete="off" spellcheck="false" />
+      <button id="designer-send">send</button>
+    </div>
+    <div id="artifact-status">
+      <div id="artifact-status-text">creating your artifact…</div>
+      <div id="artifact-result">
+        <video id="artifact-video" controls></video>
+        <br>
+        <div id="artifact-version-badge"></div>
+        <a id="artifact-download" download>download</a>
+        <div id="artifact-feedback">
+          <div id="artifact-feedback-label">refine your artifact</div>
+          <div class="feedback-row">
+            <input class="feedback-input" id="feedback-resonated" placeholder="what felt true…" />
+          </div>
+          <div class="feedback-row">
+            <input class="feedback-input" id="feedback-drift" placeholder="what didn't feel like you…" />
+          </div>
+          <button id="artifact-evolve-btn">evolve version</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="input-bar">
+    <textarea id="msg-input" rows="1" placeholder="speak or write…" autocomplete="off" spellcheck="false"></textarea>
+    <button class="bar-btn" id="mic-btn" title="Voice input">🎙</button>
+    <button class="bar-btn" id="send-btn">send</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ── Storage + world state ─────────────────────────────────────────────────────
+const store = (() => {
+  try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return localStorage; }
+  catch { return sessionStorage; }
+})();
+
+const ws = (() => { try { return JSON.parse(store.getItem('nyxa_world_state_v1')); } catch { return null; } })();
+const guestId     = store.getItem('nyxa_guest_id') || ('g_' + Date.now().toString(36));
+const visitorName = ws?.visitor_name || '';
+const worldName   = ws?.world_name   || '';
+window._guestWorldName = worldName;
+const worldSeed   = ws?.world_seed   || '';
+const painSeed    = ws?.pain_seed    || '';
+const accent      = ws?.portal_design?.accent || '#c4b5fd';
+
+document.documentElement.style.setProperty('--accent', accent);
+
+// ── Canvas — breathing particle field ────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let W, H, particles = [], tick = 0;
+
+function hexToRgb(h) {
+  try { return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+  catch { return [196,181,253]; }
+}
+const [ar,ag,ab] = hexToRgb(accent);
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  buildParticles();
+}
+window.addEventListener('resize', resize);
+
+function buildParticles() {
+  particles = [];
+  const n = Math.floor(W * H / 3800);
+  for (let i = 0; i < n; i++) {
+    particles.push({
+      x: Math.random()*W, y: Math.random()*H,
+      vx:(Math.random()-0.5)*0.15, vy:(Math.random()-0.5)*0.15,
+      r: Math.random()*1.3+0.2, a: Math.random()*0.22+0.03,
+      phase: Math.random()*Math.PI*2
+    });
+  }
+}
+
+function frame() {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = ws?.portal_design?.bg_from || '#07070f';
+  ctx.fillRect(0,0,W,H);
+  tick += 0.008;
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x<0) p.x=W; if (p.x>W) p.x=0;
+    if (p.y<0) p.y=H; if (p.y>H) p.y=0;
+    const pulse = p.a * (0.7 + 0.3 * Math.sin(tick + p.phase));
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${ar},${ag},${ab},${pulse})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(frame);
+}
+
+// ── Animation weight by level/age ────────────────────────────────────────────
+function applyAnimWeight(level, mastery) {
+  // l1-l2 = gentle/adult default
+  // l3+ with high mastery = slightly more alive
+  // age injected later via teacher.age_hint
+  const speed = level === 'l1' ? 1 : level === 'l2' ? 1.1 : 1.2;
+  document.documentElement.style.setProperty('--speed', speed);
+}
+
+function applyAgeMode(ageHint) {
+  // ageHint: 'adult' | 'teen' | 'child'
+  document.body.classList.remove('playful','vivid');
+  if (ageHint === 'teen')  document.body.classList.add('playful');
+  if (ageHint === 'child') document.body.classList.add('vivid');
+}
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+const TEACHER_VOICE = '5Zug9ENtDqE2S2hmPtMl';
+const WATCHER_VOICE = '5Zug9ENtDqE2S2hmPtMl';
+const dot = document.getElementById('speaking-dot');
+
+async function speak(text, voiceId) {
+  try {
+    dot.classList.add('active');
+    const r = await fetch('/api/tts', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ text, voiceId: voiceId || TEACHER_VOICE })
+    });
+    if (!r.ok) throw new Error();
+    const buf = await r.arrayBuffer();
+    const actx = new (window.AudioContext||window.webkitAudioContext)();
+    const src  = actx.createBufferSource();
+    src.buffer = await actx.decodeAudioData(buf);
+    src.connect(actx.destination);
+    await new Promise(res => { src.onended = res; src.start(0); });
+  } catch {}
+  dot.classList.remove('active');
+}
+
+// ── QCE client state ──────────────────────────────────────────────────────────
+let qceState = { environment_tone: null, confidence: null, subtype: null };
+
+const TONE_COLORS = {
+  calm: '#93c5fd', reflective: '#a5b4fc', exploratory: '#fbbf24',
+  curious: '#34d399', tense: '#f87171', stuck: '#f87171', grounded: '#86efac'
+};
+
+function renderStateBar() {
+  document.getElementById('state-bar').classList.add('on');
+  const toneEl = document.getElementById('st-tone');
+  const stabEl = document.getElementById('st-stability');
+  const levEl  = document.getElementById('st-level');
+  if (qceState.environment_tone) {
+    toneEl.textContent = qceState.environment_tone;
+    toneEl.style.color = TONE_COLORS[qceState.environment_tone] || 'rgba(196,181,253,0.55)';
+  }
+  if (qceState.confidence != null) stabEl.textContent = Math.round(qceState.confidence*100)+'%';
+
+  // Curriculum
+  const c = curriculumState;
+  levEl.textContent = c.level_name || c.level_id || '—';
+  document.getElementById('level-bar').classList.add('on');
+  document.getElementById('level-name').textContent = c.objectives?.[0] || '';
+  const pct = Math.min(100, Math.round((c.mastery / (c.mastery_threshold || 0.65)) * 100));
+  document.getElementById('level-fill').style.width = pct + '%';
+  document.getElementById('level-pct').textContent = pct + '%';
+  applyAnimWeight(c.level_id, c.mastery);
+}
+
+function applyCurriculumUpdate(c) {
+  if (!c) return;
+  curriculumState = { ...curriculumState, ...c };
+  renderStateBar();
+  if (c.advanced) {
+    // Flash level name to signal advancement
+    const lbl = document.getElementById('level-name');
+    lbl.style.color = 'rgba(196,181,253,0.9)';
+    setTimeout(() => { lbl.style.color = ''; }, 3000);
+  }
+}
+
+// ── Chat rendering ────────────────────────────────────────────────────────────
+let teacher = null;
+let chatHistory = [];
+let busy = false;
+let curriculumState = { level_id: 'l1', level_name: 'arrival', objectives: [], mastery: 0, mastery_threshold: 0.65 };
+
+function scrollBottom() {
+  const el = document.getElementById('chat');
+  el.scrollTop = el.scrollHeight;
+}
+
+function addMsg(role, text, label) {
+  const chat = document.getElementById('chat');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + role;
+  if (label && role !== 'user') {
+    const lbl = document.createElement('div');
+    lbl.className = 'msg-label';
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
+  }
+  const body = document.createElement('div');
+  body.textContent = text;
+  wrap.appendChild(body);
+  chat.appendChild(wrap);
+  scrollBottom();
+  return wrap;
+}
+
+function removeMsg(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+
+// ── Topic choices ─────────────────────────────────────────────────────────────
+function showTopicChoices() {
+  const chat = document.getElementById('chat');
+  const wrap = document.createElement('div');
+  wrap.id = 'topic-choices';
+
+  const topics = [
+    'What does my world teach me about myself?',
+    'What am I avoiding right now?',
+    'What feels true but hard to say?',
+    'What would I do if I wasn\'t afraid?'
+  ];
+
+  topics.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn';
+    btn.textContent = t;
+    btn.addEventListener('click', () => {
+      wrap.remove();
+      const inp = document.getElementById('msg-input');
+      inp.value = t;
+      send();
+    });
+    wrap.appendChild(btn);
+  });
+
+  chat.appendChild(wrap);
+  scrollBottom();
+}
+
+// ── Send message ──────────────────────────────────────────────────────────────
+async function send() {
+  if (busy || !teacher) return;
+  const inp = document.getElementById('msg-input');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = ''; inp.style.height = 'auto';
+  stopMic();
+  busy = true;
+  document.getElementById('send-btn').disabled = true;
+
+  addMsg('user', msg);
+
+  const thinking = addMsg('thinking', teacher.name + ' considers…');
+
+  try {
+    await new Promise(res => setTimeout(res, 320));
+    const r = await fetch('/api/learn/chat', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message: msg, user_id: guestId,
+        history: chatHistory.slice(-8),
+        qce: qceState,
+        behavior: null,
+        level_name: curriculumState.level_id,
+        level_objectives: curriculumState.objectives
+      })
+    }).then(r => r.json());
+
+    removeMsg(thinking);
+
+    if (r.reply) {
+      chatHistory.push({ role: 'user', content: msg });
+      chatHistory.push({ role: 'assistant', content: r.reply });
+      addMsg('teacher', r.reply, r.teacher_name || teacher.name);
+      applyCurriculumUpdate(r.curriculum);
+      await speak(r.reply, r.voice_id);
+    }
+
+    if (r.watcher) {
+      await new Promise(res => setTimeout(res, 600));
+      addMsg('watcher', r.watcher);
+      await speak(r.watcher, r.watcher_voice_id);
+    }
+  } catch {
+    removeMsg(thinking);
+    addMsg('thinking', 'Something broke the thread…');
+  }
+
+  busy = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+// ── Init — load/create teacher ────────────────────────────────────────────────
+async function init() {
+  try {
+    const params = new URLSearchParams({
+      visitor_name: visitorName, world_name: worldName,
+      world_seed: worldSeed, pain_seed: painSeed
+    });
+    const r = await fetch(`/api/learn/teacher/${encodeURIComponent(guestId)}?${params}`)
+      .then(r => r.json());
+
+    if (!r.ok || !r.teacher) throw new Error('no teacher');
+    teacher = r.teacher;
+
+    // Load curriculum state
+    try {
+      const [currResp, progResp] = await Promise.all([
+        fetch('/api/curriculum/nyxa_onboarding').then(r => r.json()),
+        fetch(`/api/progress/${encodeURIComponent(guestId)}/nyxa_onboarding`).then(r => r.json())
+      ]);
+      const levels = currResp.levels || currResp.curriculum?.levels || [];
+      const currentLevelId = progResp.current_level || (levels[0]?.id) || 'l1';
+      const currentLevel = levels.find(l => l.id === currentLevelId) || levels[0];
+      if (currentLevel) {
+        curriculumState = {
+          level_id: currentLevel.id,
+          level_name: currentLevel.name,
+          objectives: currentLevel.objectives || [],
+          mastery: progResp.mastery?.[currentLevel.id] || 0,
+          mastery_threshold: currentLevel.mastery_threshold || 0.65,
+          completed_levels: progResp.completed_levels || []
+        };
+      }
+    } catch {}
+
+    // Apply age mode if stored
+    applyAgeMode(teacher.age_hint || 'adult');
+
+    // Update header
+    document.getElementById('teacher-id').textContent = teacher.name;
+    document.getElementById('world-id').textContent = worldName.toUpperCase() || 'YOUR WORLD';
+    document.getElementById('loading-glyph').textContent = ws?.portal_design?.world_glyph || '◈';
+
+    // Show teacher intro card
+    const intro = document.getElementById('teacher-intro');
+    document.getElementById('intro-glyph').textContent = ws?.portal_design?.world_glyph || '◈';
+    document.getElementById('intro-name').textContent  = teacher.name;
+    document.getElementById('intro-focus').textContent = teacher.focus || '';
+    intro.style.display = 'flex';
+
+    // Fade out loading, fade in intro
+    const loading = document.getElementById('loading');
+    loading.style.opacity = '0';
+    setTimeout(() => {
+      loading.style.display = 'none';
+      requestAnimationFrame(() => { intro.style.opacity = '1'; });
+    }, 1200);
+
+    // After 3s transition to chat
+    setTimeout(async () => {
+      intro.style.opacity = '0';
+      setTimeout(async () => {
+        intro.style.display = 'none';
+        const chatEl = document.getElementById('chat');
+        chatEl.style.display = 'flex';
+        const opening = teacher.opening || 'You are here. That already means something.';
+        addMsg('teacher', opening, teacher.name);
+        chatHistory.push({ role: 'assistant', content: opening });
+        renderStateBar();
+        await speak(opening);
+        // Show topic choices after opening is spoken
+        showTopicChoices();
+      }, 800);
+    }, 3200);
+
+  } catch (e) {
+    document.getElementById('loading-text').textContent = 'could not find your teacher';
+  }
+}
+
+// ── Input wiring ──────────────────────────────────────────────────────────────
+document.getElementById('send-btn').addEventListener('click', send);
+document.getElementById('msg-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+document.getElementById('msg-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+});
+
+// ── Mic / STT ─────────────────────────────────────────────────────────────────
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+let micRec = null, micOn = false, micFinal = '', micSilence = null;
+
+document.getElementById('mic-btn').addEventListener('click', () => {
+  if (!SpeechRec) { alert('Speech recognition not supported in this browser.'); return; }
+  micOn ? stopMic() : startMic();
+});
+
+function startMic() {
+  if (!SpeechRec) return;
+  micOn = true; micFinal = '';
+  const btn = document.getElementById('mic-btn');
+  btn.classList.add('active'); btn.textContent = '⏹';
+
+  micRec = new SpeechRec();
+  micRec.lang = 'en-US'; micRec.interimResults = true; micRec.continuous = true;
+
+  micRec.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      e.results[i].isFinal
+        ? (micFinal += e.results[i][0].transcript + ' ')
+        : (interim += e.results[i][0].transcript);
+    }
+    const inp = document.getElementById('msg-input');
+    inp.value = micFinal + interim;
+    inp.style.height = 'auto';
+    inp.style.height = Math.min(inp.scrollHeight,80)+'px';
+    clearTimeout(micSilence);
+    if ((micFinal+interim).trim()) {
+      micSilence = setTimeout(() => {
+        if (micFinal.trim()) { stopMic(); send(); }
+      }, 1800);
+    }
+  };
+  micRec.onerror = e => { if (e.error !== 'aborted') stopMic(); };
+  micRec.onend   = () => { if (micOn) { try { micRec.start(); } catch { stopMic(); } } };
+  micRec.start();
+}
+
+function stopMic() {
+  micOn = false;
+  clearTimeout(micSilence);
+  if (micRec) { try { micRec.stop(); } catch {} micRec = null; }
+  const btn = document.getElementById('mic-btn');
+  btn.classList.remove('active'); btn.textContent = '🎙';
+  const inp = document.getElementById('msg-input');
+  inp.value = micFinal.trim();
+  micFinal = '';
+}
+
+// Pause mic while teacher speaks
+const _origSpeak = speak;
+// (already awaits — mic auto-pauses during send() since busy=true)
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+document.getElementById('room-btn').addEventListener('click', () => {
+  window.location.href = 'https://thechat.future24.eu/dashboard/room';
+});
+
+document.getElementById('exit-btn').addEventListener('click', async () => {
+  if (busy) return;
+  document.getElementById('exit-btn').disabled = true;
+  busy = true;
+
+  // Step 1: teacher farewell
+  let farewell = 'You came. You stayed. That matters more than you know — come back when the world calls you again.';
+  if (teacher) {
+    try {
+      const r = await fetch('/api/learn/chat', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          message: '[EXIT] The student is leaving the session now. Give them a brief, warm farewell — one to two sentences. Reference where they are in their journey. Invite them back.',
+          user_id: guestId,
+          history: chatHistory.slice(-4),
+          level_name: curriculumState.level_id,
+          level_objectives: curriculumState.objectives
+        })
+      }).then(r => r.json());
+      if (r.reply) farewell = r.reply;
+    } catch {}
+  }
+  addMsg('teacher', farewell, teacher?.name || 'Your Teacher');
+  await speak(farewell);
+
+  // Step 2: Watcher donation line
+  let watcherLine = 'This space runs on server time and API calls. If it gave you something real — consider keeping it alive.';
+  try {
+    const rw = await fetch('/api/watcher/chat', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message: '[EXIT-DONATION] The student is leaving. Speak one sentence — witness their session, then gently note that this space costs real money to run (APIs, servers) and invite them to support it if it meant something. Keep it honest, not sales-y. One sentence only.',
+        visitor_name: visitorName, world_name: worldName,
+        world_seed: worldSeed, pain_seed: painSeed,
+        history: chatHistory.slice(-2)
+      })
+    }).then(r => r.json());
+    if (rw.reply) watcherLine = rw.reply;
+  } catch {}
+
+  // Step 3: show exit overlay
+  const overlay = document.getElementById('exit-overlay');
+  const watcherEl = document.getElementById('exit-watcher-line');
+  const donateCard = document.getElementById('donate-card');
+  const proceedBtn = document.getElementById('exit-proceed');
+
+  watcherEl.textContent = watcherLine;
+  overlay.classList.add('on');
+  await new Promise(res => setTimeout(res, 400));
+  watcherEl.classList.add('on');
+  await speak(watcherLine);
+  await new Promise(res => setTimeout(res, 600));
+  donateCard.classList.add('on');
+  showMerchCard();
+  await new Promise(res => setTimeout(res, 1000));
+  document.getElementById('artifact-cta').classList.add('on');
+  await new Promise(res => setTimeout(res, 600));
+  proceedBtn.classList.add('on');
+});
+
+// ── Merch ─────────────────────────────────────────────────────────────────────
+function showMerchCard() {
+  const card = document.getElementById('merch-card');
+  if (card) {
+    card.classList.add('on');
+    // Populate world name preview
+    const worldName = window._guestWorldName || '';
+    const worldColor = window._guestWorldColor || '#34d399';
+    const wrap = document.getElementById('merch-world-preview-wrap');
+    if (wrap && worldName) {
+      wrap.innerHTML = '<span class="merch-world-preview" style="color:' + worldColor + ';border:1px solid ' + worldColor + '55;">' + worldName + '</span>';
+    }
+  }
+}
+
+function openMerch(product) {
+  const worldName  = encodeURIComponent(window._guestWorldName  || 'My World');
+  const worldColor = encodeURIComponent(window._guestWorldColor || '#34d399');
+  // Printful custom product builder — replace with actual Printful store link when set up
+  const base = 'https://www.customink.com/lab/new';
+  const url = base + '?text=' + worldName + '&product=' + product;
+  window.open(url, '_blank');
+}
+
+document.getElementById('exit-proceed').addEventListener('click', () => {
+  window.location.href = 'https://thechat.future24.eu/dashboard/room';
+});
+
+// ── Artifact CTA ──────────────────────────────────────────────────────────────
+document.getElementById('artifact-cta-btn').addEventListener('click', openDesigner);
+document.getElementById('designer-close').addEventListener('click', () => {
+  document.getElementById('designer-modal').classList.remove('on');
+});
+
+let designerBusy = false;
+let designerComplete = false;
+let artifactId = null;
+let pollTimer = null;
+
+function dAddMsg(role, text) {
+  const chat = document.getElementById('designer-chat');
+  const wrap = document.createElement('div');
+  if (role === 'designer') {
+    const lbl = document.createElement('div');
+    lbl.className = 'd-label'; lbl.textContent = 'The Designer';
+    wrap.appendChild(lbl);
+    wrap.className = 'd-msg-designer';
+  } else {
+    wrap.className = 'd-msg-user';
+  }
+  const body = document.createElement('div');
+  body.textContent = text;
+  wrap.appendChild(body);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function openDesigner() {
+  const modal = document.getElementById('designer-modal');
+  modal.classList.add('on');
+  const chat = document.getElementById('designer-chat');
+  chat.innerHTML = '';
+  designerComplete = false;
+  artifactId = null;
+
+  // Opening message from Designer
+  designerBusy = true;
+  document.getElementById('designer-send').disabled = true;
+  try {
+    const r = await fetch('/api/designer/chat', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message: '[START] Begin the interview. Ask the first question only.',
+        user_id: guestId,
+        visitor_name: visitorName, world_name: worldName,
+        world_seed: worldSeed, pain_seed: painSeed,
+        teacher_data: teacher ? { name: teacher.name, focus: teacher.focus } : null,
+        curriculum_data: curriculumState
+      })
+    }).then(r => r.json());
+    if (r.reply) {
+      dAddMsg('designer', r.reply);
+      await speak(r.reply, r.voice_id);
+    }
+  } catch {}
+  designerBusy = false;
+  document.getElementById('designer-send').disabled = false;
+  document.getElementById('designer-input').focus();
+}
+
+async function sendDesignerMsg() {
+  if (designerBusy || designerComplete) return;
+  const inp = document.getElementById('designer-input');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  dAddMsg('user', msg);
+  designerBusy = true;
+  document.getElementById('designer-send').disabled = true;
+
+  try {
+    const r = await fetch('/api/designer/chat', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message: msg, user_id: guestId,
+        visitor_name: visitorName, world_name: worldName,
+        world_seed: worldSeed, pain_seed: painSeed,
+        teacher_data: teacher ? { name: teacher.name, focus: teacher.focus } : null,
+        curriculum_data: curriculumState
+      })
+    }).then(r => r.json());
+
+    if (r.reply) {
+      dAddMsg('designer', r.reply);
+      await speak(r.reply, r.voice_id);
+    }
+
+    if (r.complete) {
+      designerComplete = true;
+      // Hide input, start generation
+      document.getElementById('designer-input-row').style.display = 'none';
+      await startArtifactGeneration();
+      return;
+    }
+  } catch {}
+  designerBusy = false;
+  document.getElementById('designer-send').disabled = false;
+  document.getElementById('designer-input').focus();
+}
+
+async function startArtifactGeneration() {
+  document.getElementById('artifact-status').classList.add('on');
+  try {
+    const r = await fetch('/api/artifact/create', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id: guestId,
+        visitor_name: visitorName, world_name: worldName,
+        world_seed: worldSeed, pain_seed: painSeed,
+        accent: ws?.portal_design?.accent || '#c4b5fd',
+        teacher_data: teacher ? { name: teacher.name, focus: teacher.focus } : null,
+        curriculum_data: curriculumState
+      })
+    }).then(r => r.json());
+
+    if (r.artifact_id) {
+      artifactId = r.artifact_id;
+      pollArtifact();
+    }
+  } catch {
+    document.getElementById('artifact-status-text').textContent = 'something went wrong — try again later';
+  }
+}
+
+function pollArtifact() {
+  if (!artifactId) return;
+  pollTimer = setInterval(async () => {
+    try {
+      const r = await fetch('/api/artifact/' + artifactId).then(r => r.json());
+      const statusMap = {
+        queued: 'preparing…', generating_song: 'composing your song…',
+        generating_video: 'rendering your world…', polling: 'waiting for the universe…',
+        combining: 'weaving song and vision…', complete: 'your artifact is ready',
+        failed: 'something broke — we\'re sorry'
+      };
+      document.getElementById('artifact-status-text').textContent = statusMap[r.status] || r.status;
+      if (r.status === 'complete' && r.artifact_url) {
+        clearInterval(pollTimer);
+        const video = document.getElementById('artifact-video');
+        video.src = r.artifact_url;
+        const dl = document.getElementById('artifact-download');
+        dl.href = r.artifact_url;
+        dl.textContent = 'download';
+        document.getElementById('artifact-version-badge').textContent =
+          r.version ? 'version ' + r.version + (r.is_branch ? ' (new branch)' : '') : '';
+        document.getElementById('artifact-result').classList.add('on');
+        setTimeout(() => document.getElementById('artifact-feedback').classList.add('on'), 2000);
+      }
+      if (r.status === 'failed') clearInterval(pollTimer);
+    } catch {}
+  }, 8000);
+}
+
+document.getElementById('designer-send').addEventListener('click', sendDesignerMsg);
+document.getElementById('designer-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); sendDesignerMsg(); }
+});
+
+document.getElementById('artifact-evolve-btn').addEventListener('click', async () => {
+  if (!artifactId) return;
+  const resonated = document.getElementById('feedback-resonated').value.trim();
+  const drift     = document.getElementById('feedback-drift').value.trim();
+  if (!resonated && !drift) return;
+
+  const btn = document.getElementById('artifact-evolve-btn');
+  btn.disabled = true;
+
+  // Store feedback
+  try {
+    await fetch('/synthesis/feedback', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ artifact_id: artifactId, user_id: guestId, resonated, drift })
+    });
+  } catch {}
+
+  // Request evolution
+  try {
+    const r = await fetch('/synthesis/evolve', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id: guestId,
+        session_state: null,
+        curriculum_data: curriculumState
+      })
+    }).then(r => r.json());
+
+    if (r.artifact_id) {
+      artifactId = r.artifact_id;
+      document.getElementById('artifact-feedback').style.display = 'none';
+      document.getElementById('artifact-result').classList.remove('on');
+      document.getElementById('artifact-status-text').textContent =
+        r.is_branch ? 'starting a new branch…' : 'evolving version ' + (r.version - 1) + ' → ' + r.version + '…';
+      pollArtifact();
+    }
+  } catch {
+    btn.disabled = false;
+  }
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+resize(); frame(); init();
+</script>
+</body>
+</html>

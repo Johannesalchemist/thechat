@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nyxa — Invite Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #070710; --surface: #0e0e1c; --surface2: #14142a;
+      --border: rgba(255,255,255,0.07); --text: #e8e8f4; --muted: #5a5a7a;
+      --accent: #a78bfa; --green: #4ade80; --red: #f87171; --radius: 14px;
+    }
+    html, body { min-height: 100%; background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+    #loginOverlay { position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .login-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px; width: 320px; }
+    .login-card h2 { margin-bottom: 20px; font-size: 16px; }
+    .login-card input { width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 14px;
+      font-family: inherit; outline: none; margin-bottom: 12px; }
+    .login-card input:focus { border-color: var(--accent); }
+    .login-card button { width: 100%; background: var(--accent); color: #fff; border: none;
+      padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    #main { display: none; max-width: 760px; margin: 0 auto; padding: 32px 20px; }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    header h1 { font-size: 18px; font-weight: 700; }
+    .badge { background: var(--surface2); border: 1px solid var(--border);
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; color: var(--muted); }
+    .composer { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
+    .composer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .composer input, .composer textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; }
+    .composer textarea { min-height: 96px; resize: vertical; margin-bottom: 10px; }
+    .composer input:focus, .composer textarea:focus { border-color: var(--accent); }
+    .composer-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .composer-status { color: var(--muted); font-size: 12px; }
+    .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: opacity .2s; }
+    .btn:hover { opacity: .85; }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: rgba(255,255,255,.2); color: var(--text); }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); padding: 0 12px 10px; }
+    td { padding: 10px 12px; border-top: 1px solid var(--border); }
+    tr:hover td { background: var(--surface2); }
+    .code { font-family: monospace; font-size: 15px; letter-spacing: .12em; font-weight: 600; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; }
+    .pill.used { background: rgba(74,222,128,.1); color: var(--green); }
+    .pill.free { background: rgba(167,139,250,.1); color: var(--accent); }
+    .del { background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 16px; padding: 2px 6px; border-radius: 4px; transition: color .2s; }
+    .del:hover { color: var(--red); }
+    .empty { color: var(--muted); text-align: center; padding: 40px; }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin: 32px 0 12px; }
+  </style>
+</head>
+<body>
+<div id="loginOverlay">
+  <div class="login-card">
+    <h2>Admin Access</h2>
+    <input id="adminToken" type="password" placeholder="Admin token" />
+    <button onclick="adminLogin()">Enter</button>
+    <div id="loginErr" style="color:#f87171;font-size:12px;margin-top:8px;"></div>
+  </div>
+</div>
+
+<div id="main">
+  <header>
+    <h1>Invite Manager</h1>
+    <span class="badge" id="stats">loading...</span>
+  </header>
+  <div class="composer">
+    <div class="section-title" style="margin:0 0 12px;">Send Invite Email</div>
+    <div class="composer-grid">
+      <input id="inviteName" type="text" placeholder="Name" />
+      <input id="inviteEmail" type="email" placeholder="Email" />
+    </div>
+    <textarea id="inviteMessage" placeholder="Optional personal message that will appear inside the invite email."></textarea>
+    <div class="composer-actions">
+      <button class="btn" onclick="sendInviteEmail()">Send Invite Email</button>
+      <button class="btn btn-ghost" onclick="generateInvites(1)">+ Generate 1</button>
+      <button class="btn btn-ghost" onclick="generateInvites(5)">+ Generate 5</button>
+      <button class="btn btn-ghost" onclick="load()">Refresh</button>
+      <span class="composer-status" id="inviteStatus"></span>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Code</th><th>Status</th><th>Reserved For</th><th>Used By</th><th>Created</th><th></th></tr></thead>
+    <tbody id="inviteList"></tbody>
+  </table>
+  <div id="empty" class="empty" style="display:none">No invite codes yet.</div>
+  <div class="section-title">Registered Users</div>
+  <table>
+    <thead><tr><th>Name</th><th>Invite Used</th><th>Joined</th></tr></thead>
+    <tbody id="userList"></tbody>
+  </table>
+</div>
+
+<script>
+  const API = '';
+  let adminToken = '';
+
+  function adminLogin() {
+    const t = document.getElementById('adminToken').value.trim();
+    if (!t) return;
+    adminToken = t;
+    load();
+  }
+
+  document.getElementById('adminToken').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') adminLogin();
+  });
+
+  async function load() {
+    const [invRes, usrRes] = await Promise.all([
+      fetch(API + '/api/admin/invites', { headers: { Authorization: 'Bearer ' + adminToken } }),
+      fetch(API + '/api/admin/users',   { headers: { Authorization: 'Bearer ' + adminToken } })
+    ]);
+    if (!invRes.ok) {
+      document.getElementById('loginErr').textContent = 'Invalid token.';
+      return;
+    }
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+
+    const invData = await invRes.json();
+    const usrData = await usrRes.json();
+    const invites = invData.invites;
+    const users   = usrData.users;
+
+    const free = invites.filter(function(i) { return !i.usedBy; }).length;
+    document.getElementById('stats').textContent = invites.length + ' invites / ' + free + ' free';
+
+    const tbody = document.getElementById('inviteList');
+    tbody.innerHTML = '';
+    document.getElementById('empty').style.display = invites.length ? 'none' : 'block';
+
+    invites.slice().reverse().forEach(function(inv) {
+      const tr = document.createElement('tr');
+      const delBtn = !inv.usedBy
+        ? '<button class="del" onclick="deleteInvite(\'' + inv.code + '\')" title="Revoke">x</button>'
+        : '';
+      tr.innerHTML =
+        '<td><span class="code">' + inv.code + '</span></td>' +
+        '<td><span class="pill ' + (inv.usedBy ? 'used' : 'free') + '">' + (inv.usedBy ? 'used' : 'free') + '</span></td>' +
+        '<td style="color:var(--muted)">' + (inv.reservedFor || '-') + '</td>' +
+        '<td style="color:var(--muted)">' + (inv.usedBy || '-') + '</td>' +
+        '<td style="color:var(--muted)">' + new Date(inv.createdAt).toLocaleDateString() + '</td>' +
+        '<td>' + delBtn + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    const userBody = document.getElementById('userList');
+    userBody.innerHTML = '';
+    users.forEach(function(u) {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td style="font-weight:600">' + u.name + '</td>' +
+        '<td><span class="code" style="font-size:12px">' + u.inviteCode + '</span></td>' +
+        '<td style="color:var(--muted)">' + new Date(u.createdAt).toLocaleDateString() + '</td>';
+      userBody.appendChild(tr);
+    });
+  }
+
+  async function sendInviteEmail() {
+    const name = document.getElementById('inviteName').value.trim();
+    const email = document.getElementById('inviteEmail').value.trim();
+    const message = document.getElementById('inviteMessage').value.trim();
+    const status = document.getElementById('inviteStatus');
+    if (!email) { status.textContent = 'Email required.'; return; }
+    status.textContent = 'Sending…';
+    const res = await fetch(API + '/api/admin/invites/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + adminToken },
+      body: JSON.stringify({ email, name, message })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      status.textContent = data.error || 'Send failed.';
+      return;
+    }
+    status.innerHTML = 'Sent to ' + email + ' · <a href="' + data.invite.loginUrl + '" target="_blank" rel="noopener" style="color:#a78bfa">open link</a> · token ' + data.invite.code;
+    document.getElementById('inviteEmail').value = '';
+    document.getElementById('inviteName').value = '';
+    document.getElementById('inviteMessage').value = '';
+    load();
+  }
+
+  async function generateInvites(count) {
+    await fetch(API + '/api/admin/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + adminToken },
+      body: JSON.stringify({ count: count })
+    });
+    load();
+  }
+
+  async function deleteInvite(code) {
+    if (!confirm('Revoke invite ' + code + '?')) return;
+    await fetch(API + '/api/admin/invites/' + code, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + adminToken }
+    });
+    load();
+  }
+</script>
+</body>
+</html>

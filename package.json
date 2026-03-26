@@ -1,0 +1,16 @@
+{
+  "name": "thechat",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node apps/telegram/bot.js",
+    "bot:mvp": "node apps/telegram-bot/bot.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0",
+    "elevenlabs": "^1.59.0",
+    "googleapis": "^171.4.0",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^8.0.3"
+  }
+}

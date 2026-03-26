@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.env
+data/users.json
+data/invites.json
+data/stammtisch_sessions/
+data/leads/
+data/cloudtalk_calls.json
+get_token.js
+*.env*
+.env*

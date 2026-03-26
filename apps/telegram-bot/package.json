@@ -1,0 +1,11 @@
+{
+  "name": "thechat-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram interface for The Chat",
+  "main": "bot.js",
+  "type": "module",
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "dotenv": "^16.4.0"
+  }
+}
