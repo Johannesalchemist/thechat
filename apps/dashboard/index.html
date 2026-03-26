@@ -146,7 +146,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 </div>
 <div class="freq-bar" id="freqBar"><div class="freq-txt" id="freqTxt">♩ 432 Hz · A</div></div>
 <canvas id="hbCv" style="position:fixed;inset:0;z-index:9;pointer-events:none;opacity:0;transition:opacity 2s"></canvas>
-<div class="skip-hint" id="skipHint" onclick="skipToPhase2()">click to enter →</div>
+<div class="skip-hint" id="skipHint" onclick="skipToPhase2()">click to enter →</div><div style="position:fixed;bottom:12px;left:14px;z-index:30;font-size:9px;color:rgba(255,255,255,0.15);letter-spacing:.12em;font-family:monospace;cursor:pointer" onclick="openProjects()">◎ projects</div>
 <button class="mute" id="muteBtn" onclick="toggleMute()">♪</button>
 
 <!-- ═══ TRANSITION VEIL ═══ -->
@@ -861,5 +861,15 @@ document.body.addEventListener('keydown',e=>{
 },{once:false});
 loop();
 </script>
+
+<div id="projOverlay" style="display:none;position:fixed;inset:0;z-index:50;background:rgba(4,4,15,0.92);backdrop-filter:blur(8px);overflow-y:auto;padding:20px 20px 80px">
+<button onclick="document.getElementById('projOverlay').style.display='none'" style="position:sticky;top:0;float:right;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.5);font-size:11px;cursor:pointer;margin-bottom:12px">✕ Close</button>
+<div style="max-width:1000px;margin:0 auto">
+<div style="font-size:10px;letter-spacing:.3em;color:#5DD2C0;text-transform:uppercase;margin-bottom:16px;font-family:monospace">Project Overview · Braindump Match</div>
+<div id="projContent" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+<div style="margin-top:24px;font-size:10px;letter-spacing:.2em;color:#5a5a7a;text-transform:uppercase;margin-bottom:12px">Songs from today · <span id="songDateLabel"></span></div>
+<div id="songMatch" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+</div>
+</div>
 </body>
 </html>
