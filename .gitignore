@@ -9,3 +9,6 @@ data/cloudtalk_calls.json
 get_token.js
 *.env*
 .env*
+.env.txt
+ssl/
+HandBrake/
