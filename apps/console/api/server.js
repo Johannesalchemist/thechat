@@ -1803,7 +1803,7 @@ async function anthropicCall(systemPrompt, messages, model = 'claude-sonnet-4-6'
 
   // Fallback: OpenRouter with Claude or Gemini
   if (openrouterKey) {
-    const orModel = preferClaude ? 'anthropic/claude-haiku-4-5' : 'google/gemini-2.0-flash-001';
+    const orModel = 'google/gemini-2.0-flash-001';
     const orMessages = [{ role: 'user', content: systemPrompt + '\n\n' + (messages[messages.length-1]?.content || '') }];
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -1897,7 +1897,7 @@ app.post('/api/room/message', async (req, res) => {
     return res.json({ ok: true, chosenAgents: [], responses: [systemMsg] });
   }
   // ────────────────────────────────────────────────────────────────────────────
-  if (!process.env.ANTHROPIC_KEY) return res.status(500).json({ error: 'ANTHROPIC_KEY not set' });
+  if (!process.env.ANTHROPIC_KEY && !process.env.OPENROUTER_API_KEY) return res.status(500).json({ error: 'No LLM key configured' });
 
   const userEntry = {
     role: 'user', agent: userName, color: '#e8e8f0', emoji: '👤',
