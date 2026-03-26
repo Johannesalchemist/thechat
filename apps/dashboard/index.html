@@ -841,6 +841,22 @@ function showGongRipple(idx){
 
 // Planet click detection on cosmos canvas
 C3.style.pointerEvents='all';
+// Auto audio unlock
+document.body.addEventListener('click',startAudio);
+document.body.addEventListener('touchstart',startAudio);
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    try{const t=new(window.AudioContext||window.webkitAudioContext)();
+    t.resume().then(()=>{t.close();startAudio();});}catch(e){}
+  },800);
+});
+// Speak title
+function trySpeak(){
+  const vv=speechSynthesis.getVoices();
+  if(vv.length>0){speakTitle();}else{speechSynthesis.onvoiceschanged=speakTitle;}
+}
+setTimeout(trySpeak,1500);
+
 C3.addEventListener('click',(e)=>{
   if(phase2Active) return;
   startAudio();
