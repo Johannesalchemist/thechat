@@ -1,1 +1,2 @@
-# NYXA MASTERPLAN - see full version
+# NYXA MASTERPLAN
+Stand: März 2026
