@@ -12,3 +12,5 @@ get_token.js
 .env.txt
 ssl/
 HandBrake/
+claude.md.txt
+infra/.env*
