@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Johannes Süss — Music</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#04040f;--s:rgba(10,10,22,0.95);--b:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.14);--t:#e8e8f4;--m:#5a5a7a;--a:#a78bfa;--gold:#fbbf24;--teal:#22d3ee}
+html,body{min-height:100%;background:var(--bg);color:var(--t);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6}
+header{position:sticky;top:0;z-index:100;background:rgba(4,4,15,0.9);border-bottom:1px solid var(--b);backdrop-filter:blur(20px);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+.lm{width:28px;height:28px;border-radius:50%;background:conic-gradient(from 120deg,#a78bfa,#22d3ee,#fbbf24,#a78bfa)}
+.lt{font-size:12px;font-weight:700;letter-spacing:.18em;background:linear-gradient(90deg,#a78bfa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+nav a{font-size:11px;color:var(--m);text-decoration:none;margin-left:14px;transition:color .2s}
+nav a:hover{color:var(--t)}
+.hero{padding:60px 20px 40px;text-align:center;max-width:600px;margin:0 auto}
+.eye{font-size:10px;letter-spacing:.3em;color:var(--m);text-transform:uppercase;margin-bottom:12px}
+.hname{font-size:clamp(28px,6vw,56px);font-weight:200;letter-spacing:.06em;background:linear-gradient(135deg,#e8e8f4 0%,#a78bfa 50%,#22d3ee 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.hsub{font-size:12px;color:var(--m);letter-spacing:.08em;margin-bottom:24px}
+.hlinks{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hl{display:flex;align-items:center;gap:6px;padding:7px 16px;border:1px solid var(--b2);border-radius:20px;font-size:11px;color:var(--t);text-decoration:none;letter-spacing:.1em;transition:all .25s}
+.hl:hover,.hl.suno:hover{border-color:var(--a);color:var(--a)}
+.hl.suno{border-color:rgba(251,191,36,0.3);color:var(--gold)}
+.sec{max-width:1100px;margin:0 auto;padding:0 20px 50px}
+.sh{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.st{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--m)}
+.sl{flex:1;height:1px;background:var(--b)}
+.sb{font-size:10px;padding:2px 9px;border-radius:10px;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);color:var(--a)}
+.daily-banner{background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.15);border-radius:12px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.daily-icon{font-size:20px;flex-shrink:0}
+.daily-text{font-size:12px;color:var(--m)}
+.daily-text strong{color:var(--t)}
+.tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:5px 14px;border-radius:20px;border:1px solid var(--b);background:none;color:var(--m);font-size:11px;font-family:inherit;cursor:pointer;letter-spacing:.08em;transition:all .2s}
+.tab.on{background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.3);color:var(--a)}
+.tab:hover:not(.on){border-color:var(--b2);color:var(--t)}
+.mood-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:36px}
+.mc{padding:14px;border-radius:12px;border:1px solid var(--b);background:rgba(10,10,22,0.5);cursor:pointer;transition:all .25s}
+.mc:hover,.mc.on{border-color:var(--b2);transform:translateY(-1px)}
+.mc.on{background:rgba(167,139,250,0.07)}
+.mi{font-size:22px;margin-bottom:6px}
+.mn{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.md{font-size:10px;color:var(--m);line-height:1.4}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.sc{background:rgba(10,10,22,0.7);border:1px solid var(--b);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .25s;position:relative}
+.sc:hover{border-color:var(--b2);transform:translateY(-2px)}
+.sc.playing{border-color:rgba(167,139,250,0.5)}
+.sc.daily-pick::before{content:"TODAY";position:absolute;top:8px;left:8px;font-size:8px;letter-spacing:.15em;background:var(--gold);color:#000;padding:2px 6px;border-radius:4px;font-weight:700;z-index:2}
+.sc.top-pick::before{content:"#1 LIKED";position:absolute;top:8px;left:8px;font-size:8px;letter-spacing:.15em;background:var(--a);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;z-index:2}
+.cov{width:100%;aspect-ratio:1;background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(34,211,238,0.12));display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.4;position:relative}
+.pov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);opacity:0;transition:opacity .2s}
+.sc:hover .pov,.sc.playing .pov{opacity:1}
+.pb{width:44px;height:44px;border-radius:50%;background:rgba(167,139,250,0.9);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sinfo{padding:12px 14px}
+.stitle{font-size:12px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.smeta{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--m)}
+.ssrc{padding:1px 6px;border-radius:6px;font-size:9px;border:1px solid}
+.ssrc.sc-src{border-color:rgba(255,85,0,0.3);color:rgba(255,130,50,0.8)}
+.ssrc.suno-src{border-color:rgba(251,191,36,0.3);color:rgba(251,191,36,0.8)}
+.slikes{display:flex;align-items:center;gap:3px}
+.embed-wrap{margin-top:20px;border-radius:12px;overflow:hidden;border:1px solid var(--b);display:none}
+.embed-wrap iframe{display:block;width:100%;border:none}
+.pbar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(4,4,15,0.97);border-top:1px solid var(--b);backdrop-filter:blur(24px);padding:10px 20px;display:flex;align-items:center;gap:14px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.pbar.vis{transform:translateY(0)}
+.pinfo{flex:1;min-width:0}
+.ptitle{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psrc{font-size:10px;color:var(--m)}
+.pctrl{display:flex;align-items:center;gap:8px}
+.cb{width:34px;height:34px;border-radius:50%;border:1px solid var(--b);background:none;color:var(--m);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.cb:hover{border-color:var(--b2);color:var(--t)}
+.cb.play{width:42px;height:42px;font-size:17px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;color:#fff}
+.pbar-bottom{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+@media(max-width:600px){.sgrid{grid-template-columns:1fr 1fr}.hero{padding:40px 14px 30px}.sec{padding:0 14px 40px}}
+</style>
+</head>
+<body>
+<header>
+  <a href="/dashboard/" class="logo"><div class="lm"></div><span class="lt">NYXA</span></a>
+  <nav>
+    <a href="/dashboard/">Room</a>
+    <a href="https://soundcloud.com/johannes-suess-63448974" target="_blank">SoundCloud</a>
+    <a href="https://suno.com/@josuss" target="_blank">Suno</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="eye">Artist · Creator · Alchemist</div>
+  <div class="hname">Johannes Süss</div>
+  <div class="hsub">Music that heals · Frequencies that move</div>
+  <div class="hlinks">
+    <a href="https://soundcloud.com/johannes-suess-63448974" target="_blank" class="hl">☁ SoundCloud</a>
+    <a href="https://suno.com/@josuss" target="_blank" class="hl suno">✦ Suno</a>
+    <a href="#" class="hl" onclick="alert('NFT Platform coming soon')">◈ NFT soon</a>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sh"><span class="st">Today's picks</span><div class="sl"></div><span class="sb" id="dateLabel"></span></div>
+  <div class="daily-banner">
+    <div class="daily-icon">✦</div>
+    <div class="daily-text" id="dailyText">Loading today's selection...</div>
+  </div>
+
+  <div class="sh"><span class="st">Mood</span><div class="sl"></div></div>
+  <div class="mood-grid">
+    <div class="mc on" onclick="setMood('all',this)" style="border-color:rgba(167,139,250,0.2)"><div class="mi">∞</div><div class="mn">All</div><div class="md">Complete journey</div></div>
+    <div class="mc" onclick="setMood('detox',this)" style="--mc:#22d3ee"><div class="mi">🌊</div><div class="mn" style="color:#22d3ee">Detox</div><div class="md">Release & renew</div></div>
+    <div class="mc" onclick="setMood('wakeup',this)" style="--mc:#fbbf24"><div class="mi">☀</div><div class="mn" style="color:#fbbf24">Wake Up</div><div class="md">Begin with clarity</div></div>
+    <div class="mc" onclick="setMood('healing',this)" style="--mc:#f87171"><div class="mi">♥</div><div class="mn" style="color:#f87171">Healing</div><div class="md">Look where it hurts</div></div>
+    <div class="mc" onclick="setMood('courage',this)" style="--mc:#a78bfa"><div class="mi">⚡</div><div class="mn" style="color:#a78bfa">Courage</div><div class="md">Radical decisions</div></div>
+    <div class="mc" onclick="setMood('gratitude',this)" style="--mc:#4ade80"><div class="mi">🌿</div><div class="mn" style="color:#4ade80">Gratitude</div><div class="md">Anchor in now</div></div>
+  </div>
+
+  <div class="sh"><span class="st">Songs</span><div class="sl"></div><span class="sb" id="moodLabel">All</span></div>
+  <div class="tabs">
+    <button class="tab on" onclick="setSrc('all',this)">All</button>
+    <button class="tab" onclick="setSrc('soundcloud',this)">☁ SoundCloud</button>
+    <button class="tab" onclick="setSrc('suno',this)">✦ Suno</button>
+  </div>
+  <div class="sgrid" id="grid"></div>
+
+  <div class="embed-wrap" id="embedWrap">
+    <iframe id="embedFrame" height="166" scrolling="no" allow="autoplay"></iframe>
+  </div>
+
+  <div style="margin-top:32px">
+    <div class="sh"><span class="st">Full SoundCloud stream</span><div class="sl"></div></div>
+    <div style="border-radius:12px;overflow:hidden;border:1px solid var(--b)">
+      <iframe height="400" scrolling="no" allow="autoplay" style="display:block;width:100%;border:none"
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/johannes-suess-63448974&color=%23a78bfa&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&visual=true">
+      </iframe>
+    </div>
+  </div>
+</div>
+
+<div class="pbar" id="pbar">
+  <div class="pinfo"><div class="ptitle" id="ptitle">—</div><div class="psrc" id="psrc">—</div></div>
+  <div class="pctrl">
+    <button class="cb" onclick="prev()">⏮</button>
+    <button class="cb play" id="ppbtn" onclick="togglePlay()">▶</button>
+    <button class="cb" onclick="next()">⏭</button>
+  </div>
+</div>
+
+<script>
+const SONGS=[
+  {id:1,title:"Add track 1",src:"soundcloud",url:"https://soundcloud.com/johannes-suess-63448974",mood:["all","healing"],likes:42,plays:310},
+  {id:2,title:"Add track 2",src:"soundcloud",url:"https://soundcloud.com/johannes-suess-63448974",mood:["all","wakeup"],likes:38,plays:280},
+  {id:3,title:"Add track 3",src:"soundcloud",url:"https://soundcloud.com/johannes-suess-63448974",mood:["all","detox"],likes:29,plays:195},
+  {id:4,title:"Add Suno track 1",src:"suno",url:"https://suno.com/@josuss",mood:["all","courage"],likes:51,plays:420},
+  {id:5,title:"Add Suno track 2",src:"suno",url:"https://suno.com/@josuss",mood:["all","gratitude"],likes:19,plays:140},
+  {id:6,title:"Add Suno track 3",src:"suno",url:"https://suno.com/@josuss",mood:["all","healing"],likes:33,plays:260},
+];
+
+let mood='all',srcFilter='all',curIdx=0,playing=false;
+
+// Daily picks: seeded by date, favors high likes+plays, + 2 random
+function getDailyPicks(){
+  const d=new Date();
+  const seed=d.getFullYear()*10000+( d.getMonth()+1)*100+d.getDate();
+  const sorted=[...SONGS].sort((a,b)=>(b.likes*2+b.plays)-(a.likes*2+a.plays));
+  const top=sorted[0];
+  const rest=sorted.slice(1);
+  // seeded pseudo-random for 2 daily randoms
+  const r1=rest[seed%rest.length];
+  const r2=rest[(seed*7+3)%rest.length];
+  return[top.id,r1?.id,r2?.id].filter(Boolean);
+}
+
+const dailyIds=getDailyPicks();
+
+function filtered(){
+  return SONGS.filter(s=>{
+    const m=mood==='all'||s.mood.includes(mood);
+    const sr=srcFilter==='all'||s.src===srcFilter;
+    return m&&sr;
+  }).sort((a,b)=>(b.likes*2+b.plays)-(a.likes*2+a.plays));
+}
+
+function render(){
+  const songs=filtered();
+  const topId=songs[0]?.id;
+  document.getElementById('grid').innerHTML=songs.map((s,i)=>`
+    <div class="sc${playing&&curIdx===i?' playing':''}${dailyIds.includes(s.id)?' daily-pick':''}${s.id===topId?' top-pick':''}" onclick="play(${i})">
+      <div class="cov">♪<div class="pov"><button class="pb">${playing&&curIdx===i?'⏸':'▶'}</button></div></div>
+      <div class="sinfo">
+        <div class="stitle">${s.title}</div>
+        <div class="smeta">
+          <span class="ssrc ${s.src===1?'sc':'suno'}-src">${s.src==='soundcloud'?'☁ SC':'✦ Suno'}</span>
+          <span class="slikes">♥ ${s.likes} · ▶ ${s.plays}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function play(i){
+  const songs=filtered();
+  const s=songs[i];
+  if(!s)return;
+  curIdx=i;playing=true;
+  document.getElementById('ptitle').textContent=s.title;
+  document.getElementById('psrc').textContent=s.src==='soundcloud'?'☁ SoundCloud':'✦ Suno';
+  document.getElementById('pbar').classList.add('vis');
+  document.getElementById('ppbtn').textContent='⏸';
+  const ew=document.getElementById('embedWrap');
+  const ef=document.getElementById('embedFrame');
+  if(s.src==='soundcloud'){
+    ef.src=`https://w.soundcloud.com/player/?url=${encodeURIComponent(s.url)}&color=%23a78bfa&auto_play=true&hide_related=true&show_comments=false&show_user=false`;
+    ef.height='166';ew.style.display='block';
+  }else{window.open(s.url,'_blank');ew.style.display='none';}
+  render();
+}
+
+function togglePlay(){playing=!playing;document.getElementById('ppbtn').textContent=playing?'⏸':'▶';}
+function next(){const s=filtered();curIdx=(curIdx+1)%s.length;play(curIdx);}
+function prev(){const s=filtered();curIdx=(curIdx-1+s.length)%s.length;play(curIdx);}
+
+function setMood(m,btn){
+  mood=m;document.querySelectorAll('.mc').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  document.getElementById('moodLabel').textContent=btn.querySelector('.mn').textContent;render();
+}
+function setSrc(s,btn){
+  srcFilter=s;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();
+}
+
+// Date label
+const now=new Date();
+document.getElementById('dateLabel').textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+
+// Daily text
+const top=SONGS.sort((a,b)=>(b.likes*2+b.plays)-(a.likes*2+a.plays))[0];
+document.getElementById('dailyText').innerHTML=`<strong>Listener's Choice:</strong> "${top.title}" (♥${top.likes} · ▶${top.plays}) + 2 tägliche Zufalls-Picks`;
+
+render();
+</script>
+</body>
+</html>
