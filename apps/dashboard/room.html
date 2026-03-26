@@ -2020,3 +2020,34 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVision(
   });
 })();
 </script>
+
+<style id="rpv3">
+@media(max-width:768px){
+  .header-actions{flex-wrap:wrap;justify-content:flex-end;gap:3px}
+  .header-actions .btn-sm{font-size:10px;padding:5px 8px;min-height:32px}
+  .lang-switcher .lang-btn{min-height:36px;min-width:44px;font-size:12px}
+  .btn-icon,.btn-send{width:46px;height:46px;font-size:20px}
+}
+#responseDelayRow,#fontSizeRow{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:4px}
+#responseDelayRow select,#fontSizeRow input{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:11px;font-family:inherit}
+</style>
+<script id="rpv3js">
+(function(){
+  const vr=document.querySelector(".voice-row");
+  const d=document.createElement("div");
+  d.id="responseDelayRow";
+  d.innerHTML="<span>Delay:</span><select id='delaySel'><option value='0'>Instant</option><option value='2000'>2s</option><option value='5000' selected>5s</option><option value='10000'>10s</option><option value='manual'>Manual</option></select>";
+  vr.appendChild(d);
+  const f=document.createElement("div");
+  f.id="fontSizeRow";
+  f.innerHTML="<span>Font:</span><input type='range' min='12' max='20' value='14' id='fsRange' step='1'><span id='fsVal'>14px</span>";
+  vr.appendChild(f);
+  document.getElementById("fsRange").addEventListener("input",function(){
+    document.getElementById("fsVal").textContent=this.value+"px";
+    document.querySelector(".messages").style.fontSize=this.value+"px";
+    localStorage.setItem("nyxa_fs",this.value);
+  });
+  const sv=localStorage.getItem("nyxa_fs");
+  if(sv){document.querySelector(".messages").style.fontSize=sv+"px";const r=document.getElementById("fsRange");if(r){r.value=sv;document.getElementById("fsVal").textContent=sv+"px";}}
+})();
+</script>
