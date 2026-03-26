@@ -2608,6 +2608,12 @@ app.get('/dashboard/invites', (req, res) => {
 app.get('/dashboard/login', (req, res) => {
   res.sendFile(path.join(__dirname, '../../dashboard/login.html'));
 });
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dashboard/index.html'));
+});
+app.get('/dashboard/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dashboard/index.html'));
+});
 
 app.get('/dashboard/room', (req, res) => {
   res.sendFile(path.join(__dirname, '../../dashboard/room.html'));
