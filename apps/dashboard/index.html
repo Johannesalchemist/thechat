@@ -844,12 +844,7 @@ C3.style.pointerEvents='all';
 // Auto audio unlock
 document.body.addEventListener('click',startAudio);
 document.body.addEventListener('touchstart',startAudio);
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    try{const t=new(window.AudioContext||window.webkitAudioContext)();
-    t.resume().then(()=>{t.close();startAudio();});}catch(e){}
-  },800);
-});
+
 // Speak title
 function trySpeak(){
   const vv=speechSynthesis.getVoices();
@@ -859,7 +854,10 @@ setTimeout(trySpeak,1500);
 
 C3.addEventListener('click',(e)=>{
   if(phase2Active) return;
-  startAudio();
+  if(!audioOn){
+    startAudio();
+    setTimeout(()=>{trySpeak();},800);
+  }
   const rect=C3.getBoundingClientRect();
   const mx=e.clientX-rect.left,my=e.clientY-rect.top;
   let hit=false;
