@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suno Quick Access</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Suno</h1>
+      <span class="subtitle">AI Music Generator</span>
+    </header>
+
+    <section class="quick-actions">
+      <button id="btn-open-suno" class="btn btn-primary">
+        Open Suno
+      </button>
+      <button id="btn-create-song" class="btn btn-accent">
+        Create New Song
+      </button>
+    </section>
+
+    <section class="prompt-section">
+      <label for="prompt-input">Song Prompt</label>
+      <textarea id="prompt-input" rows="3" placeholder="Describe your song... e.g. 'upbeat electronic track with synth leads and a catchy melody'"></textarea>
+      <div class="prompt-options">
+        <label>
+          <input type="checkbox" id="instrumental-toggle"> Instrumental
+        </label>
+        <select id="style-select">
+          <option value="">Style (optional)</option>
+          <option value="pop">Pop</option>
+          <option value="rock">Rock</option>
+          <option value="hip-hop">Hip-Hop</option>
+          <option value="electronic">Electronic</option>
+          <option value="jazz">Jazz</option>
+          <option value="classical">Classical</option>
+          <option value="r-and-b">R&B</option>
+          <option value="country">Country</option>
+          <option value="latin">Latin</option>
+          <option value="metal">Metal</option>
+          <option value="folk">Folk</option>
+          <option value="ambient">Ambient</option>
+        </select>
+      </div>
+      <button id="btn-generate" class="btn btn-generate">
+        Generate with Suno
+      </button>
+    </section>
+
+    <section class="history-section">
+      <h2>Recent Prompts</h2>
+      <ul id="history-list"></ul>
+      <button id="btn-clear-history" class="btn btn-small">Clear History</button>
+    </section>
+
+    <footer>
+      <a href="#" id="btn-library">My Library</a>
+      <a href="#" id="btn-explore">Explore</a>
+      <a href="#" id="btn-settings">Settings</a>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
