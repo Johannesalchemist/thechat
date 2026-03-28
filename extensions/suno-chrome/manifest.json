@@ -1,15 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "Suno Quick Access",
-  "version": "1.0.0",
-  "description": "Quick access to Suno AI music generation from your browser toolbar",
+  "name": "Suno + Claude — AI Music Prompter",
+  "version": "2.0.0",
+  "description": "Use Claude AI to generate and enhance music prompts for Suno, then send them directly to Suno's create page",
   "permissions": [
     "storage",
     "activeTab"
   ],
   "host_permissions": [
     "https://suno.com/*",
-    "https://app.suno.ai/*"
+    "https://app.suno.ai/*",
+    "https://api.anthropic.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -33,5 +34,9 @@
   ],
   "background": {
     "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
   }
 }

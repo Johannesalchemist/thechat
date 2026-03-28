@@ -3,28 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Suno Quick Access</title>
+  <title>Suno + Claude</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Suno</h1>
-      <span class="subtitle">AI Music Generator</span>
+      <h1>Suno + Claude</h1>
+      <span class="subtitle">AI-Powered Music Prompts</span>
     </header>
 
+    <!-- API Key Warning -->
+    <div id="api-key-warning" class="warning" style="display:none;">
+      No Anthropic API key set.
+      <a href="#" id="btn-open-settings">Configure in Settings</a>
+    </div>
+
     <section class="quick-actions">
-      <button id="btn-open-suno" class="btn btn-primary">
-        Open Suno
-      </button>
-      <button id="btn-create-song" class="btn btn-accent">
-        Create New Song
-      </button>
+      <button id="btn-open-suno" class="btn btn-primary">Open Suno</button>
+      <button id="btn-create-song" class="btn btn-accent">Create Song</button>
     </section>
 
+    <!-- Idea Input -->
     <section class="prompt-section">
-      <label for="prompt-input">Song Prompt</label>
-      <textarea id="prompt-input" rows="3" placeholder="Describe your song... e.g. 'upbeat electronic track with synth leads and a catchy melody'"></textarea>
+      <label for="idea-input">Your Idea</label>
+      <textarea id="idea-input" rows="2" placeholder="Describe what you want... e.g. 'a chill lo-fi beat for studying' or 'epic orchestral battle theme'"></textarea>
+
       <div class="prompt-options">
         <label>
           <input type="checkbox" id="instrumental-toggle"> Instrumental
@@ -43,21 +47,58 @@
           <option value="metal">Metal</option>
           <option value="folk">Folk</option>
           <option value="ambient">Ambient</option>
+          <option value="lo-fi">Lo-Fi</option>
+          <option value="synthwave">Synthwave</option>
+          <option value="reggae">Reggae</option>
+          <option value="soul">Soul</option>
+        </select>
+        <select id="mood-select">
+          <option value="">Mood</option>
+          <option value="happy">Happy</option>
+          <option value="sad">Sad</option>
+          <option value="energetic">Energetic</option>
+          <option value="chill">Chill</option>
+          <option value="dark">Dark</option>
+          <option value="uplifting">Uplifting</option>
+          <option value="romantic">Romantic</option>
+          <option value="aggressive">Aggressive</option>
+          <option value="dreamy">Dreamy</option>
+          <option value="epic">Epic</option>
         </select>
       </div>
-      <button id="btn-generate" class="btn btn-generate">
-        Generate with Suno
+
+      <button id="btn-claude-generate" class="btn btn-claude">
+        <span class="btn-icon">C</span> Ask Claude to Write Prompt
       </button>
     </section>
 
+    <!-- Claude Output -->
+    <section id="claude-output-section" class="output-section" style="display:none;">
+      <label>Claude's Suno Prompt</label>
+      <div id="claude-output" class="output-box"></div>
+      <div id="claude-lyrics" class="output-box lyrics-box" style="display:none;"></div>
+      <div class="output-actions">
+        <button id="btn-send-to-suno" class="btn btn-generate">Send to Suno</button>
+        <button id="btn-regenerate" class="btn btn-small">Regenerate</button>
+        <button id="btn-copy" class="btn btn-small">Copy</button>
+      </div>
+    </section>
+
+    <!-- Loading -->
+    <div id="loading" class="loading" style="display:none;">
+      <div class="spinner"></div>
+      <span>Claude is composing...</span>
+    </div>
+
+    <!-- History -->
     <section class="history-section">
-      <h2>Recent Prompts</h2>
+      <h2>Recent</h2>
       <ul id="history-list"></ul>
-      <button id="btn-clear-history" class="btn btn-small">Clear History</button>
+      <button id="btn-clear-history" class="btn btn-small">Clear</button>
     </section>
 
     <footer>
-      <a href="#" id="btn-library">My Library</a>
+      <a href="#" id="btn-library">Library</a>
       <a href="#" id="btn-explore">Explore</a>
       <a href="#" id="btn-settings">Settings</a>
     </footer>

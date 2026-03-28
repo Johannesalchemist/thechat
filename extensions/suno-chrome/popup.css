@@ -5,7 +5,7 @@
 }
 
 body {
-  width: 360px;
+  width: 380px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #0a0a0f;
   color: #e8e8ed;
@@ -17,15 +17,15 @@ body {
 
 header {
   text-align: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #1e1e2e;
 }
 
 header h1 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  background: linear-gradient(135deg, #d4a574, #ec4899, #7c3aed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -38,10 +38,28 @@ header .subtitle {
   letter-spacing: 1.5px;
 }
 
+/* Warning banner */
+.warning {
+  background: #2a1a0a;
+  border: 1px solid #8b5e34;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #d4a574;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.warning a {
+  color: #ec4899;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .quick-actions {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .btn {
@@ -63,6 +81,13 @@ header .subtitle {
   transform: translateY(0);
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
 .btn-primary {
   flex: 1;
   background: #1e1e2e;
@@ -80,25 +105,55 @@ header .subtitle {
   color: white;
 }
 
-.btn-generate {
+/* Claude-branded button */
+.btn-claude {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, #ec4899, #7c3aed);
-  color: white;
+  background: linear-gradient(135deg, #d4a574, #c4956a);
+  color: #1a1a2e;
   font-size: 14px;
   margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-claude:hover {
+  background: linear-gradient(135deg, #e0b080, #d4a574);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #1a1a2e;
+  color: #d4a574;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-generate {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #ec4899, #7c3aed);
+  color: white;
+  font-size: 13px;
 }
 
 .btn-small {
-  padding: 4px 10px;
+  padding: 6px 12px;
   font-size: 11px;
-  background: transparent;
-  color: #666;
+  background: #1e1e2e;
+  color: #aaa;
   border: 1px solid #2e2e3e;
 }
 
 .prompt-section {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .prompt-section label {
@@ -126,7 +181,7 @@ header .subtitle {
 }
 
 .prompt-section textarea:focus {
-  border-color: #7c3aed;
+  border-color: #d4a574;
 }
 
 .prompt-section textarea::placeholder {
@@ -136,7 +191,7 @@ header .subtitle {
 .prompt-options {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   margin-top: 8px;
 }
 
@@ -149,10 +204,11 @@ header .subtitle {
   cursor: pointer;
   text-transform: none;
   letter-spacing: normal;
+  white-space: nowrap;
 }
 
 .prompt-options input[type="checkbox"] {
-  accent-color: #7c3aed;
+  accent-color: #d4a574;
 }
 
 .prompt-options select {
@@ -161,16 +217,85 @@ header .subtitle {
   color: #aaa;
   border: 1px solid #2e2e3e;
   border-radius: 6px;
-  padding: 5px 8px;
-  font-size: 12px;
+  padding: 5px 6px;
+  font-size: 11px;
   outline: none;
   cursor: pointer;
+  min-width: 0;
 }
 
 .prompt-options select:focus {
-  border-color: #7c3aed;
+  border-color: #d4a574;
 }
 
+/* Claude output */
+.output-section {
+  margin-bottom: 14px;
+}
+
+.output-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4a574;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.output-box {
+  background: #12121a;
+  border: 1px solid #2e2e3e;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e8e8ed;
+  max-height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.lyrics-box {
+  margin-top: 8px;
+  max-height: 150px;
+  color: #ccc;
+  font-style: italic;
+  border-color: #3e2e4e;
+}
+
+.output-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  color: #d4a574;
+  font-size: 13px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #2e2e3e;
+  border-top-color: #d4a574;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* History */
 .history-section {
   margin-bottom: 12px;
 }
@@ -181,23 +306,23 @@ header .subtitle {
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 #history-list {
   list-style: none;
-  max-height: 120px;
+  max-height: 100px;
   overflow-y: auto;
   margin-bottom: 6px;
 }
 
 #history-list li {
-  padding: 6px 10px;
-  font-size: 12px;
+  padding: 5px 10px;
+  font-size: 11px;
   color: #aaa;
   background: #12121a;
   border-radius: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -216,14 +341,14 @@ header .subtitle {
   font-size: 11px;
   color: #555;
   text-align: center;
-  padding: 8px;
+  padding: 6px;
 }
 
 footer {
   display: flex;
   justify-content: center;
   gap: 20px;
-  padding-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid #1e1e2e;
 }
 
@@ -238,14 +363,6 @@ footer a:hover {
   color: #ec4899;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #2e2e3e;
-  border-radius: 4px;
-}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2e2e3e; border-radius: 4px; }
