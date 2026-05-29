@@ -1,0 +1,111 @@
+project:
+  name: sapiocard_episode_001
+
+status:
+  phase: render
+
+input:
+  title: "SapioCard Episode 1"
+
+hook:
+  "Datingprofile zeigen oft, wie jemand wirken will. Aber nicht, wie jemand verbindet."
+
+format:
+  vertical: true
+  aspect_ratio: "9:16"
+  resolution: "720x1280"
+  duration: 30
+  fps: 24
+
+voiceover: |
+  Datingprofile zeigen oft, wie jemand wirken will.
+
+  Aber sie zeigen selten, wie jemand wirklich verbindet.
+
+  Wie geht jemand mit Nähe um?
+  Wie kommuniziert jemand unter Stress?
+  Wie wichtig sind Freiheit, Tiefe, Ehrlichkeit und Grenzen?
+
+  Genau dafür ist die SapioCard gedacht.
+
+  Nicht nur:
+  Wie sehe ich aus?
+
+  Sondern:
+  Wie begegne ich?
+
+  Würdest du lieber Fotos sehen –
+  oder Menschen verstehen?
+
+caption: |
+  Datingprofile zeigen oft, wie jemand wirken will.
+
+  Aber nicht, wie jemand wirklich verbindet.
+
+  SapioCard ist die Idee eines Profils für Werte,
+  Nähe, Grenzen, Kommunikation und echte Resonanz.
+
+  Würdest du lieber Fotos sehen –
+  oder Menschen verstehen?
+
+segments:
+  - id: 1
+    start: 0
+    end: 10
+    label: "Profile Transform"
+    prompt: |
+      Vertical 9:16 futuristic premium interface video. A modern dating profile
+      with soft-lit portrait photos slowly dissolves. The photos fade into a
+      dark luxury card interface. Warm gold text labels appear one by one:
+      "Werte", "Nähe", "Grenzen", "Kommunikation". Cinematic motion graphics.
+      Premium UI. Dark background, warm gold accents, soft blue highlights.
+      Human-centered. Clean and readable. Not cyberpunk. Not cluttered.
+    negative_prompt: |
+      No clutter. No tiny unreadable text. No random logos. No distorted faces.
+      No cyberpunk overload. No excessive animations.
+
+  - id: 2
+    start: 10
+    end: 20
+    label: "SapioCard Reveal"
+    prompt: |
+      Vertical 9:16 futuristic premium interface video. A glowing luxury card
+      materializes — the SapioCard. On the dark card surface, elegant sections
+      appear with smooth transitions: emotional patterns, conflict style, life
+      vision. Warm gold typography on deep dark background with soft blue
+      ambient glow. Cinematic. Premium. Minimalist motion design. Human warmth.
+      Not mechanical. Not cyberpunk. Not cluttered.
+    negative_prompt: |
+      No clutter. No tiny unreadable text. No random logos. No distorted faces.
+      No cyberpunk overload. No excessive animations.
+
+  - id: 3
+    start: 20
+    end: 30
+    label: "CTA — Question"
+    prompt: |
+      Vertical 9:16 futuristic premium interface video. Dark luxury background.
+      Two choices slowly materialize in elegant gold typography. First:
+      "Fotos sehen?" with a fading portrait. Then: "Menschen verstehen?" with
+      a glowing SapioCard profile. A gentle pulse effect invites reflection.
+      Cinematic. Warm. Human. Premium UI. Clean. Not cluttered. Not cyberpunk.
+    negative_prompt: |
+      No clutter. No tiny unreadable text. No random logos. No distorted faces.
+      No cyberpunk overload. No excessive animations.
+
+runway:
+  model: "gen3a_turbo"
+  duration_per_segment: 10
+  ratio: "720:1280"
+
+outputs:
+  - master_video
+  - subtitle_file
+  - caption_file
+  - thumbnail
+
+review_gate:
+  required: true
+
+publish:
+  enabled: false
