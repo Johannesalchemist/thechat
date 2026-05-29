@@ -1,0 +1,26 @@
+THUMBNAIL — SapioCard Episode 1
+
+Midjourney / Runway / DALL-E prompt:
+
+  Vertical 9:16 premium dark luxury UI card. The "SapioCard" — a sleek,
+  glowing relationship intelligence profile card. Deep near-black background.
+  Warm gold typography and dividers. Soft blue ambient light glow around
+  the card edges. The card shows elegant sections: "Werte · Nähe · Grenzen ·
+  Kommunikation". A faint human silhouette softly visible behind the card.
+  Cinematic depth of field. Premium. Human-centered. Clean. Uncluttered.
+  Ultra-high quality. --ar 9:16 --style raw --q 2
+
+Negative (Midjourney):
+  --no clutter, tiny text, random logos, cyberpunk, neon overload,
+  distorted faces, mechanical, cold, sterile
+
+Frame to capture (for Runway thumbnail extraction):
+  Segment 2, approx 00:00:15 — the SapioCard fully revealed, gold glow,
+  dark luxury backdrop, labels visible and readable.
+
+Title overlay (add in post):
+  Text: "SapioCard"
+  Subtext: "Wer bist du wirklich?"
+  Font: Light weight, sans-serif (e.g. Geist, Inter, or similar)
+  Color: Warm gold (#D4A853)
+  Position: Lower third, centered
