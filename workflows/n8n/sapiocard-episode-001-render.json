@@ -1,0 +1,339 @@
+{
+  "name": "SapioCard Episode 1 — Render",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Setup\n1. Edit the **Config** node: set `apiBase` (default: `http://localhost:3001`) and `telegramChatId`\n2. Add Telegram credentials to the two Telegram nodes\n3. Make sure `RUNWAY_API_KEY` is set in your API `.env`\n4. Click **Execute Workflow**\n\nThe workflow starts the render job, polls every 30s, and notifies you on Telegram when done or if it fails.",
+        "height": 200,
+        "width": 420
+      },
+      "id": "sticky-setup",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [200, 80]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 320]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-project",
+              "name": "project",
+              "value": "sapiocard_episode_001",
+              "type": "string"
+            },
+            {
+              "id": "cfg-api",
+              "name": "apiBase",
+              "value": "http://localhost:3001",
+              "type": "string"
+            },
+            {
+              "id": "cfg-chat",
+              "name": "telegramChatId",
+              "value": "YOUR_TELEGRAM_CHAT_ID",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.apiBase + '/video/render' }}",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "project",
+              "value": "={{ $json.project }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false
+            }
+          }
+        }
+      },
+      "id": "start-render",
+      "name": "Start Render Job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [640, 320]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "state-jobid",
+              "name": "jobId",
+              "value": "={{ $json.jobId }}",
+              "type": "string"
+            },
+            {
+              "id": "state-api",
+              "name": "apiBase",
+              "value": "={{ $('Config').first().json.apiBase }}",
+              "type": "string"
+            },
+            {
+              "id": "state-chat",
+              "name": "telegramChatId",
+              "value": "={{ $('Config').first().json.telegramChatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-state",
+      "name": "Set State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [860, 320]
+    },
+    {
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "id": "wait-node",
+      "name": "Wait 30s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1080, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.apiBase + '/video/render/' + $json.jobId }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false
+            }
+          }
+        }
+      },
+      "id": "poll-status",
+      "name": "Poll Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1300, 320]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "merge-jobid",
+              "name": "jobId",
+              "value": "={{ $json.jobId }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-status",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-segments",
+              "name": "segments",
+              "value": "={{ $json.segments }}",
+              "type": "array"
+            },
+            {
+              "id": "merge-api",
+              "name": "apiBase",
+              "value": "={{ $('Set State').first().json.apiBase }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-chat",
+              "name": "telegramChatId",
+              "value": "={{ $('Set State').first().json.telegramChatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "merge-state",
+      "name": "Merge State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1520, 320]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-done",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "done",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-done",
+      "name": "Done?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1740, 320]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-failed",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "failed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-failed",
+      "name": "Failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1740, 520]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.telegramChatId }}",
+        "text": "=✅ SapioCard Episode 1 render complete!\n\nSegmente fertig: {{ $json.segments ? $json.segments.length : '?' }}\nManifest geschrieben.\n\nNächste Schritte:\n1. Segmente prüfen (output/)\n2. Master zusammensetzen (ffmpeg)\n3. Voiceover + Untertitel\n4. Review Gate → publish",
+        "additionalFields": {}
+      },
+      "id": "telegram-done",
+      "name": "Telegram: Done",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [1960, 220],
+      "credentials": {
+        "telegramApi": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.telegramChatId }}",
+        "text": "=❌ SapioCard Episode 1 render FEHLGESCHLAGEN.\n\nJob: {{ $json.jobId }}\nStatus: {{ $json.status }}\n\nAPI-Logs prüfen für Details.",
+        "additionalFields": {}
+      },
+      "id": "telegram-failed",
+      "name": "Telegram: Failed",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [1960, 520],
+      "credentials": {
+        "telegramApi": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Start": {
+      "main": [
+        [{ "node": "Config", "type": "main", "index": 0 }]
+      ]
+    },
+    "Config": {
+      "main": [
+        [{ "node": "Start Render Job", "type": "main", "index": 0 }]
+      ]
+    },
+    "Start Render Job": {
+      "main": [
+        [{ "node": "Set State", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set State": {
+      "main": [
+        [{ "node": "Wait 30s", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait 30s": {
+      "main": [
+        [{ "node": "Poll Status", "type": "main", "index": 0 }]
+      ]
+    },
+    "Poll Status": {
+      "main": [
+        [{ "node": "Merge State", "type": "main", "index": 0 }]
+      ]
+    },
+    "Merge State": {
+      "main": [
+        [{ "node": "Done?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Done?": {
+      "main": [
+        [{ "node": "Telegram: Done", "type": "main", "index": 0 }],
+        [{ "node": "Failed?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Failed?": {
+      "main": [
+        [{ "node": "Telegram: Failed", "type": "main", "index": 0 }],
+        [{ "node": "Wait 30s", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1"
+}
