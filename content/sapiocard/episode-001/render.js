@@ -4,14 +4,10 @@
 const fs = require("fs");
 const path = require("path");
 const https = require("https");
+const { generateRunwayVideo } = require("../../../apps/api/video/runway");
 
 const SPEC_PATH = path.join(__dirname, "spec.yaml");
 const OUTPUT_DIR = path.join(__dirname, "output");
-
-const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
-const RUNWAY_BASE = "https://api.runwayml.com/v1";
-const POLL_INTERVAL_MS = 8000;
-const POLL_TIMEOUT_MS = 600000;
 
 function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);
@@ -38,117 +34,42 @@ function parseYamlSegments() {
   return segments;
 }
 
-async function apiPost(endpoint, body) {
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify(body);
-    const options = {
-      hostname: "api.runwayml.com",
-      path: `/v1${endpoint}`,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${RUNWAY_API_KEY}`,
-        "X-Runway-Version": "2024-11-06",
-        "Content-Length": Buffer.byteLength(payload),
-      },
-    };
-    const req = https.request(options, (res) => {
-      let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => {
-        if (res.statusCode >= 400) {
-          reject(new Error(`Runway API ${res.statusCode}: ${data}`));
-        } else {
-          resolve(JSON.parse(data));
-        }
-      });
-    });
-    req.on("error", reject);
-    req.write(payload);
-    req.end();
-  });
-}
-
-async function apiGet(endpoint) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: "api.runwayml.com",
-      path: `/v1${endpoint}`,
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${RUNWAY_API_KEY}`,
-        "X-Runway-Version": "2024-11-06",
-      },
-    };
-    const req = https.request(options, (res) => {
-      let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => {
-        if (res.statusCode >= 400) {
-          reject(new Error(`Runway API ${res.statusCode}: ${data}`));
-        } else {
-          resolve(JSON.parse(data));
-        }
-      });
-    });
-    req.on("error", reject);
-    req.end();
-  });
-}
-
 async function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(destPath);
-    https.get(url, (res) => {
-      if (res.statusCode === 301 || res.statusCode === 302) {
-        file.close();
-        https.get(res.headers.location, (r) => r.pipe(file));
+    const get = (u) =>
+      https.get(u, (res) => {
+        if (res.statusCode === 301 || res.statusCode === 302) {
+          file.close();
+          get(res.headers.location);
+          return;
+        }
+        res.pipe(file);
         file.on("finish", () => file.close(resolve));
-        return;
-      }
-      res.pipe(file);
-      file.on("finish", () => file.close(resolve));
-    }).on("error", (err) => {
-      fs.unlink(destPath, () => {});
-      reject(err);
-    });
+      }).on("error", (err) => {
+        fs.unlink(destPath, () => {});
+        reject(err);
+      });
+    get(url);
   });
-}
-
-async function pollTask(taskId) {
-  const start = Date.now();
-  while (Date.now() - start < POLL_TIMEOUT_MS) {
-    const task = await apiGet(`/tasks/${taskId}`);
-    log(`  Task ${taskId} status: ${task.status}`);
-    if (task.status === "SUCCEEDED") return task;
-    if (task.status === "FAILED" || task.status === "CANCELLED") {
-      throw new Error(`Task ${taskId} ${task.status}: ${task.failure || ""}`);
-    }
-    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-  }
-  throw new Error(`Task ${taskId} timed out after ${POLL_TIMEOUT_MS / 1000}s`);
 }
 
 async function renderSegment(segment) {
   log(`Submitting segment ${segment.id}: "${segment.label}"`);
 
-  const task = await apiPost("/text_to_video", {
-    model: "gen3a_turbo",
-    prompt_text: segment.prompt,
+  const result = await generateRunwayVideo({
+    prompt: segment.prompt,
     negative_prompt: segment.negative_prompt,
     duration: 10,
     ratio: "720:1280",
+    wait: true,
   });
 
-  log(`  Task created: ${task.id}`);
-  const completed = await pollTask(task.id);
-
-  const outputUrl = completed.output?.[0];
-  if (!outputUrl) throw new Error(`No output URL for segment ${segment.id}`);
+  if (!result.url) throw new Error(`No output URL for segment ${segment.id}`);
 
   const outPath = path.join(OUTPUT_DIR, `segment-${segment.id}.mp4`);
   log(`  Downloading to ${outPath}`);
-  await downloadFile(outputUrl, outPath);
+  await downloadFile(result.url, outPath);
   log(`  Segment ${segment.id} done.`);
   return outPath;
 }
@@ -174,7 +95,7 @@ function writeManifest(segmentPaths) {
 }
 
 async function main() {
-  if (!RUNWAY_API_KEY) {
+  if (!process.env.RUNWAY_API_KEY) {
     console.error("ERROR: RUNWAY_API_KEY is not set in environment.");
     console.error("Export it: export RUNWAY_API_KEY=your_key_here");
     process.exit(1);
@@ -188,8 +109,7 @@ async function main() {
 
   const segmentPaths = [];
   for (const seg of segments) {
-    const outPath = await renderSegment(seg);
-    segmentPaths.push(outPath);
+    segmentPaths.push(await renderSegment(seg));
   }
 
   writeManifest(segmentPaths);
