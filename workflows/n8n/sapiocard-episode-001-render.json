@@ -248,7 +248,7 @@
     {
       "parameters": {
         "chatId": "={{ $json.telegramChatId }}",
-        "text": "=✅ SapioCard Episode 1 render complete!\n\nSegmente fertig: {{ $json.segments ? $json.segments.length : '?' }}\nManifest geschrieben.\n\nNächste Schritte:\n1. Segmente prüfen (output/)\n2. Master zusammensetzen (ffmpeg)\n3. Voiceover + Untertitel\n4. Review Gate → publish",
+        "text": "=✅ SapioCard Episode 1 render complete!\n\nSegmente: {{ $json.segments ? $json.segments.length : '?' }}\n\nDownload:\n{{ $json.segments ? $json.segments.map(s => $('Config').first().json.apiBase + '/video/render/' + $json.jobId + '/download/' + s.file).join('\\n') : 'n/a' }}\n\nNächste Schritte:\n1. Segmente prüfen\n2. Master zusammensetzen (ffmpeg concat)\n3. Voiceover + Untertitel\n4. Review Gate → publish",
         "additionalFields": {}
       },
       "id": "telegram-done",
