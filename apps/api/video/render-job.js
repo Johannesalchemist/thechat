@@ -5,14 +5,14 @@ const path = require("path");
 const https = require("https");
 const { generateRunwayVideo } = require("./runway");
 
-const REPO_ROOT = path.join(__dirname, "../../..");
+const CONTENT_ROOT = process.env.CONTENT_DIR || path.join(__dirname, "../../../content");
 const jobs = new Map();
 
 function projectToSpecPath(project) {
   const m = project.match(/^(.+?)_episode_(\d+)$/);
   if (!m) throw new Error(`Cannot resolve spec for project "${project}". Expected format: name_episode_NNN`);
   const [, name, num] = m;
-  return path.join(REPO_ROOT, "content", name, `episode-${num}`, "spec.yaml");
+  return path.join(CONTENT_ROOT, name, `episode-${num}`, "spec.yaml");
 }
 
 function parseSegments(specPath) {

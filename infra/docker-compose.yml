@@ -6,6 +6,10 @@
       - "4100:3000"
     env_file:
       - .env
+    environment:
+      - CONTENT_DIR=/data/content
+    volumes:
+      - ../content:/data/content
     depends_on:
       - db
       - redis
