@@ -1,0 +1,72 @@
+NYXA OBSERVATION ROOM / EVIDENCE RELEASE V1 REPORT
+====================================================
+
+STATUS:
+- Conceptual Framework: GREEN
+- Runtime Implementation: GREEN (all tests pass)
+- Production Deployment: LOCKED
+
+SCOPE:
+Implemented local governance rules for:
+- observation room holding state
+- provenance requirement
+- confidence discipline
+- Bayesian signal weighting
+- validation gating
+- evidence release blocking
+- high blast-radius execution blocking
+
+FILES:
+- src/nyxa_governance/observation_room.py
+- src/nyxa_governance/__init__.py
+- src/__init__.py
+- tests/test_observation_room.py
+- reports/NYXA-OBSERVATION-ROOM-EVIDENCE-RELEASE-V1-REPORT.txt
+
+ACCEPTANCE CRITERIA:
+1. No claim can become EVIDENCE_RELEASED without provenance.          [PASS]
+2. No unvalidated inference can become evidence.                      [PASS]
+3. High-risk execute actions are blocked even if validated.           [PASS]
+4. Contradicted claims are rejected.                                  [PASS]
+5. High-confidence unvalidated claims trigger investigation.          [PASS]
+6. Low-risk weak signals remain held in observation.                  [PASS]
+7. Classification snapshot exposes state, confidence, validation      [PASS]
+   and action permissions.
+
+TEST COMMAND:
+python -m pytest tests/test_observation_room.py -v
+
+TEST RESULT:
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /home/user/thechat
+collected 10 items
+
+tests/test_observation_room.py::test_unvalidated_inference_stays_out_of_evidence PASSED [ 10%]
+tests/test_observation_room.py::test_missing_provenance_blocks_evidence_release PASSED [ 20%]
+tests/test_observation_room.py::test_validated_low_risk_claim_can_release_to_evidence PASSED [ 30%]
+tests/test_observation_room.py::test_high_risk_execute_is_blocked_even_when_validated PASSED [ 40%]
+tests/test_observation_room.py::test_contradicted_claim_is_rejected PASSED [ 50%]
+tests/test_observation_room.py::test_high_blast_radius_triggers_investigation PASSED [ 60%]
+tests/test_observation_room.py::test_high_confidence_without_validation_triggers_investigation PASSED [ 70%]
+tests/test_observation_room.py::test_low_weight_low_risk_signal_remains_held PASSED [ 80%]
+tests/test_observation_room.py::test_classify_claim_returns_governance_snapshot PASSED [ 90%]
+tests/test_observation_room.py::test_inference_without_provenance_is_not_governable_as_evidence PASSED [100%]
+
+============================== 10 passed in 0.03s ==============================
+
+AMPEL:
+GREEN — all 10 tests pass, no production action taken.
+
+DEPLOYMENT:
+No deployment performed.
+Deployment remains locked.
+
+ROLLBACK:
+Created files can be removed:
+- src/nyxa_governance/observation_room.py
+- src/nyxa_governance/__init__.py
+- src/__init__.py
+- tests/test_observation_room.py
+
+No existing files were modified. No backups required.
