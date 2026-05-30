@@ -72,7 +72,9 @@ async function sendRecall(apiBase, userId, text, keyboard) {
   });
   const data = await res.json();
   if (!data.ok) {
-    throw new Error(data.description || 'sendMessage failed');
+    const err = new Error(data.description || 'sendMessage failed');
+    err.telegramErrorCode = data.error_code;
+    throw err;
   }
   return data;
 }
@@ -133,7 +135,19 @@ async function run() {
       saveUserMemory(userId, memory);
       console.log(`[UNIFIED-RECALL] sent user=${userId} domain=${domain} tier=${tier} resume=${resumeKey}`);
     } catch (error) {
-      console.error(`[UNIFIED-RECALL] send_failed user=${userId} domain=${domain} tier=${tier}: ${error.message}`);
+      const errMsg = String(error.message || '');
+      const isDeviceBlocked =
+        error.telegramErrorCode === 403 ||
+        errMsg.includes('blocked by the user') ||
+        errMsg.includes('user is deactivated') ||
+        errMsg.includes('chat not found');
+
+      if (isDeviceBlocked) {
+        memory.connection = { blocked: true, blockedAt: Date.now() };
+        console.warn(`[UNIFIED-RECALL] device_blocked user=${userId}: ${errMsg}`);
+      } else {
+        console.error(`[UNIFIED-RECALL] send_failed user=${userId} domain=${domain} tier=${tier}: ${errMsg}`);
+      }
       // Persist synced state even on send failure, but keep lastTier unchanged to retry deterministically.
       saveUserMemory(userId, memory);
     }

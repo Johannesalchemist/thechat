@@ -64,6 +64,10 @@ function createDefaultMemory(userId) {
       careTier: 0,
       nextAction: ''
     },
+    connection: {
+      blocked: false,
+      blockedAt: 0
+    },
     access: [],
     meta: {
       createdAt: ts,
@@ -99,6 +103,10 @@ function normalizeMemory(userId, raw) {
       lastClientAction: Number(memory?.clientCare?.lastClientAction || 0),
       careTier: Number(memory?.clientCare?.careTier || 0),
       nextAction: String(memory?.clientCare?.nextAction || '')
+    },
+    connection: {
+      blocked: Boolean(memory?.connection?.blocked || false),
+      blockedAt: Number(memory?.connection?.blockedAt || 0)
     },
     access: normalizeAccess(memory?.access),
     meta: {
@@ -281,6 +289,7 @@ function getTier(lastSeen) {
 
 function shouldPing(memory, tier) {
   if (tier <= 0) return false;
+  if (memory?.connection?.blocked) return false;
   return tier > Number(memory?.activity?.lastTier || 0);
 }
 
