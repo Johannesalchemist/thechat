@@ -1,0 +1,132 @@
+{
+  "version": "0.1",
+  "updated": "2026-05-30",
+  "description": "NYXA Governance-Regeln — Betriebsgrenzen, Rote Linien und Eskalationsregeln",
+  "governance": {
+    "principles": [
+      {
+        "id": "gov-p-001",
+        "name": "Stabilität vor Geschwindigkeit vor Features",
+        "description": "Kein neues Feature ohne stabile Basis. Keine Optimierung vor Korrektheit. Reihenfolge ist zwingend.",
+        "enforcement": "hard"
+      },
+      {
+        "id": "gov-p-002",
+        "name": "Determinismus",
+        "description": "Gleicher Input → Gleicher Output. Keine randomisierten Prozesse ohne explizite Seed-Kontrolle.",
+        "enforcement": "hard"
+      },
+      {
+        "id": "gov-p-003",
+        "name": "Vollständige Dateien",
+        "description": "Keine Fragmente, keine TODOs, keine Platzhalter in produktiven Dateien. Entweder vollständig oder nicht vorhanden.",
+        "enforcement": "hard"
+      },
+      {
+        "id": "gov-p-004",
+        "name": "Fehler = STOP",
+        "description": "Bei Fehler in kritischen Komponenten: stoppen, melden, warten auf Freigabe. Kein Weiterarbeiten mit fehlerhaftem Zustand.",
+        "enforcement": "hard"
+      },
+      {
+        "id": "gov-p-005",
+        "name": "Sequenz einhalten",
+        "description": "Phasen und Aufgaben strikt in der definierten Reihenfolge. Keine Phase überspringen.",
+        "enforcement": "hard"
+      }
+    ],
+    "red_lines": [
+      {
+        "id": "gov-r-001",
+        "category": "legal",
+        "rule": "Keine Förder-, Kredit- oder Einkommensgarantien",
+        "description": "Das System garantiert keine staatlichen Förderungen, Kreditvergaben oder Einkommensziele für Gründer.",
+        "violation_action": "immediate_rejection_of_content"
+      },
+      {
+        "id": "gov-r-002",
+        "category": "legal",
+        "rule": "Keine unlizenzierte Finanzberatung",
+        "description": "NYXA gibt keine Steuerberatung, Rechtsberatung oder Anlageberatung. Alle Hinweise sind informatorisch.",
+        "violation_action": "flag_and_escalate"
+      },
+      {
+        "id": "gov-r-003",
+        "category": "data",
+        "rule": "Keine personenbezogene Datensammlung ohne Einwilligung",
+        "description": "SSN, ITIN und andere PII werden nur verschlüsselt gespeichert. Keine Weitergabe an Dritte ohne explizite Freigabe.",
+        "violation_action": "immediate_stop_and_delete"
+      },
+      {
+        "id": "gov-r-004",
+        "category": "automation",
+        "rule": "Kein automatischer Outreach ohne explizite Trigger",
+        "description": "Keine automatisierten E-Mails, Anrufe oder Nachrichten ohne vorherigen Opt-In oder manuellen Trigger.",
+        "violation_action": "block_and_log"
+      },
+      {
+        "id": "gov-r-005",
+        "category": "production",
+        "rule": "Kein Production-Deploy ohne Review",
+        "description": "Jeder Production-Deploy erfordert manuelle Freigabe. Keine automatischen Pushes in production-Umgebungen.",
+        "violation_action": "block_deploy"
+      },
+      {
+        "id": "gov-r-006",
+        "category": "naming",
+        "rule": "Kein alternativer System-Name",
+        "description": "Das System heißt ausschließlich NYXA. Keine Alias-Namen, keine alternativen Bezeichnungen in produktiven Dokumenten.",
+        "violation_action": "reject_and_rename"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "id": "gov-e-001",
+        "trigger": "payment_failed_after_service_started",
+        "action": "pause_fulfillment",
+        "notify": ["system_admin"],
+        "auto_resolve": false
+      },
+      {
+        "id": "gov-e-002",
+        "trigger": "government_portal_schema_changed",
+        "action": "disable_playwright_connector",
+        "notify": ["system_admin"],
+        "auto_resolve": false
+      },
+      {
+        "id": "gov-e-003",
+        "trigger": "api_key_missing_or_invalid",
+        "action": "block_dependent_mvps",
+        "notify": ["system_admin"],
+        "auto_resolve": false
+      },
+      {
+        "id": "gov-e-004",
+        "trigger": "lead_score_exceeds_90",
+        "action": "trigger_immediate_phone_outreach",
+        "notify": [],
+        "auto_resolve": true
+      },
+      {
+        "id": "gov-e-005",
+        "trigger": "database_write_failure",
+        "action": "halt_transaction",
+        "notify": ["system_admin"],
+        "auto_resolve": false
+      }
+    ],
+    "versioning": {
+      "current_version": "0.1",
+      "change_protocol": "Jede Änderung an Governance-Regeln erfordert explizite Versionierung und Kommentar.",
+      "change_log": [
+        {
+          "version": "0.1",
+          "date": "2026-05-30",
+          "author": "NYXA System Init",
+          "changes": "Initiale Governance-Regeln erstellt"
+        }
+      ]
+    }
+  }
+}

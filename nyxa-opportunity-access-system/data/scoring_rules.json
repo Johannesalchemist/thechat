@@ -1,0 +1,155 @@
+{
+  "version": "0.1",
+  "updated": "2026-05-30",
+  "description": "NYXA Scoring-Regeln — deterministische Bewertungslogik für MVPs und Opportunities",
+  "scoring_model": {
+    "name": "NYXA Opportunity Score (NOS)",
+    "scale": "0–40",
+    "dimensions": [
+      {
+        "id": "dim-complexity",
+        "name": "Complexity Score",
+        "description": "Technische und operative Komplexität der Implementierung (1 = einfach, 10 = sehr komplex)",
+        "scale": "1–10",
+        "weight": 1.0,
+        "direction": "lower_is_better",
+        "thresholds": {
+          "green": "1–4",
+          "yellow": "5–7",
+          "red": "8–10"
+        }
+      },
+      {
+        "id": "dim-revenue",
+        "name": "Revenue Potential Score",
+        "description": "Erwartetes Umsatzpotenzial bezogen auf Marktgröße und Wiederholbarkeit (1 = gering, 10 = sehr hoch)",
+        "scale": "1–10",
+        "weight": 1.0,
+        "direction": "higher_is_better",
+        "thresholds": {
+          "green": "8–10",
+          "yellow": "5–7",
+          "red": "1–4"
+        }
+      },
+      {
+        "id": "dim-market_readiness",
+        "name": "Market Readiness Score",
+        "description": "Bereitschaft des Zielmarkts — Nachfrage, Zahlungsbereitschaft, regulatorische Klarheit (1 = unreif, 10 = sehr reif)",
+        "scale": "1–10",
+        "weight": 1.0,
+        "direction": "higher_is_better",
+        "thresholds": {
+          "green": "8–10",
+          "yellow": "5–7",
+          "red": "1–4"
+        }
+      },
+      {
+        "id": "dim-founder_effort",
+        "name": "Founder Effort Score",
+        "description": "Aufwand für den Gründer bei Serviceabruf und Onboarding (1 = minimal, 10 = sehr hoch)",
+        "scale": "1–10",
+        "weight": 1.0,
+        "direction": "lower_is_better",
+        "thresholds": {
+          "green": "1–2",
+          "yellow": "3–5",
+          "red": "6–10"
+        }
+      }
+    ],
+    "total_score_formula": "revenue_potential + market_readiness + (10 - complexity) + (10 - founder_effort)",
+    "total_score_scale": "0–40",
+    "total_score_thresholds": {
+      "priority_0": {"range": "33–40", "label": "P0 — Sofort umsetzen", "color": "green"},
+      "priority_1": {"range": "26–32", "label": "P1 — Woche 1", "color": "yellow_green"},
+      "priority_2": {"range": "20–25", "label": "P2 — Woche 2–4", "color": "yellow"},
+      "priority_3": {"range": "14–19", "label": "P3 — Monat 2+", "color": "orange"},
+      "priority_4": {"range": "0–13", "label": "P4 — Backlog", "color": "red"}
+    }
+  },
+  "lead_scoring": {
+    "name": "NYXA Lead Score (NLS)",
+    "description": "Echtzeit-Lead-Qualifikation auf Basis von Interaktionssignalen",
+    "scale": "0–100",
+    "signals": [
+      {
+        "id": "sig-001",
+        "name": "Keyword Delaware",
+        "trigger": "message_contains_keyword",
+        "keywords": ["delaware", "llc", "us company", "us gmbh"],
+        "points": 20,
+        "decay_hours": 48
+      },
+      {
+        "id": "sig-002",
+        "name": "Keyword Businessplan",
+        "trigger": "message_contains_keyword",
+        "keywords": ["businessplan", "business plan", "investoren", "pitch deck"],
+        "points": 15,
+        "decay_hours": 48
+      },
+      {
+        "id": "sig-003",
+        "name": "Keyword Gründung",
+        "trigger": "message_contains_keyword",
+        "keywords": ["gründung", "gruendung", "formation", "company setup"],
+        "points": 15,
+        "decay_hours": 48
+      },
+      {
+        "id": "sig-004",
+        "name": "Phone Call geführt",
+        "trigger": "call_completed",
+        "keywords": [],
+        "points": 30,
+        "decay_hours": 168
+      },
+      {
+        "id": "sig-005",
+        "name": "Stripe Checkout geöffnet",
+        "trigger": "checkout_session_created",
+        "keywords": [],
+        "points": 40,
+        "decay_hours": 24
+      },
+      {
+        "id": "sig-006",
+        "name": "Zahlung erfolgreich",
+        "trigger": "payment_succeeded",
+        "keywords": [],
+        "points": 100,
+        "decay_hours": 0
+      },
+      {
+        "id": "sig-007",
+        "name": "Wiederholte Anfrage",
+        "trigger": "second_contact_within_7_days",
+        "keywords": [],
+        "points": 20,
+        "decay_hours": 72
+      }
+    ],
+    "lead_tiers": {
+      "hot": {"min_score": 70, "action": "immediate_phone_outreach"},
+      "warm": {"min_score": 40, "action": "telegram_followup_24h"},
+      "cold": {"min_score": 15, "action": "nurture_sequence_7d"},
+      "unqualified": {"min_score": 0, "action": "tag_and_monitor"}
+    }
+  },
+  "opportunity_filters": {
+    "mandatory_exclusions": [
+      "Keine Förder-, Kredit- oder Einkommensgarantien in Kommunikation oder Dokumenten",
+      "Keine regulatorisch verbotenen Finanzdienstleistungen ohne Lizenz",
+      "Keine Beratungsversprechen mit festgelegtem Erfolgsziel",
+      "Keine automatische Datensammlung ohne explizite Einwilligung"
+    ],
+    "mandatory_inclusions": [
+      "Alle Preise in USD oder EUR klar kommuniziert",
+      "Lieferzeitraum in Werktagen angegeben",
+      "Deliverables vollständig und klar definiert",
+      "Zuständige Jurisdiktion klar gekennzeichnet"
+    ]
+  }
+}
