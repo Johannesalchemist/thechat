@@ -3,7 +3,8 @@
 Status: ARCHITECTURE DECISION — DRAFT
 
 ## Objective
-Document the governance, audit, confidence, and safety checks that should surround World Forge generation.
+Document the governance, audit, confidence, and safety checks that should surround planned World Forge generation.
+This pipeline is a proposed documentation flow for future use and does not claim a deployed or production-ready service.
 
 ## Pipeline Stages
 1. Input validation

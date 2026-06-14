@@ -3,7 +3,8 @@
 Status: ARCHITECTURE DECISION — DRAFT
 
 ## Purpose
-Maintain a registry of reusable world templates for the Falke B World Forge path.
+Maintain a registry of reusable world templates for the planned Falke B World Forge path.
+This is a documentation-only proposal for a future target architecture, not a deployed runtime component.
 
 ## Registry Categories
 - Narrative template

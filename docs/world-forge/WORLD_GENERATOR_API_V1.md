@@ -3,7 +3,8 @@
 Status: ARCHITECTURE DECISION — DRAFT
 
 ## Purpose
-Define the documentation-level interface for World Forge generation flows.
+Define the documentation-level interface for planned World Forge generation flows.
+This is a future target design note for Falke B; it does not imply a live service, deployment, or production-ready runtime.
 
 ## Proposed API Surface
 - generateWorld(input)
