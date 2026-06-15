@@ -1,0 +1,368 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 380px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0a0a0f;
+  color: #e8e8ed;
+}
+
+.container {
+  padding: 16px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #1e1e2e;
+}
+
+header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #d4a574, #ec4899, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+header .subtitle {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* Warning banner */
+.warning {
+  background: #2a1a0a;
+  border: 1px solid #8b5e34;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #d4a574;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.warning a {
+  color: #ec4899;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.btn-primary {
+  flex: 1;
+  background: #1e1e2e;
+  color: #e8e8ed;
+  border: 1px solid #2e2e3e;
+}
+
+.btn-primary:hover {
+  background: #2a2a3a;
+}
+
+.btn-accent {
+  flex: 1;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+}
+
+/* Claude-branded button */
+.btn-claude {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #d4a574, #c4956a);
+  color: #1a1a2e;
+  font-size: 14px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-claude:hover {
+  background: linear-gradient(135deg, #e0b080, #d4a574);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #1a1a2e;
+  color: #d4a574;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-generate {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #ec4899, #7c3aed);
+  color: white;
+  font-size: 13px;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 11px;
+  background: #1e1e2e;
+  color: #aaa;
+  border: 1px solid #2e2e3e;
+}
+
+.prompt-section {
+  margin-bottom: 14px;
+}
+
+.prompt-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #aaa;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prompt-section textarea {
+  width: 100%;
+  background: #12121a;
+  color: #e8e8ed;
+  border: 1px solid #2e2e3e;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.prompt-section textarea:focus {
+  border-color: #d4a574;
+}
+
+.prompt-section textarea::placeholder {
+  color: #555;
+}
+
+.prompt-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.prompt-options label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #aaa;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+
+.prompt-options input[type="checkbox"] {
+  accent-color: #d4a574;
+}
+
+.prompt-options select {
+  flex: 1;
+  background: #12121a;
+  color: #aaa;
+  border: 1px solid #2e2e3e;
+  border-radius: 6px;
+  padding: 5px 6px;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.prompt-options select:focus {
+  border-color: #d4a574;
+}
+
+/* Claude output */
+.output-section {
+  margin-bottom: 14px;
+}
+
+.output-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4a574;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.output-box {
+  background: #12121a;
+  border: 1px solid #2e2e3e;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e8e8ed;
+  max-height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.lyrics-box {
+  margin-top: 8px;
+  max-height: 150px;
+  color: #ccc;
+  font-style: italic;
+  border-color: #3e2e4e;
+}
+
+.output-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  color: #d4a574;
+  font-size: 13px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #2e2e3e;
+  border-top-color: #d4a574;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* History */
+.history-section {
+  margin-bottom: 12px;
+}
+
+.history-section h2 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+#history-list {
+  list-style: none;
+  max-height: 100px;
+  overflow-y: auto;
+  margin-bottom: 6px;
+}
+
+#history-list li {
+  padding: 5px 10px;
+  font-size: 11px;
+  color: #aaa;
+  background: #12121a;
+  border-radius: 6px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s;
+}
+
+#history-list li:hover {
+  background: #1e1e2e;
+  color: #e8e8ed;
+}
+
+#history-list:empty::after {
+  content: 'No recent prompts';
+  display: block;
+  font-size: 11px;
+  color: #555;
+  text-align: center;
+  padding: 6px;
+}
+
+footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #1e1e2e;
+}
+
+footer a {
+  font-size: 12px;
+  color: #7c3aed;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+footer a:hover {
+  color: #ec4899;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2e2e3e; border-radius: 4px; }
