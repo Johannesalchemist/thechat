@@ -1,8 +1,10 @@
-﻿const express = require("express");
+﻿require("dotenv").config({ path: require("path").join(__dirname, "../../.env") });
+const express = require("express");
 const cors = require("cors");
 
 const { routeLLM } = require("./llm/router");
 const { routeVideo } = require("./video/router");
+const intelligenceRouter = require("./video/intelligence-router");
 
 const app = express();
 app.use(cors());
@@ -25,6 +27,8 @@ app.post("/ai/:room", async (req, res) => {
     res.status(500).json({ error: "LLM call failed" });
   }
 });
+
+app.use("/video/intelligence", intelligenceRouter);
 
 app.post("/video/generate", async (req, res) => {
   try {
