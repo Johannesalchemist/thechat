@@ -1,0 +1,167 @@
+{
+  "version": "0.1",
+  "updated": "2026-05-30",
+  "description": "NYXA Self-Hosting-Matrix — Bewertung jeder Systemkomponente nach Self-Hosting-Möglichkeit und Exit-Optionen",
+  "matrix": {
+    "columns": ["component", "self_hostable", "external_dependency", "exit_strategy", "migration_effort", "data_sovereignty"],
+    "components": [
+      {
+        "id": "sh-001",
+        "component": "NYXA Core (Event Bus, Registry, Dispatcher)",
+        "self_hostable": true,
+        "external_dependency": "none",
+        "exit_strategy": "Vollständig portable — reines TypeScript ohne Cloud-Lock-in",
+        "migration_effort": "low",
+        "data_sovereignty": "full",
+        "hosting_options": ["docker_local", "vps", "bare_metal"],
+        "recommended_runtime": "Node.js 20+ auf VPS oder Docker"
+      },
+      {
+        "id": "sh-002",
+        "component": "Next.js Frontend",
+        "self_hostable": true,
+        "external_dependency": "optional_vercel",
+        "exit_strategy": "Selbst-gehostet via Docker oder eigener Node.js Server; kein Vercel-Lock-in",
+        "migration_effort": "low",
+        "data_sovereignty": "full",
+        "hosting_options": ["docker_local", "vps", "vercel", "netlify", "cloudflare_pages"],
+        "recommended_runtime": "Docker auf eigener VPS"
+      },
+      {
+        "id": "sh-003",
+        "component": "Node.js API Backend",
+        "self_hostable": true,
+        "external_dependency": "none",
+        "exit_strategy": "Vollständig portabel — Express/Fastify, kein Cloud-spezifisches SDK",
+        "migration_effort": "low",
+        "data_sovereignty": "full",
+        "hosting_options": ["docker_local", "vps", "pm2"],
+        "recommended_runtime": "Docker mit PM2 als Process Manager"
+      },
+      {
+        "id": "sh-004",
+        "component": "SQLite Event Store",
+        "self_hostable": true,
+        "external_dependency": "none",
+        "exit_strategy": "Migration zu PostgreSQL via TypeORM oder Drizzle ohne App-Änderungen",
+        "migration_effort": "medium",
+        "data_sovereignty": "full",
+        "hosting_options": ["local_file", "docker_volume", "network_attached_storage"],
+        "recommended_runtime": "Lokal auf App-Server; Backup auf S3-kompatiblem Speicher"
+      },
+      {
+        "id": "sh-005",
+        "component": "Anthropic API (Claude LLM)",
+        "self_hostable": false,
+        "external_dependency": "anthropic_api",
+        "exit_strategy": "Wechsel zu OpenAI via LangChain-Adapter; Ollama für lokale Inferenz (Qualitätsverlust)",
+        "migration_effort": "medium",
+        "data_sovereignty": "partial",
+        "hosting_options": ["anthropic_cloud_only"],
+        "recommended_runtime": "Anthropic API — kein Self-Hosting verfügbar",
+        "fallback": "OpenAI GPT-4o oder lokales Llama 3.1 via Ollama"
+      },
+      {
+        "id": "sh-006",
+        "component": "VAPI Telephony",
+        "self_hostable": false,
+        "external_dependency": "vapi_cloud",
+        "exit_strategy": "Wechsel zu Twilio Conversation Relay oder Bland.ai via Webhook-Adapter",
+        "migration_effort": "medium",
+        "data_sovereignty": "none",
+        "hosting_options": ["vapi_cloud_only"],
+        "recommended_runtime": "VAPI Cloud — kein Self-Hosting verfügbar",
+        "fallback": "Twilio + eigener LLM-Proxy"
+      },
+      {
+        "id": "sh-007",
+        "component": "ElevenLabs TTS",
+        "self_hostable": false,
+        "external_dependency": "elevenlabs_cloud",
+        "exit_strategy": "Wechsel zu Azure Cognitive Services oder lokaler Coqui TTS Installation",
+        "migration_effort": "low",
+        "data_sovereignty": "none",
+        "hosting_options": ["elevenlabs_cloud_only"],
+        "recommended_runtime": "ElevenLabs Cloud",
+        "fallback": "Coqui TTS lokal (open source) oder Azure Speech"
+      },
+      {
+        "id": "sh-008",
+        "component": "Stripe Payment Processing",
+        "self_hostable": false,
+        "external_dependency": "stripe_cloud",
+        "exit_strategy": "Wechsel zu Paddle oder LemonSqueezy; EU-Alternative: Mollie",
+        "migration_effort": "medium",
+        "data_sovereignty": "none",
+        "hosting_options": ["stripe_cloud_only"],
+        "recommended_runtime": "Stripe — PCI-DSS-zertifiziert, kein Self-Hosting sinnvoll",
+        "fallback": "Mollie (EU) oder Paddle"
+      },
+      {
+        "id": "sh-009",
+        "component": "Mercury Banking API",
+        "self_hostable": false,
+        "external_dependency": "mercury_cloud",
+        "exit_strategy": "Wechsel zu Brex, Relay oder Plaid für Transaktionsdaten",
+        "migration_effort": "medium",
+        "data_sovereignty": "none",
+        "hosting_options": ["mercury_cloud_only"],
+        "recommended_runtime": "Mercury Cloud API",
+        "fallback": "Brex API oder Plaid"
+      },
+      {
+        "id": "sh-010",
+        "component": "Playwright Browser Automation",
+        "self_hostable": true,
+        "external_dependency": "none",
+        "exit_strategy": "Wechsel zu Puppeteer mit < 5 Zeilen Änderung; beide nutzen CDP",
+        "migration_effort": "low",
+        "data_sovereignty": "full",
+        "hosting_options": ["docker_local", "browserless_io", "steel_dev"],
+        "recommended_runtime": "Docker mit Chromium vorinstalliert"
+      },
+      {
+        "id": "sh-011",
+        "component": "ELSTER ERiC CLI",
+        "self_hostable": true,
+        "external_dependency": "elster_eric_binary",
+        "exit_strategy": "Keine direkte Alternative — ERiC ist der einzige zugelassene Weg zu ELSTER",
+        "migration_effort": "high",
+        "data_sovereignty": "full",
+        "hosting_options": ["linux_vps_with_eric_binary"],
+        "recommended_runtime": "Linux VPS; ERiC-Binary von ELSTER-Website beziehen",
+        "fallback": "Kein gleichwertiger Ersatz verfügbar"
+      },
+      {
+        "id": "sh-012",
+        "component": "Telegram Bot",
+        "self_hostable": true,
+        "external_dependency": "telegram_api",
+        "exit_strategy": "Wechsel zu WhatsApp Cloud API, Signal Bot oder Matrix via ähnlichem Webhook-Pattern",
+        "migration_effort": "low",
+        "data_sovereignty": "partial",
+        "hosting_options": ["docker_local", "vps"],
+        "recommended_runtime": "Node.js Prozess hinter Reverse Proxy"
+      },
+      {
+        "id": "sh-013",
+        "component": "DOCX Generator",
+        "self_hostable": true,
+        "external_dependency": "none",
+        "exit_strategy": "Wechsel zu pdfmake für PDF-Output oder LibreOffice Headless",
+        "migration_effort": "low",
+        "data_sovereignty": "full",
+        "hosting_options": ["in_process", "docker_local"],
+        "recommended_runtime": "In-Process mit npm docx Bibliothek — kein Server nötig"
+      }
+    ],
+    "summary": {
+      "fully_self_hostable_count": 7,
+      "cloud_dependent_count": 6,
+      "full_data_sovereignty_count": 8,
+      "partial_data_sovereignty_count": 3,
+      "no_data_sovereignty_count": 4,
+      "risk_assessment": "Mittleres Vendor-Lock-in-Risiko. Kritische Pfade (LLM, Payment, Telephony) sind cloud-abhängig. Exit-Strategien für alle Komponenten dokumentiert."
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "version": "0.1",
+  "updated": "2026-05-30",
+  "description": "NYXA Founder-Access-Taxonomie — Klassifikation von Gründertypen und deren Zugangspfaden zum NYXA-System",
+  "taxonomy": {
+    "dimensions": [
+      {
+        "id": "dim-01",
+        "name": "Gründungsphase",
+        "values": ["pre_idea", "idea_stage", "mvp_building", "early_revenue", "scaling", "established"]
+      },
+      {
+        "id": "dim-02",
+        "name": "Jurisdiktions-Präferenz",
+        "values": ["us_delaware", "germany", "austria", "uk", "multi_jurisdiction", "undecided"]
+      },
+      {
+        "id": "dim-03",
+        "name": "Primärer Zugangskanal",
+        "values": ["phone_inbound", "telegram_message", "web_form", "referral", "email"]
+      },
+      {
+        "id": "dim-04",
+        "name": "Paketaffinität",
+        "values": ["starter", "growth", "pro", "enterprise", "addon_only"]
+      },
+      {
+        "id": "dim-05",
+        "name": "Sprachpräferenz",
+        "values": ["de", "en", "mixed"]
+      }
+    ],
+    "founder_archetypes": [
+      {
+        "id": "arch-001",
+        "name": "Der Delaware-Starter",
+        "description": "Deutschsprachiger Gründer, der eine US LLC schnell und günstig gründen möchte. Typisch: Freelancer, Softwareentwickler, Content Creator.",
+        "phase": "idea_stage",
+        "jurisdiction_preference": "us_delaware",
+        "primary_channel": "telegram_message",
+        "typical_package": "starter",
+        "language": "de",
+        "mvps_relevant": ["mvp-001", "mvp-002", "mvp-010"],
+        "access_path": [
+          "Telegram-Keyword 'delaware' oder 'llc' triggert Auto-Reply",
+          "Phone Agent qualifiziert Bedarf",
+          "Stripe Checkout Starter 149 USD",
+          "Delaware LLC + RA + EIN + Operating Agreement geliefert"
+        ],
+        "friction_points": ["EIN dauert 1-4 Wochen", "Bankverbindung erfordert US-Adresse für manche Banken"],
+        "upsell_opportunities": ["mvp-004 Mercury Banking", "mvp-003 Business Plan"]
+      },
+      {
+        "id": "arch-002",
+        "name": "Der Seriengründer",
+        "description": "Erfahrener Unternehmer mit mehreren Entities in verschiedenen Jurisdiktionen. Braucht Effizienz und Compliance-Automatisierung.",
+        "phase": "scaling",
+        "jurisdiction_preference": "multi_jurisdiction",
+        "primary_channel": "phone_inbound",
+        "typical_package": "enterprise",
+        "language": "mixed",
+        "mvps_relevant": ["mvp-001", "mvp-006", "mvp-007", "mvp-011", "mvp-012", "mvp-013"],
+        "access_path": [
+          "Inbound Call via VAPI",
+          "Phone Agent identifiziert Multi-Jurisdiktion-Bedarf",
+          "Stripe Enterprise Checkout",
+          "Dedizierter Onboarding-Anruf",
+          "Cap Table + Steuer-Automation eingerichtet"
+        ],
+        "friction_points": ["Multi-Jurisdiktion erfordert lokale Compliance-Experten", "ELSTER benötigt deutsches Steuerzertifikat"],
+        "upsell_opportunities": ["mvp-014 Steuerberater-Marketplace", "mvp-007 ELSTER"]
+      },
+      {
+        "id": "arch-003",
+        "name": "Der Vereinsgründer (AT)",
+        "description": "Österreichischer Unternehmer oder NGO-Initiator, der einen gemeinnützigen Verein gründen möchte.",
+        "phase": "idea_stage",
+        "jurisdiction_preference": "austria",
+        "primary_channel": "web_form",
+        "typical_package": "addon_only",
+        "language": "de",
+        "mvps_relevant": ["mvp-005"],
+        "access_path": [
+          "Web-Formular Österreich Verein",
+          "Input: Name, Zweck, Sitz, Vorstand",
+          "Stripe Checkout AT Verein 199 EUR",
+          "Statuten DOCX + ZVR-Anmeldeformular geliefert"
+        ],
+        "friction_points": ["ZVR erfordert physische Einreichung beim BMI", "Notar-Beglaubigung in manchen Fällen nötig"],
+        "upsell_opportunities": []
+      },
+      {
+        "id": "arch-004",
+        "name": "Der Businessplan-Kunde",
+        "description": "Gründer oder Freelancer, der einen professionellen Businessplan für Bank, Investor oder Visa-Antrag benötigt.",
+        "phase": "mvp_building",
+        "jurisdiction_preference": "undecided",
+        "primary_channel": "telegram_message",
+        "typical_package": "addon_only",
+        "language": "mixed",
+        "mvps_relevant": ["mvp-003"],
+        "access_path": [
+          "Telegram-Keyword 'businessplan' triggert Auto-Reply",
+          "Input-Formular: Branche, Idee, Zielmarkt, Budget, Gründer",
+          "Stripe Checkout Businessplan 99 USD",
+          "DOCX in 24h per Download"
+        ],
+        "friction_points": ["Qualitätskontrolle KI-Output nötig", "Finanzprojektion benötigt Zahlen vom Kunden"],
+        "upsell_opportunities": ["mvp-001 Delaware LLC", "mvp-004 Mercury Banking"]
+      },
+      {
+        "id": "arch-005",
+        "name": "Der Growth-Gründer",
+        "description": "Startup-Gründer der ersten Stunde mit klarer Produktvision und Wachstumsplan. Braucht vollständiges Setup inkl. Bank und Businessplan.",
+        "phase": "early_revenue",
+        "jurisdiction_preference": "us_delaware",
+        "primary_channel": "phone_inbound",
+        "typical_package": "growth",
+        "language": "mixed",
+        "mvps_relevant": ["mvp-001", "mvp-002", "mvp-003", "mvp-004", "mvp-010"],
+        "access_path": [
+          "VAPI Inbound-Anruf",
+          "Phone Agent qualifiziert Growth-Paket-Bedarf",
+          "Stripe Checkout Growth 299 USD",
+          "Delaware LLC + Premium RA + Mercury Bank + Businessplan + Phone Onboarding"
+        ],
+        "friction_points": ["Mercury Konto erfordert US Entity und EIN", "Businessplan-Input muss vom Kunden kommen"],
+        "upsell_opportunities": ["mvp-012 Cap Table", "mvp-013 Annual Report"]
+      }
+    ],
+    "access_levels": [
+      {
+        "id": "access-01",
+        "name": "Self-Service",
+        "description": "Gründer führt den Prozess vollständig selbst durch via Web-Formular oder Telegram-Bot.",
+        "automation_grade": "full",
+        "human_touchpoints": 0,
+        "suitable_packages": ["starter", "addon_only"],
+        "founder_archetypes": ["arch-001", "arch-003", "arch-004"]
+      },
+      {
+        "id": "access-02",
+        "name": "Phone-Assisted",
+        "description": "Phone Agent führt initialen Qualifikations-Call, danach Self-Service-Checkout.",
+        "automation_grade": "high",
+        "human_touchpoints": 1,
+        "suitable_packages": ["starter", "growth"],
+        "founder_archetypes": ["arch-001", "arch-005"]
+      },
+      {
+        "id": "access-03",
+        "name": "White-Glove",
+        "description": "Dedizierter Ansprechpartner, manuelle Koordination für komplexe Multi-Jurisdiktion-Setups.",
+        "automation_grade": "medium",
+        "human_touchpoints": 3,
+        "suitable_packages": ["pro", "enterprise"],
+        "founder_archetypes": ["arch-002"]
+      }
+    ]
+  }
+}
